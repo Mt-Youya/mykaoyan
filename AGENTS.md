@@ -131,6 +131,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 | 数据库 | `supabase`、`supabase-postgres-best-practices` |
 | 认证 | `better-auth-best-practices`、`better-auth-security-best-practices` |
 | 媒体 Worker、R2、DNS | `cloudflare`、`wrangler`、`workers-best-practices` |
+| 阿里云（备案、DNS、ECS、云监控） | `alibabacloud-domain`、`alibabacloud-cli-guidance`、`alibabacloud-dns-resolve-diagnose-customer`、`alibabacloud-ecs-diagnose`、`alibabacloud-ecs-health-inspection`、`alibabacloud-cms-alert-rule-create`；完整清单与前置条件见 [docs/agents/alibabacloud-skills.md](docs/agents/alibabacloud-skills.md) |
 | skill 与 CLI | `skill-creator`（遵循 agentskills.io 规范）、`cli-creator`（Rust CLI 参考 Rust CLI Book） |
 | 规格、工单、测试 | `to-spec`、`to-tickets`、`tdd`、`code-review` |
 
