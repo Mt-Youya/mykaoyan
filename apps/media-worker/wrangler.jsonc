@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "mykaoyan-media",
+  "name": "mykaoyan",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-26",
   "workers_dev": false,

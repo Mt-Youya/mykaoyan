@@ -65,6 +65,7 @@
 - **TypeScript 版本**（pf/DEPLOY-16、pf/TOOL-15）：TypeScript 7 移除了 `baseUrl`，并曾导致构建崩溃。M0 先确认 TanStack Start、NestJS、Drizzle 在所选版本下能构建，不行就钉在能用的版本。
 - **生成文件是否入库**（pf/DEPLOY-21）：TanStack Router 的 `routeTree.gen.ts` 等生成物，在 M0 决定是否提交并写进 ARCHITECTURE。
 - **调试页不对外**（pf/AGENT-08）：`/setup`、诊断页在生产环境必须登录且为管理员。
+- **Worker 名与配置漂移**（mk/DEPLOY-01）：媒体 Worker 线上名是 `mykaoyan`，仓库 `wrangler.jsonc` 一度写成 `mykaoyan-media`；按配置部署会新建一个 Worker，而 `media.mykaoyan.cn` 仍指向旧 Worker。改 name 前先用 Cloudflare API 核对 `workers/scripts` 与 `workers/domains`，确认线上 Worker 名和自定义域绑定，再对齐配置。
 
 ## 6. 数据契约与记录
 
