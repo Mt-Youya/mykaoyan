@@ -12,3 +12,7 @@
 - [ ] 历史版本列表接口与页面
 - [ ] 「别人的数据读不到、写不进」的接口测试
 - [ ] 写入后校验受影响行数或读回结果
+
+## 现状（2026-10-28）
+
+后端 `apps/api/src/progress` 已实现 `GET/PUT /api/v1/progress` 与 `GET /api/v1/progress/revisions`；前端 `apps/web/src/features/progress` 提供 `use-progress` 供今日页与错题页读写。历史版本页面尚未实现。复选框未逐条核销。

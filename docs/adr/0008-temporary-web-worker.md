@@ -20,3 +20,7 @@ status: accepted
 - CI 检查两个构建目标，并对 Workers 产物执行不上传的 dry-run。当前只授权本机发布，不能自动推送 Git 或增加自动生产部署。
 - 备案完成后，可按原 Docker/Caddy 流程运行 Node 产物；届时是否保留临时 Worker 由站主决定。
 - 本次不启用 `workers.dev` 或版本预览地址，不调整 `www`。恢复 ECS 的主域名路由需要另行确认，并重新核对 DNS、TLS 与 HTTP。
+
+## 更新
+
+- 2026-10-28：[ADR 0010](0010-worker-api-proxy.md) 取代本文的「不增加 API 代理」与「不能增加自动生产部署」两条：`mykaoyan-web` 现在把 `/api/**` 反代到广州 ECS 的 `api.mykaoyan.cn`，并新增手动触发的 [deploy-api.yml](../../.github/workflows/deploy-api.yml) 生产部署工作流。本文其余内容（独立 Worker、构建与发布方式、不启用 `workers.dev` 与预览地址）继续有效。

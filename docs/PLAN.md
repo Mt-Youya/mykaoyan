@@ -120,12 +120,13 @@ M5 的资质约束（2026-10 调研，签约前复核）：
 
 ## 6. 域名与环境
 
-备案等待期间，前端按 [ADR 0008](./adr/0008-temporary-web-worker.md) 临时部署到独立 `mykaoyan-web` Worker，直接使用 `mykaoyan.cn`。本次只上线当前 Hello 页面，API 仍待 ECS 环境，不视为完整链路验收。备案完成后是否切回 ECS，届时另行确认。
+备案等待期间，前端按 [ADR 0008](./adr/0008-temporary-web-worker.md) 部署到独立 `mykaoyan-web` Worker，直接使用 `mykaoyan.cn`。按 [ADR 0010](./adr/0010-worker-api-proxy.md)（2026-10-28 确认方案 B），前端继续由 Worker 承载，NestJS API 部署到广州 ECS 的 `api.mykaoyan.cn`，Worker 把 `/api/**` 反代过去；浏览器只访问 `mykaoyan.cn`，因此不需要 CORS，会话 cookie 仍是一方 cookie。备案通过后不切回整站 ECS 方案。
 
 | 主机名 | 归属 | 说明 |
 | --- | --- | --- |
-| `mykaoyan.cn` | 临时 Cloudflare Worker Custom Domain → `mykaoyan-web` | 当前只提供 TanStack Start Hello 页面；正式 ECS 方案保留，等待备案 |
-| `www.mykaoyan.cn` | 规划为 Cloudflare DNS 仅解析 → ECS，本次未调整 | 备案后按 Caddy 方案启用 |
+| `mykaoyan.cn` | Cloudflare Worker Custom Domain → `mykaoyan-web` | 前端（TanStack Start）与 `/api/**` 反代；线上仍是 M0 Hello 版本，正式首页待发布 |
+| `api.mykaoyan.cn` | Cloudflare DNS 仅解析（灰云）→ 广州 ECS（Caddy → NestJS） | 备案通过后加 A 记录并放行 80/443；Caddy 用 HTTP-01 签证书 |
+| `www.mykaoyan.cn` | 规划为同一 `mykaoyan-web` Worker | 方案 B 下与主域共用前端，不指向 ECS；本次未调整 |
 | `media.mykaoyan.cn` | Cloudflare Worker Custom Domain | 媒体 Worker + R2，不挂 Cloudflare Access |
 | `admin.*` 等其他子域 | 暂不使用 | 新增前先更新本表 |
 
@@ -152,8 +153,8 @@ M0 的本地代码与配置已准备，云端尚未验收，状态见 [本地交
 - **媒体** `apps/media-worker`：Cloudflare Worker，校验 HMAC 播放令牌后从 R2 读取并支持 Range。
 - **CLI** `apps/cli`：Rust（clap），类型从 OpenAPI 生成。
 - **Skill** `skills/mykaoyan`：按 agentskills.io 规范，包含进度文件说明、零依赖校验脚本、空白模板。
-- **部署**：GitHub Actions 构建镜像 → 阿里云 ACR → SSH 到 ECS 执行 `docker compose pull && up -d` → 冒烟检查（首页 200、`/api/health` 200 且连上数据库）。镜像中不含任何密钥，密钥只在 ECS 的 `.env`。
-- **ECS**：深圳，2 核 4G，固定带宽 3–5 Mbps，云监控在 CPU、内存、磁盘持续超过 80% 时告警。
+- **部署**：API 由 GitHub Actions 构建镜像 → 阿里云 ACR → SSH 到广州 ECS 执行 `docker compose pull && up -d` → 冒烟 `/api/health` 200 且连上数据库；前端 Worker 用 `pnpm --filter @mykaoyan/web deploy:workers` 手动发布。镜像中不含任何密钥，密钥只在 ECS 的 `.env`。
+- **ECS**：广州（华南 3），2 核 4G，固定带宽 3–5 Mbps，云监控在 CPU、内存、磁盘持续超过 80% 时告警。
 - **备份**：每天 `pg_dump` 到 R2 私有桶，保留 30 天，每月演练一次恢复。
 
 M0 的前端生产启动入口为 `pnpm --filter @mykaoyan/web start`：先用 zod 验证 `NODE_ENV`、`HOST`、`PORT`，再加载 Nitro 的 `.output/server/index.mjs`；不直接绕过启动校验运行产物。

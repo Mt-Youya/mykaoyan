@@ -4,14 +4,12 @@
 
 ## 请求路径
 
-备案等待期间，当前前端路径为：浏览器 → `mykaoyan.cn`（`mykaoyan-web` Custom Domain）→ `apps/web`（SSR 与静态资源）。该前端不绑定数据库或媒体签名密钥，API 不随本次迁移。详见 [ADR 0008](./adr/0008-temporary-web-worker.md)。
-
-下图为保留的 ECS 方案，待备案后确认是否切回：
+当前路径按 [ADR 0010](./adr/0010-worker-api-proxy.md)（方案 B）：前端由 Cloudflare Worker `mykaoyan-web` 承载（`apps/web` 的 SSR 与静态资源），Worker 把 `/api` 与 `/api/**` 反代到广州 ECS 上的 NestJS；浏览器只访问 `mykaoyan.cn`，不需要 CORS。该 Worker 不绑定数据库或媒体签名密钥，密钥只在 ECS 与媒体 Worker。
 
 ```
-浏览器 ──HTTPS──▶ ECS(Caddy) ──/api/*──▶ apps/api (NestJS + Better Auth) ──Supavisor──▶ Supabase Postgres（新加坡）
-                    │
-                    └──其余────▶ apps/web (TanStack Start, SSR) ──带 cookie 调──▶ apps/api
+浏览器 ──HTTPS──▶ mykaoyan.cn (Cloudflare Worker: mykaoyan-web)
+                    ├── /api/** 反代──▶ api.mykaoyan.cn (广州 ECS: Caddy → apps/api) ──Supavisor──▶ Supabase Postgres（新加坡）
+                    └──其余──────▶ apps/web (TanStack Start, SSR，Worker 内)
 浏览器 ──HTTPS──▶ media.mykaoyan.cn (apps/media-worker) ──▶ R2 私有桶
 浏览器 ──预签名 URL──▶ R2（投稿分片直传）
 agent / CLI ──Agent 令牌──▶ mykaoyan.cn/api/v1/*
@@ -41,7 +39,7 @@ docs/             规划、ADR、坑点、规格
 
 媒体 Worker 的 `worker-configuration.d.ts` 由该包的 `typecheck` 先运行 `wrangler types` 生成，忽略且不提交；运行时类型由锁定的 Wrangler 版本提供。
 
-临时前端的 `cloudflare.config.ts` 使用项目内 `cf` 与 Cloudflare Vite plugin；`.cloudflare/` 中的构建产物、生成类型与状态全部忽略，不参与源码架构扫描。默认 Node 构建保持可用于 ECS。
+临时前端的 `cloudflare.config.ts` 使用项目内 `cf` 与 Cloudflare Vite plugin；`.cloudflare/` 中的构建产物、生成类型与状态全部忽略，不参与源码架构扫描。默认 Node 构建保留为回退方案；生产前端由 Worker 承载（[ADR 0010](./adr/0010-worker-api-proxy.md)）。
 
 ## 领域
 

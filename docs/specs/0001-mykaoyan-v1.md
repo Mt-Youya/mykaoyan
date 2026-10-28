@@ -138,7 +138,9 @@
 
 **运行拓扑**（[ADR 0001](../adr/0001-runtime-topology.md)）
 
-- 前端 TanStack Start 与后端 NestJS 都以 Node 进程跑在深圳 ECS，Caddy 按路径分发：`/api/*` 给后端，其余给前端。同一域名，不需要跨域配置。
+- 前端 TanStack Start 与后端 NestJS 都以 Node 进程跑在大陆 ECS，Caddy 按路径分发：`/api/*` 给后端，其余给前端。同一域名，不需要跨域配置。
+
+> 更新（2026-10-28）：按 [ADR 0010](../adr/0010-worker-api-proxy.md)，前端改为留在 Cloudflare Worker `mykaoyan-web`，ECS 只跑 NestJS API 并经 Worker 反代 `/api/**`；ECS 地域为广州（华南 3）。原「前后端同一台 ECS」的方案不再采用。
 - 数据库是 Supabase 新加坡区域的 Postgres，只当普通 Postgres 用（[ADR 0002](../adr/0002-supabase-as-plain-postgres.md)），经 Supavisor transaction 模式连接。
 - 视频在 R2，由媒体 Worker 校验 HMAC 播放令牌后直接回给浏览器（[ADR 0003](../adr/0003-video-on-r2.md)）。
 

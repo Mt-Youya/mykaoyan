@@ -1,5 +1,12 @@
 # M0 本地交付报告
 
+## 状态更新（2026-10-28）
+
+- 上述本地改动已提交并推送到 GitHub `main`（`initial`、`fix(ci)`、`ci(gitleaks)`、`feat(api)` 四个提交），CI 连续两次通过，包含契约无差异、Workers 构建与 dry-run、gitleaks 与假密钥变异检查。本报告中「未提交、未 push」的描述已过时。
+- 部署方案按 [ADR 0010](../adr/0010-worker-api-proxy.md) 调整为方案 B：`mykaoyan.cn` 继续由 `mykaoyan-web` 承载，`/api/**` 反代到广州 ECS 的 `api.mykaoyan.cn`；新增 `.github/workflows/deploy-api.yml`、`deploy/api-compose.yaml`、`deploy/api-Caddyfile`。
+- GitHub `production` environment 已配 5 个 secret 与 2 个 variable，仍缺 `DEPLOY_KNOWN_HOSTS`；`database-dev`、`database-prod`、`backup-production` 环境尚未创建，`migrations.yml` 与 `operations.yml` 因此还不能真正执行。
+- 线上 Worker 仍是 M0 Hello 版本，正式首页、登录、课程与工作台尚未发布。
+
 ## 后续部署更新（2026-10-27）
 
 备案等待期间，前端已按 [ADR 0008](../adr/0008-temporary-web-worker.md) 发布到独立 `mykaoyan-web` Worker，并绑定 `https://mykaoyan.cn`。控制台读回部署就绪、流量 100%；HTTPS 首页与浏览器均显示当前 M0 Hello 页面，浏览器未见控制台错误。JS、CSS 返回 200，不存在的页面返回 404；`/api/health` 探测超时，未验收通过。媒体域名仍指向原 `mykaoyan` Worker，邮件 TXT 记录保留；本次未调整 `www`。

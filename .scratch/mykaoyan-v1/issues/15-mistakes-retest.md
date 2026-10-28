@@ -10,3 +10,7 @@
 - [ ] 错题的下次复测日期、次数、是否稳定、逾期天数都由记录推算，不单独存
 - [ ] 错题列表、记录、订正、复测页面
 - [ ] 错题数据是进度文件的一部分，上传下载往返无损
+
+## 现状（2026-10-28）
+
+`packages/core/src/mistakes` 已实现复测推算（`getRetestState`）、到期排序（`getDueRetests`）与追加复测（`recordRetest`）；`apps/web/src/features/mistakes/mistakes-page.tsx` 已提供录入与复测页；进度文件 schema 含 `mistakes`。复选框未逐条核销。
