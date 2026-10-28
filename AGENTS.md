@@ -106,7 +106,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 - commit、push、部署、创建或修改云资源（Supabase、Cloudflare、阿里云）都要用户在本轮明确同意。只读任务不跑会写文件的命令。
 - 同一工作区同一时间只有一个会话写入；接手前先看 `git status`。
-- 每个包自己声明依赖；不改 `packages/ui/components/ui/*` 这些 shadcn 生成物。
+- 包特定依赖由各包自己声明；`tsx`、`@types/node`、`oxfmt`、`oxlint`、`typescript`、`vitest` 这些全仓库工具只在根声明；不改 `packages/ui/components/ui/*` 这些 shadcn 生成物。
 - 交付前运行（M0 建好后生效）：
 
   ```bash

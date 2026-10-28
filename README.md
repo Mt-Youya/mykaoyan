@@ -15,7 +15,7 @@ pnpm test
 pnpm build
 ```
 
-每个包自行声明依赖。新增包必须提供 `typecheck`、`test`、`build` 脚本，确保根聚合命令覆盖它。
+包特定依赖由各包自行声明；`tsx`、`@types/node`、`oxfmt`、`oxlint`、`typescript`、`vitest` 这些全仓库工具只在根声明。新增包必须提供 `typecheck`、`test`、`build` 脚本，确保根聚合命令覆盖它。
 
 `pnpm test` 在没有 `DATABASE_URL` 时自动建立并关闭独立临时 Postgres；显式传入的测试连接仅允许本机名为 `mykaoyan_test` 的空库。开发用的 Supabase 连接不能拿来跑测试。
 

@@ -1,5 +1,5 @@
 import { index, integer, jsonb, pgTable, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core"
-import { accounts } from "../accounts/index"
+import { accounts } from "../accounts"
 
 /** 每个账号当前的一份学习进度文档；内容只由 API 服务层访问。 */
 export const progressDocuments = pgTable(

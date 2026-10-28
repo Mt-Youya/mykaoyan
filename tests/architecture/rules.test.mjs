@@ -77,17 +77,9 @@ describe("仓库架构", () => {
       "vitest",
     ])
     expect(packages.length).toBeGreaterThan(0)
-    for (const { path, manifest: pkg } of packages) {
+    for (const { manifest: pkg } of packages) {
       for (const script of ["typecheck", "test", "build"]) {
         expect(pkg.scripts?.[script], `${pkg.name} 缺少 ${script}`).toBeTruthy()
-      }
-      const declared = { ...pkg.dependencies, ...pkg.devDependencies }
-      if (Object.values(pkg.scripts).some((script) => /\btsx\b/.test(script))) {
-        expect(declared.tsx, `${pkg.name} 必须自行声明 tsx`).toBeTruthy()
-      }
-      const config = json(join(path, "tsconfig.json"))
-      if (config.compilerOptions?.types?.includes("node")) {
-        expect(declared["@types/node"], `${pkg.name} 必须自行声明 Node 类型`).toBeTruthy()
       }
     }
   })
@@ -99,7 +91,7 @@ describe("仓库架构", () => {
     expect(cssFiles, "apps/web 只允许 src/globals.css 一个 CSS 入口").toEqual(["apps/web/src/globals.css"])
 
     const inlineStyle = webSource
-      .filter((file) => /\.tsx$/.test(file))
+      .filter((file) => file.endsWith(".tsx"))
       .filter((file) => /\sstyle=\{\{/.test(readFileSync(file, "utf8")))
       .map((file) => relative(root, file))
     expect(inlineStyle, "样式不写在 JSX 内联 style 里").toEqual([])
@@ -107,7 +99,7 @@ describe("仓库架构", () => {
     const handwrittenClass =
       /className=(?:"[^"]*|`[^`]*)\b(?:home-|study-|catalog-|admin-|lesson-|chapter-|player-|card-list)/
     const leftover = webSource
-      .filter((file) => /\.tsx$/.test(file))
+      .filter((file) => file.endsWith(".tsx"))
       .filter((file) => handwrittenClass.test(readFileSync(file, "utf8")))
       .map((file) => relative(root, file))
     expect(leftover, "旧手写 BEM 类名必须迁移为 Tailwind 工具类").toEqual([])
@@ -152,11 +144,13 @@ describe("仓库架构", () => {
                   const isDirectory = statSync(destination, { throwIfNoEntry: false })?.isDirectory() ?? false
                   const entry = destination.endsWith(".ts")
                     ? destination
-                    : destination.endsWith("")
+                    : destination.endsWith(".js")
                       ? destination.replace(/\.js$/, ".ts")
                       : isDirectory
                         ? join(destination, "index.ts")
-                        : destination
+                        : existsSync(`${destination}.ts`)
+                          ? `${destination}.ts`
+                          : destination
                   expect(basename(entry), "跨领域只导入入口").toMatch(/^index\.[cm]?[jt]s$/)
                   expect(existsSync(entry), `${entry} 必须存在`).toBe(true)
                 }

@@ -61,7 +61,7 @@
 - **环境变量三态**（pf/DEPLOY-01、pf/DEPLOY-04、pf/DEPLOY-26）：区分未设置、空串、有值；`??` 拦不住空串；构建期内联的 `VITE_*` 与运行时变量不混用。
 - **职责拆分**（pf/DATA-04、pf/DEPLOY-03）：不同职责的 Worker 分开部署，一个缺失的密钥不会挡住另一个的发布；新配置先 `wrangler deploy --dry-run` 和 `wrangler types` 验证。
 - **工具装进项目**（pf/DEPLOY-02、pf/MEDIA-12）：wrangler、supabase CLI 装成 devDependency，`$schema` 指向真实存在的文件。
-- **依赖声明与锁文件**（pf/VER-04、pf/DEPLOY-06、pf/DEPLOY-07、pf/DEPLOY-17、pf/DEPLOY-18、pf/DEPLOY-19）：每个包自己声明依赖并做一次干净安装验证；`devEngines` 写精确版本；install 失败要还原锁文件；聚合脚本覆盖全部包。
+- **依赖声明与锁文件**（pf/VER-04、pf/DEPLOY-06、pf/DEPLOY-07、pf/DEPLOY-17、pf/DEPLOY-18、pf/DEPLOY-19）：包特定依赖由各包自己声明，`tsx`、`@types/node` 等全仓库工具只在根声明，并做一次干净安装验证；`devEngines` 写精确版本；install 失败要还原锁文件；聚合脚本覆盖全部包。
 - **TypeScript 版本**（pf/DEPLOY-16、pf/TOOL-15）：TypeScript 7 移除了 `baseUrl`，并曾导致构建崩溃。M0 先确认 TanStack Start、NestJS、Drizzle 在所选版本下能构建，不行就钉在能用的版本。
 - **生成文件是否入库**（pf/DEPLOY-21）：TanStack Router 的 `routeTree.gen.ts` 等生成物，在 M0 决定是否提交并写进 ARCHITECTURE。
 - **调试页不对外**（pf/AGENT-08）：`/setup`、诊断页在生产环境必须登录且为管理员。

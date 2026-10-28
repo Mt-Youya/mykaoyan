@@ -34,6 +34,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - uses: ./.github/actions/postgres-client
+      - name: 构建工作区库（typecheck 与 test 需要 @mykaoyan/core、@mykaoyan/db 的 dist）
+        run: pnpm --filter @mykaoyan/core build && pnpm --filter @mykaoyan/db build
       - name: 重新生成公开契约后确认无差异
         run: |
           pnpm --filter @mykaoyan/core generate:contract
