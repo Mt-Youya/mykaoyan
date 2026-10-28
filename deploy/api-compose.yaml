@@ -1,0 +1,29 @@
+# 方案 B：只部署 API 到 ECS，前端继续跑 Cloudflare Worker。
+# 目录：/opt/mykaoyan-api
+#   .env          运行时变量（不提交，chmod 600）
+#   .env.images   由部署 workflow 写入的镜像引用
+#   Caddyfile     由 workflow 从 deploy/api-Caddyfile 复制
+services:
+  caddy:
+    image: caddy:2.11.7-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+  api:
+    image: ${API_IMAGE:?必须指定后端镜像}
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+volumes:
+  caddy_data:
+  caddy_config:

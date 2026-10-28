@@ -39,7 +39,11 @@ export function createAuth(input: {
     trustedOrigins: env.trustedOrigins,
     database: input.database,
     // 表的主键是 uuid（packages/db 定义）；Better Auth 默认生成 base62 字符串，必须指定 uuid。
-    advanced: { database: { generateId: "uuid" } },
+    // 生产里页面在 mykaoyan.cn、API 在 api.mykaoyan.cn，会话 cookie 要放到根域才能共享。
+    advanced: {
+      database: { generateId: "uuid" },
+      ...(env.cookieDomain ? { crossSubDomainCookies: { enabled: true, domain: env.cookieDomain } } : {}),
+    },
     session: input.session ?? {
       expiresIn: SESSION_EXPIRES_IN_SECONDS,
       updateAge: SESSION_UPDATE_AGE_SECONDS,

@@ -64,4 +64,23 @@ describe("认证启动配置", () => {
     )
     expect(env.trustedOrigins).toEqual(["https://a.example", "https://b.example"])
   })
+
+  it("可选 AUTH_COOKIE_DOMAIN 用于页面与 API 跨子域共享 cookie", () => {
+    expect(readAuthEnvironment(base, "development").cookieDomain).toBeUndefined()
+    expect(readAuthEnvironment({ ...base, AUTH_COOKIE_DOMAIN: "mykaoyan.cn" }, "development").cookieDomain).toBe(
+      "mykaoyan.cn"
+    )
+    expect(readAuthEnvironment({ ...base, AUTH_COOKIE_DOMAIN: ".mykaoyan.cn" }, "development").cookieDomain).toBe(
+      ".mykaoyan.cn"
+    )
+  })
+
+  it("AUTH_COOKIE_DOMAIN 只接受域名，拒绝协议与路径", () => {
+    expect(() => readAuthEnvironment({ ...base, AUTH_COOKIE_DOMAIN: "https://mykaoyan.cn" }, "development")).toThrow(
+      "AUTH_COOKIE_DOMAIN"
+    )
+    expect(() => readAuthEnvironment({ ...base, AUTH_COOKIE_DOMAIN: "mykaoyan.cn/path" }, "development")).toThrow(
+      "AUTH_COOKIE_DOMAIN"
+    )
+  })
 })

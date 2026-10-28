@@ -37,6 +37,8 @@ export type AuthEnvironment = {
   BETTER_AUTH_URL: string
   /** 允许携带 cookie 调认证接口的前端 origin；默认只放 `BETTER_AUTH_URL`。 */
   trustedOrigins: string[]
+  /** 可选：会话 cookie 的作用域根域（如 mykaoyan.cn），用于 API 与页面跨子域共享登录态。 */
+  cookieDomain?: string
   sms: AliyunAuthEnvironment | { provider: "memory" }
 }
 
@@ -64,6 +66,16 @@ export function readAuthEnvironment(
       BETTER_AUTH_SECRET: testing ? z.string().min(32).default(TEST_SECRET) : z.string().min(32),
       BETTER_AUTH_URL: testing ? httpUrl.default(TEST_URL) : httpUrl,
       AUTH_TRUSTED_ORIGINS: z.string().trim().min(1).optional(),
+      // API 与页面分属不同子域时（api.mykaoyan.cn / mykaoyan.cn），需要把会话 cookie 放到根域。
+      // 只接受域名（可带前导点），不接受协议、路径或端口。
+      AUTH_COOKIE_DOMAIN: z
+        .string()
+        .trim()
+        .min(1)
+        .refine((value) => /^\.?[a-zA-Z0-9.-]+$/.test(value) && !value.includes(".."), {
+          message: "必须是域名",
+        })
+        .optional(),
       SMS_PROVIDER: testing ? z.string().optional() : z.enum(["aliyun", "memory"]),
     })
     .safeParse(input)
@@ -83,6 +95,7 @@ export function readAuthEnvironment(
       BETTER_AUTH_SECRET: base.data.BETTER_AUTH_SECRET,
       BETTER_AUTH_URL: base.data.BETTER_AUTH_URL,
       trustedOrigins: origins,
+      ...(base.data.AUTH_COOKIE_DOMAIN ? { cookieDomain: base.data.AUTH_COOKIE_DOMAIN } : {}),
       sms: { provider: "memory" },
     }
   }
@@ -93,6 +106,7 @@ export function readAuthEnvironment(
     BETTER_AUTH_SECRET: base.data.BETTER_AUTH_SECRET,
     BETTER_AUTH_URL: base.data.BETTER_AUTH_URL,
     trustedOrigins: origins,
+    ...(base.data.AUTH_COOKIE_DOMAIN ? { cookieDomain: base.data.AUTH_COOKIE_DOMAIN } : {}),
     sms: {
       provider: "aliyun",
       accessKeyId: aliyun.data.ALIYUN_ACCESS_KEY_ID,

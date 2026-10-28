@@ -1,0 +1,4 @@
+api.mykaoyan.cn {
+	encode zstd gzip
+	reverse_proxy api:3001
+}
