@@ -4,6 +4,8 @@
 
 **Blocked by:** 10（进度文件云端读写（网页））
 
+> M2 交接：先读 [HANDOFF-M2.md](../HANDOFF-M2.md)（现状、顺序、决策点、外部阻塞）。
+
 **Status:** ready-for-agent
 
 - [ ] 生成时只显示一次明文，库里只存哈希

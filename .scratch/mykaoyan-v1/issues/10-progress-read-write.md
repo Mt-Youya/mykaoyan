@@ -4,6 +4,8 @@
 
 **Blocked by:** 05（手机号验证码登录）、09（公开契约 v1）
 
+> M2 交接：先读 [HANDOFF-M2.md](../HANDOFF-M2.md)（现状、顺序、决策点、外部阻塞）。
+
 **Status:** ready-for-agent
 
 - [ ] 每个账号一份进度文档，历史版本只追加

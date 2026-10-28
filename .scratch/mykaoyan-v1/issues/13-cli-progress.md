@@ -4,6 +4,8 @@
 
 **Blocked by:** 11（Agent 令牌）
 
+> M2 交接：先读 [HANDOFF-M2.md](../HANDOFF-M2.md)（现状、顺序、决策点、外部阻塞）。
+
 **Status:** ready-for-agent
 
 - [ ] `login`、`progress pull`、`progress validate`、`progress push` 命令，遵循 Rust CLI Book 的约定（退出码、stderr、`--json` 输出）

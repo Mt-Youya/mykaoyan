@@ -4,6 +4,8 @@
 
 **Blocked by:** 11（Agent 令牌）
 
+> M2 交接：先读 [HANDOFF-M2.md](../HANDOFF-M2.md)（现状、顺序、决策点、外部阻塞）。
+
 **Status:** ready-for-agent
 
 - [ ] 按 agentskills.io 规范组织，用 skill-creator 检查

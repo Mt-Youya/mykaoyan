@@ -4,6 +4,8 @@
 
 **Blocked by:** 07（讲的视频播放）、08（管理员角色与上下架）、13（Rust CLI 进度命令）
 
+> M2 交接：先读 [HANDOFF-M2.md](../HANDOFF-M2.md)（现状、顺序、决策点、外部阻塞）。API 目前还没有发布接口，也没有 R2 写能力，这部分要先补。
+
 **Status:** ready-for-agent
 
 - [ ] 只有管理员令牌能调用发布接口
