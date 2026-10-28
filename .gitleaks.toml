@@ -1,0 +1,8 @@
+# gitleaks 配置：保留默认规则，只放行已知误报。
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "前端 localStorage 的键名不是密钥（mykaoyan.*-v1）"
+regexTarget = "secret"
+regexes = ['''mykaoyan\.(admission-favorites|topics|vocabulary)-v1''']

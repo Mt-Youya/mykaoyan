@@ -49,7 +49,7 @@ jobs:
       - run: pnpm --filter @mykaoyan/web build:workers
       - run: pnpm --filter @mykaoyan/web deploy:workers --dry-run
       - name: 扫描全部提交中的密钥
-        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.0 git /repo --redact --no-banner
+        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.0 git /repo --config /repo/.gitleaks.toml --redact --no-banner
       - name: 确认扫描器会拒绝假密钥
         shell: bash
         run: |
