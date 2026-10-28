@@ -1,0 +1,150 @@
+/*
+ * 设计令牌（唯一来源：根目录 DESIGN.md「新版 E 讲义书房」）。
+ * 本文件只做两件事：把 DESIGN.md 的颜色/字体映射成 shadcn 语义变量与 Tailwind 主题令牌。
+ * 不要在页面里新增设计方向；页面只用 Tailwind 工具类 + @mykaoyan/ui 组件。
+ */
+
+/* 设计稿固定为纸白浅色：把 dark 变体绑到 .dark 上，避免跟随系统深色而跑偏。 */
+@custom-variant dark (&:is(.dark *));
+
+@source "../**/*.{ts,tsx}";
+
+:root {
+  --radius: 0.5rem;
+
+  /* DESIGN.md 颜色表 → shadcn 语义变量 */
+  --background: oklch(98% 0.006 85); /* 纸白底 */
+  --foreground: oklch(25% 0.008 70); /* 主文字 */
+  --card: oklch(98% 0.006 85);
+  --card-foreground: oklch(25% 0.008 70);
+  --popover: oklch(98% 0.006 85);
+  --popover-foreground: oklch(25% 0.008 70);
+  --primary: oklch(35% 0.025 255); /* 主操作 */
+  --primary-foreground: oklch(98% 0.006 85);
+  --secondary: oklch(96% 0.006 85);
+  --secondary-foreground: oklch(25% 0.008 70);
+  --muted: oklch(96% 0.006 85);
+  --muted-foreground: oklch(45% 0.012 70); /* 次级文字 */
+  --accent: oklch(96% 0.006 85);
+  --accent-foreground: oklch(25% 0.008 70);
+  --destructive: oklch(52% 0.16 27);
+  --border: oklch(83% 0.008 80); /* 分隔线 */
+  --input: oklch(83% 0.008 80);
+  --ring: oklch(35% 0.025 255);
+
+  /* 领域色：两门科目的书封与书脊，只用于书封，不用于内容卡片的状态条 */
+  --paper-soft: oklch(96% 0.006 85);
+  --note-paper: oklch(97% 0.004 85);
+  --book-blue: oklch(87% 0.025 245); /* 数学二封面 */
+  --book-blue-spine: oklch(64% 0.035 245); /* 数学二书脊 */
+  --book-gray: oklch(89% 0.016 65); /* 408 封面 */
+  --book-gray-spine: oklch(68% 0.025 65); /* 408 书脊 */
+
+  --sidebar: oklch(98% 0.006 85);
+  --sidebar-foreground: oklch(25% 0.008 70);
+  --sidebar-primary: oklch(35% 0.025 255);
+  --sidebar-primary-foreground: oklch(98% 0.006 85);
+  --sidebar-accent: oklch(96% 0.006 85);
+  --sidebar-accent-foreground: oklch(25% 0.008 70);
+  --sidebar-border: oklch(83% 0.008 80);
+  --sidebar-ring: oklch(35% 0.025 255);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* 领域色 */
+  --color-paper-soft: var(--paper-soft);
+  --color-note-paper: var(--note-paper);
+  --color-book-blue: var(--book-blue);
+  --color-book-blue-spine: var(--book-blue-spine);
+  --color-book-gray: var(--book-gray);
+  --color-book-gray-spine: var(--book-gray-spine);
+
+  /* DESIGN.md 字体：标题/书封宋体栈，正文/控件系统无衬线栈；中文字体不自托管。 */
+  --font-sans: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-serif: "Songti SC", "STSong", "SimSun", serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/*
+ * 非 inline 的 @theme：这些令牌既要生成工具类，也要作为 CSS 变量供 @utility 使用。
+ * DESIGN.md 排版尺度：首屏标题 40–64px，内容区约 74rem；阅读节奏沿用原留白。
+ */
+@theme {
+  --text-hero: clamp(2.5rem, 1.6rem + 3.2vw, 4rem);
+  --text-hero--line-height: 1.35;
+  --text-section: clamp(1.65rem, 1.4rem + 0.6vw, 1.9rem);
+  --text-section--line-height: 1.4;
+
+  --container-reading: 74rem;
+  --breakpoint-reading: 50rem;
+
+  --spacing-gutter: clamp(1.5rem, 0.5rem + 3vw, 3rem);
+  --spacing-section: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+  --spacing-column: clamp(2rem, 1rem + 4vw, 5rem);
+}
+
+/* 页面容器：内容列封顶 74rem（DESIGN.md），左右留白随屏宽增长；与旧 .home-shell 的内容宽度一致。 */
+@utility page-container {
+  inline-size: 100%;
+  max-inline-size: calc(var(--container-reading) + var(--spacing-gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    color-scheme: light;
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-foreground text-base/relaxed;
+    overflow-x: clip;
+  }
+
+  :where(h1, h2, h3, h4) {
+    @apply font-serif font-medium;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+  }
+
+  ::selection {
+    background: var(--book-blue);
+    color: var(--foreground);
+  }
+}

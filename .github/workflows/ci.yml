@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: mykaoyan_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:5432:5432"
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres@localhost:5432/mykaoyan_test
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/postgres-client
+      - name: 重新生成公开契约后确认无差异
+        run: |
+          pnpm --filter @mykaoyan/core generate:contract
+          git diff --exit-code -- apps/web/public
+          test -z "$(git status --porcelain -- apps/web/public)"
+      - run: pnpm fmt:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm --filter @mykaoyan/web build:workers
+      - run: pnpm --filter @mykaoyan/web deploy:workers --dry-run
+      - name: 扫描全部提交中的密钥
+        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.0 git /repo --redact --no-banner
+      - name: 确认扫描器会拒绝假密钥
+        shell: bash
+        run: |
+          fixture=$(mktemp -d)
+          trap 'rm -rf "$fixture"' EXIT
+          python3 -c 'import sys; open(sys.argv[1], "w").write("github_token=" + "ghp_" + "A1b2C3d4E5f6" * 3)' "$fixture/secret.txt"
+          set +e
+          docker run --rm -v "$fixture:/fixture" ghcr.io/gitleaks/gitleaks:v8.30.0 dir /fixture --redact --no-banner
+          result=$?
+          set -e
+          test "$result" -eq 1

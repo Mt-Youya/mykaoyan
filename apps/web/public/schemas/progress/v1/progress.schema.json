@@ -1,0 +1,512 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mykaoyan.cn/schemas/progress/v1/progress.schema.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "公开的进度文件 JSON Schema 地址。",
+      "type": "string"
+    },
+    "app": {
+      "type": "string",
+      "const": "mykaoyan",
+      "description": "固定为 mykaoyan，用于识别本站进度文件。"
+    },
+    "version": {
+      "type": "number",
+      "const": 1,
+      "description": "进度文件格式版本，目前为 1。"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991,
+      "description": "每次写入加 1，只用于展示；并发以 ETag 为准。"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+      "description": "最后修改时间。"
+    },
+    "updatedBy": {
+      "anyOf": [
+        {
+          "type": "string",
+          "const": "site"
+        },
+        {
+          "type": "string",
+          "const": "api"
+        },
+        {
+          "type": "string",
+          "pattern": "^agent:[\\s\\S]{1,}$"
+        }
+      ],
+      "description": "写入来源：site 网页、api 云端接口、agent:<名称> 考生的 agent。"
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "examDate": {
+                  "type": "string",
+                  "format": "date",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                  "description": "初试日期。"
+                },
+                "subjects": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "pattern": "^\\d{3}$",
+                        "description": "考试科目代码。"
+                      },
+                      "name": {
+                        "type": "string",
+                        "pattern": "\\S",
+                        "description": "考试科目名称；统考科目名称固定，自命题科目由考生自己命名。"
+                      },
+                      "targetScore": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991,
+                        "description": "该科目标分。"
+                      }
+                    },
+                    "required": [
+                      "code",
+                      "name",
+                      "targetScore"
+                    ],
+                    "additionalProperties": false,
+                    "description": "备考档案中的考试科目。"
+                  },
+                  "description": "所考的考试科目，顺序即展示顺序。"
+                },
+                "otherMin": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991,
+                  "description": "每天不归入任何考试科目的固定分钟。"
+                },
+                "phases": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "pattern": "\\S",
+                        "description": "阶段名称。"
+                      },
+                      "start": {
+                        "type": "string",
+                        "format": "date",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                        "description": "阶段开始日期，含当天。"
+                      },
+                      "end": {
+                        "type": "string",
+                        "format": "date",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                        "description": "阶段结束日期，含当天；不得早于开始日期。"
+                      },
+                      "weekday": {
+                        "type": "object",
+                        "properties": {
+                          "minutes": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string",
+                              "pattern": "^\\d{3}$",
+                              "description": "三位考试科目代码，例如 302、408。"
+                            },
+                            "additionalProperties": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "description": "各科计划分钟。"
+                          },
+                          "flexMin": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991,
+                            "description": "弹性时间分钟，不预先分给任何科目。"
+                          }
+                        },
+                        "required": [
+                          "minutes",
+                          "flexMin"
+                        ],
+                        "additionalProperties": false,
+                        "description": "工作日（周一到周五）的计划分钟。"
+                      },
+                      "weekend": {
+                        "type": "object",
+                        "properties": {
+                          "minutes": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string",
+                              "pattern": "^\\d{3}$",
+                              "description": "三位考试科目代码，例如 302、408。"
+                            },
+                            "additionalProperties": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "description": "各科计划分钟。"
+                          },
+                          "flexMin": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991,
+                            "description": "弹性时间分钟，不预先分给任何科目。"
+                          }
+                        },
+                        "required": [
+                          "minutes",
+                          "flexMin"
+                        ],
+                        "additionalProperties": false,
+                        "description": "周六与周日的计划分钟。"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "start",
+                      "end",
+                      "weekday",
+                      "weekend"
+                    ],
+                    "additionalProperties": false,
+                    "description": "按日期划分的备考阶段。"
+                  },
+                  "description": "按日期先后排列、互不重叠的阶段。"
+                }
+              },
+              "required": [
+                "examDate",
+                "subjects",
+                "otherMin",
+                "phases"
+              ],
+              "additionalProperties": false,
+              "description": "考生的备考档案。"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "备考档案；尚未建立时为 null。"
+        },
+        "progress": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "topicId": {
+                "type": "string",
+                "pattern": "\\S",
+                "description": "考点编号，例如 M03、D02。"
+              },
+              "manual": {
+                "type": "string",
+                "enum": [
+                  "untested",
+                  "learning",
+                  "practiced"
+                ],
+                "description": "未测 untested、学习中 learning、已练 practiced；稳定与待重测由错题推算。"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "description": "最后更新时间。"
+              }
+            },
+            "required": [
+              "topicId",
+              "manual",
+              "updatedAt"
+            ],
+            "additionalProperties": false,
+            "description": "考点进度，只保存考生手动设置的状态。"
+          },
+          "description": "考点进度。"
+        },
+        "mistakes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "\\S",
+                "description": "错题编号。"
+              },
+              "legacyId": {
+                "description": "回填来源中的原编号。",
+                "type": "string"
+              },
+              "subject": {
+                "type": "string",
+                "pattern": "^\\d{3}$",
+                "description": "考试科目代码。"
+              },
+              "topicId": {
+                "description": "显式关联的考点编号。",
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "description": "题目来源；不得复制真题全文。"
+              },
+              "questionMd": {
+                "type": "string",
+                "description": "考生记录的题目，Markdown。"
+              },
+              "attemptMd": {
+                "description": "原始作答，Markdown。",
+                "type": "string"
+              },
+              "firstWrongStep": {
+                "description": "第一个错误步骤。",
+                "type": "string"
+              },
+              "causes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "concept",
+                    "condition",
+                    "calculation",
+                    "evidence",
+                    "misread",
+                    "strategy"
+                  ],
+                  "description": "错因：概念 concept、条件 condition、计算 calculation、依据 evidence、审题 misread、策略 strategy。"
+                },
+                "description": "错因。"
+              },
+              "correctionMd": {
+                "type": "string",
+                "description": "订正，Markdown。"
+              },
+              "keyCondition": {
+                "description": "关键条件。",
+                "type": "string"
+              },
+              "correctedOn": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                "description": "订正日期；复测日期由它推算。"
+              },
+              "retests": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "on": {
+                      "type": "string",
+                      "format": "date",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                      "description": "复测日期。"
+                    },
+                    "result": {
+                      "type": "string",
+                      "enum": [
+                        "independent",
+                        "with-hint",
+                        "failed"
+                      ],
+                      "description": "独立完成 independent、提示后完成 with-hint、不会 failed。"
+                    }
+                  },
+                  "required": [
+                    "on",
+                    "result"
+                  ],
+                  "additionalProperties": false,
+                  "description": "一次原始复测记录。"
+                },
+                "description": "按日期升序排列的原始复测记录。"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                "description": "创建时间。"
+              }
+            },
+            "required": [
+              "id",
+              "subject",
+              "source",
+              "questionMd",
+              "causes",
+              "correctionMd",
+              "correctedOn",
+              "retests",
+              "createdAt"
+            ],
+            "additionalProperties": false,
+            "description": "一道错题及其原始复测记录；稳定状态由复测记录推算，不写入文件。"
+          },
+          "description": "错题。"
+        },
+        "daily": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                "description": "每日记录日期；可以补录过去的日期。"
+              },
+              "minutes": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string",
+                  "pattern": "^\\d{3}$",
+                  "description": "三位考试科目代码，例如 302、408。"
+                },
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "description": "当天各科实际学习时长。"
+              },
+              "done": {
+                "type": "string",
+                "description": "完成事项。"
+              },
+              "tomorrowTop": {
+                "type": "string",
+                "description": "明日首要任务。"
+              },
+              "retro": {
+                "type": "string",
+                "description": "一句复盘。"
+              }
+            },
+            "required": [
+              "date",
+              "minutes",
+              "done",
+              "tomorrowTop",
+              "retro"
+            ],
+            "additionalProperties": false,
+            "description": "每日记录。"
+          },
+          "description": "每日记录。"
+        },
+        "dayPlans": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                "description": "按天计划日期。"
+              },
+              "minutes": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string",
+                  "pattern": "^\\d{3}$",
+                  "description": "三位考试科目代码，例如 302、408。"
+                },
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "description": "各科计划分钟。"
+              },
+              "flexMin": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "弹性时间分钟。"
+              }
+            },
+            "required": [
+              "date",
+              "minutes",
+              "flexMin"
+            ],
+            "additionalProperties": false,
+            "description": "按天覆盖的计划分钟。"
+          },
+          "description": "按天计划。"
+        },
+        "weekly": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "weekStart": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                "description": "周开始日期，必须是周一。"
+              },
+              "nextWeekAdjustment": {
+                "type": "string",
+                "description": "下周调整。"
+              }
+            },
+            "required": [
+              "weekStart",
+              "nextWeekAdjustment"
+            ],
+            "additionalProperties": false,
+            "description": "周复盘，只保存考生填写的下周调整；其余汇总由本站推算。"
+          },
+          "description": "周复盘。"
+        }
+      },
+      "required": [
+        "profile",
+        "progress",
+        "mistakes",
+        "daily",
+        "dayPlans",
+        "weekly"
+      ],
+      "additionalProperties": false,
+      "description": "备考档案与五类记录；不含私有内容与单词卡。"
+    }
+  },
+  "required": [
+    "app",
+    "version",
+    "revision",
+    "updatedAt",
+    "updatedBy",
+    "data"
+  ],
+  "additionalProperties": false,
+  "description": "进度文件 v1，包含一个账号的全部学习数据。"
+}

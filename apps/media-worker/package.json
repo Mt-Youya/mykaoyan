@@ -1,0 +1,16 @@
+{
+  "name": "@mykaoyan/media-worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local",
+    "typecheck": "wrangler types && tsc --noEmit",
+    "test": "vitest run",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "types": "wrangler types"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}

@@ -1,0 +1,55 @@
+name: 手动推送迁移
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: database-migrations
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+  dev:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: database-dev
+    env:
+      DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @mykaoyan/db migration:list
+      - name: 推送并读回迁移状态
+        working-directory: packages/db
+        run: |
+          pnpm exec supabase db push --db-url "${DATABASE_URL:?}" --skip-vault --yes
+          pnpm exec supabase migration list --db-url "$DATABASE_URL"
+  prod:
+    needs: dev
+    runs-on: ubuntu-latest
+    environment: database-prod
+    env:
+      DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @mykaoyan/db migration:list
+      - name: 推送并读回迁移状态
+        working-directory: packages/db
+        run: |
+          pnpm exec supabase db push --db-url "${DATABASE_URL:?}" --skip-vault --yes
+          pnpm exec supabase migration list --db-url "$DATABASE_URL"

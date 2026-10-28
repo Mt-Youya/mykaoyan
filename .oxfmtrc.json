@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 120,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": false,
+  "singleQuote": false,
+  "trailingComma": "es5",
+  "arrowParens": "always",
+  "endOfLine": "lf",
+  "ignorePatterns": [
+    "**/next-env.d.ts",
+    "**/*.md",
+    "**/routeTree.gen.ts",
+    "**/worker-configuration.d.ts",
+    "apps/web/public/**"
+  ]
+}

@@ -1,0 +1,66 @@
+name: 备份与保活
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 18 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    if: vars.OPERATIONS_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: backup-production
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: mykaoyan_restore_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:5432:5432"
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+      DATABASE_CA: ${{ secrets.DATABASE_CA }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      BACKUP_BUCKET: ${{ secrets.BACKUP_BUCKET }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - uses: ./.github/actions/postgres-client
+      - run: pnpm install --frozen-lockfile
+      - run: aws --version
+      - name: 生产数据库备份并读回对象
+        shell: bash
+        run: |
+          output=$(pnpm --filter @mykaoyan/api backup)
+          key=$(printf '%s\n' "$output" | sed -n 's/^备份完成：//p')
+          [[ "$key" =~ ^database/[a-zA-Z0-9.:-]+$ ]]
+          printf 'BACKUP_OBJECT_KEY=%s\n' "$key" >> "$GITHUB_ENV"
+      - name: 每月恢复演练
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule != ''
+        shell: bash
+        env:
+          RESTORE_DATABASE_URL: postgresql://postgres@localhost:5432/mykaoyan_restore_test
+        run: |
+          if [[ "$(date -u +%d)" == "01" || "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            pnpm --filter @mykaoyan/api restore
+          fi
+  keepalive:
+    if: vars.OPERATIONS_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - run: node deploy/smoke.mjs https://mykaoyan.cn

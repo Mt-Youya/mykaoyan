@@ -1,0 +1,23 @@
+{
+  "name": "@mykaoyan/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./dist/index"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.build.json",
+    "generate": "drizzle-kit generate",
+    "migration:list": "supabase migration list --db-url \"${DATABASE_URL:?必须设置迁移连接}\""
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.4"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.11",
+    "supabase": "2.122.0"
+  }
+}

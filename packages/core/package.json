@@ -1,0 +1,23 @@
+{
+  "name": "@mykaoyan/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./dist/index"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "generate:contract": "tsx scripts/generate-contract.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "tsx": "^4.23.15"
+  }
+}

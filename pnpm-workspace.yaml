@@ -1,0 +1,30 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  esbuild: true
+  workerd: true
+minimumReleaseAgeExclude:
+  - "@cloudflare/build-output-utils@0.9.5"
+  - "@cloudflare/config@0.28.1"
+  - "@cloudflare/runtime-types@0.1.16"
+  - cf@1.0.0-beta.23
+  - miniflare@5.20261023.0-beta
+  - "@better-auth/core@1.7.14"
+  - "@better-auth/drizzle-adapter@1.7.14"
+  - "@better-auth/kysely-adapter@1.7.14"
+  - "@better-auth/memory-adapter@1.7.14"
+  - "@better-auth/mongo-adapter@1.7.14"
+  - "@better-auth/prisma-adapter@1.7.14"
+  - "@better-auth/telemetry@1.7.14"
+  - better-auth@1.7.14
+permissions:
+  "@tanstack/react-router":
+    skills: true
+  "@tanstack/react-start":
+    skills: true
+skills:
+  dirs:
+    - .agents/skills
+    - .claude/skills
+    - .catpaw/skills

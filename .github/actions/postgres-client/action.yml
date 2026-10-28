@@ -1,0 +1,13 @@
+name: PostgreSQL 17 客户端
+description: 安装与测试服务及生产备份匹配的 pg_dump、pg_restore 与 psql
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-common ca-certificates curl
+        sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client-17
+        echo '/usr/lib/postgresql/17/bin' >> "$GITHUB_PATH"

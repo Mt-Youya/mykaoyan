@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "base-vega",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "../../packages/ui/src/styles/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true
+  },
+  "iconLibrary": "hugeicons",
+  "aliases": {
+    "components": "@mykaoyan/ui/components",
+    "utils": "@mykaoyan/ui/lib/utils",
+    "hooks": "@mykaoyan/ui/hooks",
+    "lib": "@mykaoyan/ui/lib",
+    "ui": "@mykaoyan/ui/base"
+  },
+  "rtl": false
+}

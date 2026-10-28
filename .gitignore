@@ -1,0 +1,51 @@
+# dependencies
+node_modules/
+
+# env and secrets (never commit; see docs/PLAN.md §2)
+.env
+.env.*
+*.pem
+*.key
+
+# build output
+dist/
+build/
+out/
+.output/
+.nitro/
+.tanstack/
+.vinxi/
+coverage/
+*.tsbuildinfo
+**/worker-configuration.d.ts
+
+# cloudflare / supabase local state
+.wrangler/
+.cloudflare/
+.dev.vars
+.dev.vars.*
+**/supabase/.temp/
+**/supabase/.branches/
+
+# rust
+target/
+
+# private content imported locally (ADR 0007)
+content/private/
+
+# design explorations scratch output from tools
+.hallmark/
+
+# local agent and editor state
+.claude/settings.local.json
+.agents/skills/pnpm-*
+.claude/skills/pnpm-*
+.DS_Store
+*.log
+
+films/
+
+# third-party reference screenshots (copyright; keep locally only)
+design/
+
+.catpaw/

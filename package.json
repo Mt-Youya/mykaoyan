@@ -1,0 +1,46 @@
+{
+  "name": "mykaoyan",
+  "version": "0.0.1",
+  "private": false,
+  "description": "",
+  "keywords": [],
+  "license": "MIT",
+  "author": "Cyrus Doyle",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @mykaoyan/web dev",
+    "serve": "pnpm --filter @mykaoyan/api dev",
+    "lint": "oxlint .",
+    "fmt": "oxfmt --write .",
+    "fmt:check": "oxfmt --check .",
+    "typecheck": "pnpm -r typecheck",
+    "test": "python3 tests/with-postgres.py",
+    "test:packages": "pnpm -r --workspace-concurrency=1 test && vitest run tests",
+    "build": "pnpm -r build",
+    "pre-commit": "pnpm fmt && pnpm lint"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.15.0",
+      "onFail": "download"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "24.22.1",
+      "onFail": "download"
+    }
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@12.15.0"
+}

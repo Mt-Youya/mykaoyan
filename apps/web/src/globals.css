@@ -1,0 +1,14 @@
+/*
+ * 全站唯一 CSS 入口：Tailwind v4 + shadcn 主题。
+ * 设计令牌定义在 packages/ui/src/styles/globals.css（与 apps/web/components.json 的 css 字段一致），
+ * 这里只负责装配 Tailwind、引入主题，并声明要扫描的源码目录。
+ * 页面样式一律用 Tailwind 工具类与 @mykaoyan/ui 组件，不再新增页面级 .css 文件。
+ */
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@mykaoyan/ui/style.css";
+
+@plugin "@tailwindcss/typography";
+
+/* 本应用源码（@mykaoyan/ui 的扫描范围在它自己的主题文件里声明） */
+@source ".";

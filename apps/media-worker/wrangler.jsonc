@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "mykaoyan-media",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-26",
+  "workers_dev": false,
+  // 媒体鉴权必须每次执行，不能在 Worker 之前命中缓存。
+  "cache": { "enabled": false },
+  "routes": [{ "pattern": "media.mykaoyan.cn", "custom_domain": true }],
+  "r2_buckets": [{ "binding": "BUCKET", "bucket_name": "mykaoyan-media", "remote": false }],
+  "vars": { "ALLOWED_ORIGINS": ["https://mykaoyan.cn", "https://www.mykaoyan.cn"] },
+  "secrets": { "required": ["MEDIA_SIGNING_KEY"] },
+  // 请求 URL 含播放令牌，关闭自动请求日志与追踪，避免持久化凭据。
+  "observability": {
+    "enabled": true,
+    "logs": { "enabled": true, "invocation_logs": false },
+    "traces": { "enabled": false },
+  },
+}

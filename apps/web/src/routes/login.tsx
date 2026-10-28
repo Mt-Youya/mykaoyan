@@ -1,0 +1,209 @@
+import { createFileRoute } from "@tanstack/react-router"
+import { createServerFn } from "@tanstack/react-start"
+import { getRequest, setResponseHeader } from "@tanstack/react-start/server"
+import { Button, Input, Label } from "@mykaoyan/ui"
+import { useEffect, useState } from "react"
+import { loadLoginState, postJson } from "./-auth"
+import type { LoginState } from "./-auth"
+
+/**
+ * 服务端读取会话与登录策略。
+ *
+ * 会话在服务端可能被滑动刷新，刷新得到的 `Set-Cookie` 必须原样转回浏览器
+ * （pitfalls §3「会话刷新双写」），否则浏览器拿着旧 cookie，刷新后又掉登录。
+ */
+const fetchLoginState = createServerFn({ method: "GET" }).handler(async (): Promise<LoginState> => {
+  const { state, setCookies } = await loadLoginState(getRequest())
+  if (setCookies.length > 0) setResponseHeader("set-cookie", setCookies)
+  return state
+})
+
+export const Route = createFileRoute("/login")({
+  loader: () => fetchLoginState(),
+  component: LoginPage,
+})
+
+type Step = "phone" | "code" | "signed-in"
+
+export function LoginPage() {
+  const { policy, session } = Route.useLoaderData() as LoginState
+  const [step, setStep] = useState<Step>(session ? "signed-in" : "phone")
+  const [phone, setPhone] = useState("")
+  const [code, setCode] = useState("")
+  const [consented, setConsented] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [cooldown, setCooldown] = useState(0)
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const timer = setTimeout(() => setCooldown((value) => value - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [cooldown])
+
+  async function requestCode() {
+    setBusy(true)
+    setMessage(null)
+    const result = await postJson("/api/phone/request-code", { phone })
+    setBusy(false)
+    if (!result.ok) {
+      setMessage(result.message)
+      if (result.retryAfterSeconds) setCooldown(result.retryAfterSeconds)
+      return
+    }
+    setStep("code")
+    setCooldown(policy.cooldownSeconds)
+  }
+
+  async function verify() {
+    setBusy(true)
+    setMessage(null)
+    const result = await postJson("/api/phone/verify", {
+      phone,
+      code,
+      acceptedPolicyVersion: policy.privacyPolicyVersion,
+    })
+    setBusy(false)
+    if (!result.ok) {
+      setMessage(result.message)
+      return
+    }
+    window.location.assign("/")
+  }
+
+  async function signOut(all: boolean) {
+    setBusy(true)
+    setMessage(null)
+    const result = await postJson(all ? "/api/phone/sign-out-all" : "/api/phone/sign-out", {})
+    setBusy(false)
+    if (!result.ok) {
+      setMessage(result.message)
+      return
+    }
+    setStep("phone")
+    window.location.assign("/login")
+  }
+
+  if (step === "signed-in") {
+    return (
+      <main className="page-container py-section">
+        <div className="mx-auto max-w-[30rem]">
+          <h1 className="font-serif text-section">已登录</h1>
+          <p className="mt-4 text-muted-foreground">退出默认只结束当前设备；要结束所有设备请用下面的按钮。</p>
+          <div className="mt-8 flex flex-col gap-3">
+            <Button type="button" className="min-h-11 text-base" onClick={() => signOut(false)} disabled={busy}>
+              退出当前设备
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-11 text-base"
+              onClick={() => signOut(true)}
+              disabled={busy}
+            >
+              退出所有设备
+            </Button>
+          </div>
+          {message ? (
+            <p role="alert" className="mt-6 border-l-2 border-destructive pl-3 text-destructive">
+              {message}
+            </p>
+          ) : null}
+        </div>
+      </main>
+    )
+  }
+
+  return (
+    <main className="page-container py-section">
+      <div className="mx-auto max-w-[30rem]">
+        <h1 className="font-serif text-section">手机号登录</h1>
+        <p className="mt-4 text-muted-foreground">
+          第一次登录即注册。手机号与登录记录存储在新加坡，仅用于登录与账号识别。
+        </p>
+        <form
+          className="mt-8 grid gap-5"
+          onSubmit={(event) => {
+            event.preventDefault()
+            if (step === "phone") void requestCode()
+            else void verify()
+          }}
+        >
+          <Label className="flex-col items-stretch gap-2 leading-normal">
+            手机号
+            <Input
+              className="min-h-11 text-base md:text-base"
+              name="phone"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel"
+              maxLength={11}
+              value={phone}
+              placeholder="虚构示例：13800138000"
+              onChange={(event) => setPhone(event.target.value.replace(/\D/g, ""))}
+              required
+            />
+          </Label>
+
+          {step === "code" ? (
+            <Label className="flex-col items-stretch gap-2 leading-normal">
+              验证码
+              <Input
+                className="min-h-11 text-base md:text-base"
+                name="code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                // 位数来自服务端策略，和短信模板 / 服务端校验同一个来源
+                maxLength={policy.codeLength}
+                value={code}
+                onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
+                required
+              />
+            </Label>
+          ) : null}
+
+          <Label className="items-start gap-3 py-1 text-base font-normal leading-relaxed">
+            <input
+              name="personal-info-transfer-consent"
+              type="checkbox"
+              checked={consented}
+              onChange={(event) => setConsented(event.target.checked)}
+              className="mt-1 size-5 shrink-0 accent-primary outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring"
+            />
+            <span className="min-w-0">
+              我同意将手机号存储在新加坡用于账号识别（政策版本 {policy.privacyPolicyVersion}）。未勾选不能注册。
+            </span>
+          </Label>
+
+          <div className="grid gap-3">
+            <Button
+              type="submit"
+              className="min-h-11 text-base"
+              disabled={busy || (step === "phone" && cooldown > 0) || !consented}
+            >
+              {step === "phone" ? (cooldown > 0 ? `${cooldown} 秒后可重新获取` : "获取验证码") : "登录"}
+            </Button>
+            {step === "code" ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="min-h-11 text-base"
+                disabled={busy || cooldown > 0}
+                onClick={() => void requestCode()}
+              >
+                {cooldown > 0 ? `${cooldown} 秒后可重新获取` : "重新获取验证码"}
+              </Button>
+            ) : null}
+          </div>
+        </form>
+        {message ? (
+          <p role="alert" className="mt-6 border-l-2 border-destructive pl-3 text-destructive">
+            {message}
+          </p>
+        ) : null}
+        <p className="mt-6 text-sm text-muted-foreground">验证码 {policy.codeTtlSeconds / 60} 分钟内有效。</p>
+      </div>
+    </main>
+  )
+}

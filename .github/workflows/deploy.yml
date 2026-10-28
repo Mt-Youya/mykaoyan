@@ -1,0 +1,71 @@
+name: 手动部署
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-release
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+  release:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      ACR_REGISTRY: ${{ vars.ACR_REGISTRY }}
+      ACR_NAMESPACE: ${{ vars.ACR_NAMESPACE }}
+      ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+      ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - name: 校验部署配置并推送镜像
+        shell: bash
+        run: |
+          : "${ACR_REGISTRY:?}" "${ACR_NAMESPACE:?}" "${ACR_USERNAME:?}" "${ACR_PASSWORD:?}"
+          : "${DEPLOY_HOST:?}" "${DEPLOY_USER:?}" "${DEPLOY_SSH_KEY:?}" "${DEPLOY_KNOWN_HOSTS:?}"
+          [[ "$ACR_REGISTRY/$ACR_NAMESPACE" =~ ^[a-zA-Z0-9._/-]+$ ]]
+          printf '%s' "$ACR_PASSWORD" | docker login "$ACR_REGISTRY" -u "$ACR_USERNAME" --password-stdin
+          for app in web api; do
+            image="$ACR_REGISTRY/$ACR_NAMESPACE/$app:$GITHUB_SHA"
+            docker build --file deploy/Dockerfile --target "$app" --tag "$image" .
+            docker push "$image"
+          done
+      - name: 更新 ECS compose
+        shell: bash
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/mykaoyan
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/mykaoyan ~/.ssh/known_hosts
+          target="$DEPLOY_USER@$DEPLOY_HOST"
+          scp -i ~/.ssh/mykaoyan deploy/compose.yaml deploy/Caddyfile "$target:/opt/mykaoyan/deploy/"
+          web="$ACR_REGISTRY/$ACR_NAMESPACE/web:$GITHUB_SHA"
+          api="$ACR_REGISTRY/$ACR_NAMESPACE/api:$GITHUB_SHA"
+          ssh -i ~/.ssh/mykaoyan "$target" "bash -s -- $web $api" <<'REMOTE'
+          set -euo pipefail
+          cd /opt/mykaoyan
+          printf 'WEB_IMAGE=%s\nAPI_IMAGE=%s\n' "$1" "$2" > .env.images
+          docker compose --env-file .env.images -f deploy/compose.yaml pull
+          docker compose --env-file .env.images -f deploy/compose.yaml up -d
+          REMOTE
+      - name: 部署后冒烟检查
+        shell: bash
+        run: |
+          for attempt in {1..12}; do
+            if node deploy/smoke.mjs https://mykaoyan.cn; then exit 0; fi
+            sleep 5
+          done
+          exit 1

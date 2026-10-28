@@ -1,0 +1,38 @@
+import { Module } from "@nestjs/common"
+import type { DynamicModule } from "@nestjs/common"
+import { AdminModule } from "../admin"
+import { AdmissionsModule } from "../admissions"
+import { AppController } from "./app.controller"
+import { AppService } from "./app.service"
+import { AuthModule } from "../auth"
+import { CatalogEmptyModule, CatalogModule } from "../catalog"
+import { ConfigModule } from "../config"
+import { DatabaseModule } from "../database"
+import type { Environment } from "../environment"
+import { PlaybackModule } from "../playback"
+import { ProgressModule } from "../progress"
+
+/**
+ * 应用根模块：按领域装配子模块，启动配置经 `forRoot` 注入。
+ *
+ * 未配置 `DATABASE_URL` 时只装配不依赖数据库的领域：招生目录查询（调研招网上游）
+ * 与空的课程/讲义列表；本地无需跑 Postgres。生产环境必须配置数据库。
+ */
+@Module({})
+export class AppModule {
+  static forRoot(environment: Environment): DynamicModule {
+    const database = environment.DATABASE_URL !== undefined
+    return {
+      module: AppModule,
+      imports: [
+        ConfigModule.forRoot(environment),
+        ...(database
+          ? [DatabaseModule, AuthModule, CatalogModule, PlaybackModule, AdminModule, ProgressModule]
+          : [CatalogEmptyModule]),
+        AdmissionsModule,
+      ],
+      controllers: database ? [AppController] : [],
+      providers: database ? [AppService] : [],
+    }
+  }
+}
