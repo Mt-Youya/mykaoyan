@@ -46,6 +46,12 @@ export function getDayPlan(
   return { minutes: { ...plan.minutes }, flexMin: plan.flexMin }
 }
 
+/** 按天计划按日期唯一：已有同一天的记录就替换，否则追加；不改入参。 */
+export function upsertDayPlan(dayPlans: readonly DayPlan[], plan: DayPlan): DayPlan[] {
+  if (!dayPlans.some((item) => item.date === plan.date)) return [...dayPlans, plan]
+  return dayPlans.map((item) => (item.date === plan.date ? plan : item))
+}
+
 /** 本周从周一开始的七天日期。 */
 export function getWeekDays(weekStart: LocalDate): LocalDate[] {
   return [0, 1, 2, 3, 4, 5, 6].map((offset) => addDays(weekStart, offset))

@@ -3,7 +3,7 @@ import { parseLocalDate } from "../dates/index"
 import { progressFileSchema } from "../progress/index"
 import type { WeeklyReview } from "../progress/index"
 import { fullProgressFileFixture } from "../progress/fixtures/index"
-import { publicTopics } from "../topics/data"
+import { publicTopics } from "../topics/index"
 import { getWeeklyReview, getWeeklySummary, startOfWeek, upsertWeeklyReview } from "./index"
 
 const file = progressFileSchema.parse(fullProgressFileFixture.value)

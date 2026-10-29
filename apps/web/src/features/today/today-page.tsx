@@ -1,4 +1,5 @@
 import {
+  DAILY_NEW_CARD_LIMIT,
   getDayPlan,
   getPlanTotal,
   getRecordedMinutes,
@@ -166,7 +167,7 @@ export function TodayView({ status, document, message, today, vocab }: TodayView
                 return (
                   <li key="new-cards" className="py-4">
                     <strong>可引入新卡 {task.count} 张</strong>
-                    <p className="mt-1 text-muted-foreground">每天最多 30 张新卡。</p>
+                    <p className="mt-1 text-muted-foreground">每天最多 {DAILY_NEW_CARD_LIMIT} 张新卡。</p>
                     <a className="mt-2 inline-block underline underline-offset-4" href="/vocabulary">
                       去背单词
                     </a>

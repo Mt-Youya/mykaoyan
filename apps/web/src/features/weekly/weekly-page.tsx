@@ -23,7 +23,7 @@ export type WeeklyViewProps = {
   message: string
   weekStart: LocalDate
   onChangeWeek: (weekStart: LocalDate) => void
-  onSave: (review: WeeklyReview) => void
+  onSave: (review: WeeklyReview) => Promise<boolean>
 }
 
 function Gate({ status, message }: { status: WeeklyViewProps["status"]; message: string }) {
@@ -52,16 +52,17 @@ function AdjustmentForm({
 }: {
   weekStart: LocalDate
   initial: WeeklyReview | null
-  onSave: (review: WeeklyReview) => void
+  onSave: (review: WeeklyReview) => Promise<boolean>
 }) {
   const [text, setText] = useState(initial?.nextWeekAdjustment ?? "")
   const [error, setError] = useState("")
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError("")
     try {
-      onSave({ weekStart, nextWeekAdjustment: text })
+      if (!(await onSave({ weekStart, nextWeekAdjustment: text })))
+        setError("下周调整没有保存。云端数据可能已更新，请刷新后重试。")
     } catch {
       setError("下周调整没有保存。")
     }
@@ -238,8 +239,8 @@ export function WeeklyPage() {
   const [weekStart, setWeekStart] = useState<LocalDate>(() => startOfWeek(toLocalDate(new Date())))
 
   async function saveReview(review: WeeklyReview) {
-    if (!document) return
-    await save({ ...document, data: { ...document.data, weekly: upsertWeeklyReview(document.data.weekly, review) } })
+    if (!document) return false
+    return save({ ...document, data: { ...document.data, weekly: upsertWeeklyReview(document.data.weekly, review) } })
   }
 
   return (
@@ -250,7 +251,7 @@ export function WeeklyPage() {
       message={message}
       weekStart={weekStart}
       onChangeWeek={(next) => setWeekStart(parseLocalDate(next))}
-      onSave={(review) => void saveReview(review)}
+      onSave={saveReview}
     />
   )
 }

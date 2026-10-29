@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { parseLocalDate } from "../dates/index"
 import { progressFileSchema } from "../progress/index"
 import { fullProgressFileFixture } from "../progress/fixtures/index"
-import { getDayPlan, getPlanTotal, getWeekDays, isWeekend, validatePhases } from "./index"
+import { getDayPlan, getPlanTotal, getWeekDays, isWeekend, upsertDayPlan, validatePhases } from "./index"
 
 const file = progressFileSchema.parse(fullProgressFileFixture.value)
 const profile = file.data.profile!
@@ -48,6 +48,18 @@ describe("默认计划推算", () => {
   it("计划总分钟等于各科分钟之和加弹性时间", () => {
     expect(getPlanTotal({ minutes: { "302": 90, "408": 60 }, flexMin: 20 })).toBe(170)
     expect(getPlanTotal({ minutes: {}, flexMin: 0 })).toBe(0)
+  })
+
+  it("按天计划按日期唯一：同一天替换，新日期追加且不改入参", () => {
+    const original = [{ date: parseLocalDate("2030-03-10"), minutes: { "302": 100 }, flexMin: 25 }]
+    const replaced = upsertDayPlan(original, {
+      date: parseLocalDate("2030-03-10"),
+      minutes: { "302": 60 },
+      flexMin: 5,
+    })
+    expect(replaced).toEqual([{ date: "2030-03-10", minutes: { "302": 60 }, flexMin: 5 }])
+    expect(original[0]!.minutes).toEqual({ "302": 100 })
+    expect(upsertDayPlan(original, { date: parseLocalDate("2030-03-11"), minutes: {}, flexMin: 0 })).toHaveLength(2)
   })
 })
 

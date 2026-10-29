@@ -3,7 +3,7 @@ import type { LocalDate } from "../dates/index"
 import { getPlanTotal, getWeekDays, getDayPlan } from "../plan/index"
 import { getStableOn } from "../mistakes/index"
 import { getTopicStableOn } from "../topics/index"
-import type { Topic } from "../topics/data"
+import type { Topic } from "../topics/index"
 import type { DailyLog, DayPlan, Mistake, StudyProfile, TopicProgress, WeeklyReview } from "../progress/index"
 
 export type WeeklySubjectSummary = {

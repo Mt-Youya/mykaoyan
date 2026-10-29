@@ -4,8 +4,14 @@ import { getRetestState } from "../mistakes/index"
 import { mistakeSchema, progressFileSchema } from "../progress/index"
 import type { Mistake } from "../progress/index"
 import { fullProgressFileFixture } from "../progress/fixtures/index"
-import { publicTopics, topicSchema } from "./data"
-import { getTopicProgressList, getTopicStableOn, getTopicState } from "./index"
+import {
+  getTopicProgressList,
+  getTopicStableOn,
+  getTopicState,
+  publicTopics,
+  topicSchema,
+  upsertTopicProgress,
+} from "./index"
 
 const file = progressFileSchema.parse(fullProgressFileFixture.value)
 const base = file.data.mistakes[0]!
@@ -103,5 +109,19 @@ describe("考点进度列表", () => {
       ["M03", "stable"],
       ["D02", "learning"],
     ])
+  })
+
+  it("考点进度记录按考点唯一：同一考点替换，新考点追加且不改入参", () => {
+    const original = [{ topicId: "M03", manual: "practiced" as const, updatedAt: "2030-03-01T00:00:00.000Z" }]
+    const replaced = upsertTopicProgress(original, {
+      topicId: "M03",
+      manual: "learning",
+      updatedAt: "2030-03-02T00:00:00.000Z",
+    })
+    expect(replaced).toEqual([{ topicId: "M03", manual: "learning", updatedAt: "2030-03-02T00:00:00.000Z" }])
+    expect(original[0]!.manual).toBe("practiced")
+    expect(
+      upsertTopicProgress(original, { topicId: "D02", manual: "untested", updatedAt: "2030-03-02T00:00:00.000Z" })
+    ).toHaveLength(2)
   })
 })

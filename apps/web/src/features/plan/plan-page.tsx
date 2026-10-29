@@ -5,6 +5,7 @@ import {
   parseLocalDate,
   studyProfileSchema,
   toLocalDate,
+  upsertDayPlan,
   validatePhases,
 } from "@mykaoyan/core"
 import type { DayPlan, ProgressFile, StudyProfile } from "@mykaoyan/core"
@@ -30,8 +31,8 @@ export type PlanViewProps = {
   status: "loading" | "ready" | "unauthorized" | "error"
   document: ProgressFile | null
   message: string
-  onSaveProfile: (profile: StudyProfile) => void
-  onSaveDayPlan: (plan: DayPlan) => void
+  onSaveProfile: (profile: StudyProfile) => Promise<boolean>
+  onSaveDayPlan: (plan: DayPlan) => Promise<boolean>
 }
 
 function Gate({ status, message }: { status: PlanViewProps["status"]; message: string }) {
@@ -97,7 +98,7 @@ function phaseRows(profile: StudyProfile | null, subjects: SubjectRow[]): PhaseR
 
 function numberOrZero(value: string) {
   const parsed = Number(value)
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
+  return Number.isFinite(parsed) && parsed >= 0 ? Math.round(parsed) : 0
 }
 
 /** 备考档案与按天计划：保存后整体替换档案，按天覆盖写入单独的计划记录。 */
@@ -142,7 +143,7 @@ export function PlanView({ status, document, message, onSaveProfile, onSaveDayPl
     )
   }
 
-  function saveProfile(event: FormEvent<HTMLFormElement>) {
+  async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError("")
     setSaved("")
@@ -171,14 +172,14 @@ export function PlanView({ status, document, message, onSaveProfile, onSaveDayPl
       })
       const invalid = validatePhases(next.phases)
       if (invalid) return setError(invalid)
-      onSaveProfile(next)
+      if (!(await onSaveProfile(next))) return setError("备考档案没有保存。云端数据可能已更新，请刷新后重试。")
       setSaved("已保存备考档案。")
     } catch {
       setError("备考档案没有保存：请检查初试日期、科目代码（三位数字）、目标分与阶段日期。")
     }
   }
 
-  function saveDayPlan(event: FormEvent<HTMLFormElement>) {
+  async function saveDayPlan(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError("")
     setSaved("")
@@ -188,7 +189,7 @@ export function PlanView({ status, document, message, onSaveProfile, onSaveDayPl
         minutes: Object.fromEntries(codes.map((code) => [code, numberOrZero(overrideMinutes[code] ?? "0")])),
         flexMin: numberOrZero(overrideFlex),
       })
-      onSaveDayPlan(parsed)
+      if (!(await onSaveDayPlan(parsed))) return setError("按天计划没有保存。云端数据可能已更新，请刷新后重试。")
       setSaved(`已保存 ${parsed.date} 的按天计划。`)
     } catch {
       setError("按天计划没有保存：请选择合法日期，分钟必须是非负整数。")
@@ -223,7 +224,7 @@ export function PlanView({ status, document, message, onSaveProfile, onSaveDayPl
               <Input type="date" value={examDate} onChange={(event) => setExamDate(event.target.value)} required />
             </Label>
             <Label className="flex-col items-stretch gap-2">
-              每天不归入考试科目的固定分钟
+              每天固定分钟（不归入考试科目）
               <Input type="number" min={0} value={otherMin} onChange={(event) => setOtherMin(event.target.value)} />
             </Label>
           </div>
@@ -352,7 +353,7 @@ export function PlanView({ status, document, message, onSaveProfile, onSaveDayPl
               type="button"
               variant="outline"
               className={`${buttonSize} justify-self-start`}
-              onClick={() => setPhases((rows) => [...rows, ...phaseRows(null, subjects)])}
+              onClick={() => setPhases((rows) => [...rows, phaseRows(null, subjects)[0]!])}
             >
               添加阶段
             </Button>
@@ -424,27 +425,22 @@ export function PlanPage() {
   const { status, document, message, save } = useProgress()
 
   async function saveProfile(profile: StudyProfile) {
-    if (!document) return
-    await save({ ...document, data: { ...document.data, profile } })
+    if (!document) return false
+    return save({ ...document, data: { ...document.data, profile } })
   }
 
   async function saveDayPlan(plan: DayPlan) {
-    if (!document) return
-    const exists = document.data.dayPlans.some((item) => item.date === plan.date)
-    const dayPlans = exists
-      ? document.data.dayPlans.map((item) => (item.date === plan.date ? plan : item))
-      : [...document.data.dayPlans, plan]
-    await save({ ...document, data: { ...document.data, dayPlans } })
+    if (!document) return false
+    return save({ ...document, data: { ...document.data, dayPlans: upsertDayPlan(document.data.dayPlans, plan) } })
   }
 
   return (
     <PlanView
-      key={document?.revision ?? 0}
       status={status}
       document={document}
       message={message}
-      onSaveProfile={(profile) => void saveProfile(profile)}
-      onSaveDayPlan={(plan) => void saveDayPlan(plan)}
+      onSaveProfile={saveProfile}
+      onSaveDayPlan={saveDayPlan}
     />
   )
 }

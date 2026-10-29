@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { emptyStudyDocument, studyDocument } from "../study-fixture"
 import { DailyView } from "./daily-page"
 
-const noop = () => {}
+const noop = async () => true
 
 describe("每日记录页", () => {
   it("当天已有记录时进入编辑，并显示当天计划总分钟", () => {

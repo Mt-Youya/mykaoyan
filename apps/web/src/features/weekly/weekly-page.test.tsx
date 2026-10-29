@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import { emptyStudyDocument, studyDocument } from "../study-fixture"
 import { WeeklyView } from "./weekly-page"
 
-const noop = () => {}
+const noop = async () => true
 
 describe("周复盘页", () => {
   it("从周一开始汇总各科计划与实际分钟，并统计本周变化", () => {

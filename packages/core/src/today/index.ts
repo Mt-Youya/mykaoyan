@@ -1,5 +1,6 @@
 import { getDueRetests } from "../mistakes/index"
 import type { DueRetest } from "../mistakes/index"
+import type { LocalDate } from "../dates/index"
 import type { Mistake } from "../progress/index"
 
 /** 单词卡数量；浏览器本地没有词表时按 0 处理。 */
@@ -16,11 +17,7 @@ export type TodayTask =
  * 今日页排序（PLAN §5.8）：逾期复测（逾期最久在前）→ 今天的复测 → 到期卡数量 → 新卡数量。
  * 数量为 0 的条目不出现在待办里；不替考生挑选考点。
  */
-export function getTodayTasks(
-  mistakes: readonly Mistake[],
-  vocab: VocabCounts | null,
-  today: Parameters<typeof getDueRetests>[1]
-): TodayTask[] {
+export function getTodayTasks(mistakes: readonly Mistake[], vocab: VocabCounts | null, today: LocalDate): TodayTask[] {
   const due = getDueRetests(mistakes, today)
   const tasks: TodayTask[] = [
     ...due

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { emptyStudyDocument, studyDocument } from "../study-fixture"
 import { PlanView } from "./plan-page"
 
-const noop = () => {}
+const noop = async () => true
 
 describe("备考档案与计划页", () => {
   it("没有档案时提示先建立，并给出创建表单", () => {

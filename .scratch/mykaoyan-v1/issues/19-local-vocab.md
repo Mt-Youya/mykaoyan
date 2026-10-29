@@ -4,7 +4,7 @@
 
 **Blocked by:** 02（Hello 全链路上线）
 
-**Status:** ready-for-human（本地完成；备份恢复未做浏览器交互实测）
+**Status:** ready-for-human（本地完成并做过浏览器实测）
 
 - [x] 从旧 kaoyan 移植 SM-2 调度、到期队列、词表导入去重及其测试
 - [x] 每天新卡最多 30 张，只在到期卡清空后引入
@@ -21,6 +21,6 @@
 - 补齐 core 调度测试：hard/easy 的 ease 变化与 easy 的 1.3 倍间隔、ease 下限 1.3、评分日期不得早于上次复习、同日最多 30 张新卡且已引入的新卡计入上限、到期卡按到期日期先后且优先于新卡、复习记录按天累计。
 - 既有词表粘贴导入的 Tab 分隔、去重与错误提示保持原样。
 
-验证：core vocab 9 项、web vocab model 5 项；`pnpm fmt:check`/`lint`/`typecheck`/`build` 见本轮总结。
+验证：core vocab 9 项、web vocab model 5 项；`pnpm fmt:check`/`lint`/`typecheck`/`build` 见本轮总结。浏览器实测（真实 Chrome + CDP）：先写入 2 个词条的本地词表，选择 1 词条/1 卡/1 天记录的备份文件 → 页面列出「待恢复的备份」各类数量与当前数量、提示恢复前自动下载 → 点击恢复后 localStorage 被整体替换为备份内容（1/1/1），下载目录出现当前数据的 JSON 备份，控制台无错误。
 
-遗留：恢复备份的真实浏览器交互（文件选择、下载触发、localStorage 整体替换）未做 CDP 实测，只有模型测试与源码静态断言；换设备迁移需人工实测。
+遗留：换设备迁移仍需人工实测；词表本身不上云，没有服务端验收项。

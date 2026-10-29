@@ -3,6 +3,9 @@ import type { LocalDate } from "../dates/index"
 import type { Mistake, TopicManualState, TopicProgress } from "../progress/index"
 import type { Topic } from "./data"
 
+export { publicTopics, topicSchema } from "./data"
+export type { Topic } from "./data"
+
 /** 考点进度：未测、学习中、已练，以及由关联错题推算的待重测、稳定。 */
 export type TopicState = "untested" | "learning" | "practiced" | "retest" | "stable"
 
@@ -47,4 +50,10 @@ export function getTopicProgressList(
     const manual = progress.find((item) => item.topicId === topic.id)?.manual ?? "untested"
     return { topic, state: getTopicState(topic.id, manual, mistakes) }
   })
+}
+
+/** 考点进度记录按考点唯一：已有同考点的记录就替换，否则追加；不改入参。 */
+export function upsertTopicProgress(progress: readonly TopicProgress[], record: TopicProgress): TopicProgress[] {
+  if (!progress.some((item) => item.topicId === record.topicId)) return [...progress, record]
+  return progress.map((item) => (item.topicId === record.topicId ? record : item))
 }

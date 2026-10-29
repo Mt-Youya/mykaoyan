@@ -6,6 +6,7 @@ import {
   localDateSchema,
   parseLocalDate,
   toLocalDate,
+  upsertDailyLog,
 } from "@mykaoyan/core"
 import type { DailyLog, ProgressFile } from "@mykaoyan/core"
 import { Button, Input, Label } from "@mykaoyan/ui"
@@ -20,7 +21,7 @@ export type DailyViewProps = {
   document: ProgressFile | null
   message: string
   today: string
-  onSave: (log: DailyLog) => void
+  onSave: (log: DailyLog) => Promise<boolean>
 }
 
 function numberOrZero(value: string) {
@@ -56,7 +57,7 @@ function DailyEditor({
   date: string
   codes: string[]
   initial: DailyLog | null
-  onSave: (log: DailyLog) => void
+  onSave: (log: DailyLog) => Promise<boolean>
 }) {
   const [minutes, setMinutes] = useState<Record<string, string>>(() =>
     Object.fromEntries(codes.map((code) => [code, String(initial?.minutes[code] ?? 0)]))
@@ -66,11 +67,11 @@ function DailyEditor({
   const [retro, setRetro] = useState(initial?.retro ?? "")
   const [error, setError] = useState("")
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError("")
     try {
-      onSave(
+      const saved = await onSave(
         dailyLogSchema.parse({
           date,
           minutes: Object.fromEntries(codes.map((code) => [code, numberOrZero(minutes[code] ?? "0")])),
@@ -79,6 +80,7 @@ function DailyEditor({
           retro,
         })
       )
+      if (!saved) setError("每日记录没有保存。云端数据可能已更新，请刷新后重试。")
     } catch {
       setError("每日记录没有保存：请检查日期与各科分钟。")
     }
@@ -199,13 +201,14 @@ export function DailyView({ status, document, message, today, onSave }: DailyVie
               : "这一天不在任何阶段内，没有默认计划分钟。"}
           </p>
           <DailyEditor
-            key={date}
+            key={`${date}-${existing ? "existing" : "new"}`}
             date={date}
             codes={codes}
             initial={existing}
-            onSave={(log) => {
-              onSave(log)
+            onSave={async (log) => {
+              if (!(await onSave(log))) return false
               setNotice(`已保存 ${log.date} 的每日记录。`)
+              return true
             }}
           />
         </section>
@@ -256,22 +259,11 @@ export function DailyPage() {
   const { status, document, message, save } = useProgress()
 
   async function saveLog(log: DailyLog) {
-    if (!document) return
-    const exists = document.data.daily.some((item) => item.date === log.date)
-    const daily = exists
-      ? document.data.daily.map((item) => (item.date === log.date ? log : item))
-      : [...document.data.daily, log]
-    await save({ ...document, data: { ...document.data, daily } })
+    if (!document) return false
+    return save({ ...document, data: { ...document.data, daily: upsertDailyLog(document.data.daily, log) } })
   }
 
   return (
-    <DailyView
-      key={document?.revision ?? 0}
-      status={status}
-      document={document}
-      message={message}
-      today={toLocalDate(new Date())}
-      onSave={(log) => void saveLog(log)}
-    />
+    <DailyView status={status} document={document} message={message} today={toLocalDate(new Date())} onSave={saveLog} />
   )
 }

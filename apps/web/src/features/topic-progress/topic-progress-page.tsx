@@ -1,4 +1,4 @@
-import { getTopicProgressList, publicTopics } from "@mykaoyan/core"
+import { getTopicProgressList, publicTopics, upsertTopicProgress } from "@mykaoyan/core"
 import type { ProgressFile, TopicManualState } from "@mykaoyan/core"
 import { Button } from "@mykaoyan/ui"
 import { useProgress } from "../progress"
@@ -153,12 +153,11 @@ export function TopicProgressPage() {
 
   async function setManual(topicId: string, manual: TopicManualState) {
     if (!document) return
-    const updatedAt = new Date().toISOString()
-    const exists = document.data.progress.some((item) => item.topicId === topicId)
-    const progress = exists
-      ? document.data.progress.map((item) => (item.topicId === topicId ? { ...item, manual, updatedAt } : item))
-      : [...document.data.progress, { topicId, manual, updatedAt }]
-    await save({ ...document, data: { ...document.data, progress } })
+    const record = { topicId, manual, updatedAt: new Date().toISOString() }
+    await save({
+      ...document,
+      data: { ...document.data, progress: upsertTopicProgress(document.data.progress, record) },
+    })
   }
 
   return (
