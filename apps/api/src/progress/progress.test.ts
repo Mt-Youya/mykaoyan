@@ -134,4 +134,45 @@ describe("个人进度文档 HTTP 接口", () => {
       await (await fetch(`${origin}/api/v1/progress/revisions`, { headers: { cookie: otherCookie } })).json()
     ).toEqual([])
   })
+
+  it("错题随进度文档上传下载往返无损，派生字段不落库", async () => {
+    const cookie = await login("18800000008")
+    const headers = { cookie, "content-type": "application/json" }
+    const initial = await fetch(`${origin}/api/v1/progress`, { headers: { cookie } })
+    expect(initial.status).toBe(200)
+    const etag = initial.headers.get("etag")
+    if (!etag) throw new Error("初始读取缺少 ETag")
+    const document = (await initial.json()) as ProgressDocument
+    const mistake = {
+      id: "mistake-roundtrip",
+      subject: "302",
+      source: "虚构练习册",
+      questionMd: "虚构题面，不含真题原文。",
+      correctionMd: "虚构订正，不含真题答案。",
+      causes: ["concept"],
+      correctedOn: "2030-03-01",
+      retests: [
+        { on: "2030-03-03", result: "independent" },
+        { on: "2030-03-08", result: "with-hint" },
+      ],
+      createdAt: "2030-03-01T20:30:00.000Z",
+    }
+    // 整份替换：不依赖该账号历史数据是否为空，重复跑同一库也不会假红。
+    document.data.mistakes = [mistake]
+
+    const saved = await fetch(`${origin}/api/v1/progress`, {
+      method: "PUT",
+      headers: { ...headers, "if-match": etag },
+      body: JSON.stringify(document),
+    })
+    expect(saved.status).toBe(200)
+
+    const readBack = (await (
+      await fetch(`${origin}/api/v1/progress`, { headers: { cookie } })
+    ).json()) as ProgressDocument
+    expect(readBack.data.mistakes).toEqual([mistake])
+    expect(Object.keys(readBack.data.mistakes[0] as Record<string, unknown>).toSorted()).toEqual(
+      Object.keys(mistake).toSorted()
+    )
+  })
 })
