@@ -38,6 +38,26 @@ export function isRetestDue(state: RetestState, today: LocalDate) {
   return !state.stable && state.nextOn <= today
 }
 
+/** 错题是否稳定；稳定与查询日期无关。 */
+export function isMistakeStable(mistake: Mistake) {
+  return getRetestState(mistake, mistake.correctedOn).stable
+}
+
+/** 错题稳定的日期：第二次独立完成的复测日期；尚未稳定返回 null。 */
+export function getStableOn(mistake: Mistake): LocalDate | null {
+  let attempt: 1 | 2 = 1
+  for (const retest of mistake.retests.toSorted(byDate)) {
+    if (retest.result !== "independent") {
+      attempt = 1
+    } else if (attempt === 2) {
+      return retest.on
+    } else {
+      attempt = 2
+    }
+  }
+  return null
+}
+
 /** 只返回到期或逾期复测；逾期最久的排在今天到期之前。 */
 export function getDueRetests(mistakes: readonly Mistake[], today: LocalDate): DueRetest[] {
   return mistakes

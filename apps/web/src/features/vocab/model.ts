@@ -27,3 +27,8 @@ export function mergeVocabEntries(current: VocabEntry[], incoming: VocabEntry[])
   const entries = incoming.filter((entry) => !known.has(`${entry.term}\u0000${entry.meaning}`))
   return { entries: [...current, ...entries], added: entries.length }
 }
+
+/** 备份内容摘要：导入前列出各类条目数。 */
+export function summarizeBackup(data: VocabData) {
+  return { entries: data.entries.length, cards: data.cards.length, reviewDays: data.reviewLogs.length }
+}

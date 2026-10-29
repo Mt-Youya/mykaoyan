@@ -123,6 +123,8 @@
 
 - **Windows 检出的行尾与技能链接**（mk/TOOL-10）：`core.autocrlf=true` 时 Git 检出为 CRLF，而 `.oxfmtrc.json` 要求 LF，第一次 `pnpm fmt:check` 会在几十个既有文件上报错；先跑 `pnpm fmt` 归一，提交内容不变。`postinstall` 会把 `.agents/skills/mykaoyan`、`.claude/skills/mykaoyan` 换成 junction，而 git 以 symlink 记录（`core.symlinks=false`），此时 `git status` 会显示删除，`git add -A` 还会把链接内容当成新文件加入；提交只 `git add` 具体文件，收尾用 `git checkout -- .agents/skills/mykaoyan .claude/skills/mykaoyan` 恢复占位文件。
 
+- **不要用 PowerShell 批量改写源码**（mk/TOOL-11）：Windows 下把 `Get-Content -Raw` 的结果 `Set-Content` 回文件会按默认编码写回，UTF-8 中文会变成乱码（本轮 4 个表单文件被写坏，只能从 git 索引恢复）。批量替换只在无中文的配置里做；改源码用编辑工具，或显式 `-Encoding utf8NoBOM` 并在写后逐文件核对中文与 `git diff`。同一轮还遇到 JSX 属性 `pattern="\\d{3}"`：双引号内不处理转义，浏览器拿到字面 `\\d{3}`，`validity.patternMismatch` 恒为真并阻止表单提交；写 `pattern="[0-9]{3}"`。改表单后要在浏览器里检查 `input.validity`，不能只靠 SSR/单元测试。
+
 ## 不再适用的条目
 
 | 条目 | 原因 |

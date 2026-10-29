@@ -3,7 +3,7 @@ import type { VocabData } from "@mykaoyan/core"
 import type { ChangeEvent, FormEvent } from "react"
 import { useState } from "react"
 import { Button, Input, Label } from "@mykaoyan/ui"
-import { mergeVocabEntries, parsePastedVocab } from "./model"
+import { mergeVocabEntries, parsePastedVocab, summarizeBackup } from "./model"
 import { useVocab } from "./use-vocab"
 
 const buttonSize = "min-h-11 px-5 text-base"
@@ -83,7 +83,10 @@ export function VocabPage() {
       if (!parsed.success) throw new Error("这不是可识别的词表备份")
       setPendingBackup(parsed.data)
       setError("")
-      setMessage("备份已读取。确认恢复后会替换当前浏览器中的词表、单词卡和复习记录。")
+      const backupCounts = summarizeBackup(parsed.data)
+      setMessage(
+        `备份含 ${backupCounts.entries} 个词条、${backupCounts.cards} 张单词卡、${backupCounts.reviewDays} 天复习记录。确认恢复后会整体替换当前浏览器中的词表、单词卡和复习记录。`
+      )
     } catch (cause) {
       setPendingBackup(null)
       setMessage("")
@@ -207,9 +210,10 @@ export function VocabPage() {
                 className={buttonSize}
                 variant="destructive"
                 onClick={() => {
+                  downloadBackup(`${JSON.stringify(vocab, null, 2)}\n`)
                   if (save(pendingBackup)) {
                     setPendingBackup(null)
-                    setMessage("已恢复备份。")
+                    setMessage("已先下载当前数据，然后恢复了备份。")
                   }
                 }}
               >
@@ -217,6 +221,14 @@ export function VocabPage() {
               </Button>
             )}
           </div>
+          {pendingBackup && (
+            <p className="text-sm text-muted-foreground" role="status">
+              待恢复的备份：{summarizeBackup(pendingBackup).entries} 个词条、{summarizeBackup(pendingBackup).cards}{" "}
+              张单词卡、
+              {summarizeBackup(pendingBackup).reviewDays} 天复习记录；当前有 {summarizeBackup(vocab).entries} 个词条、
+              {summarizeBackup(vocab).cards} 张单词卡。恢复前会先自动下载一份当前数据。
+            </p>
+          )}
         </section>
 
         {(notice || error) && (

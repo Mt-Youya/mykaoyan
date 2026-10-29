@@ -1,4 +1,4 @@
-import { getRetestState, isRetestDue, recordRetest, toLocalDate } from "@mykaoyan/core"
+import { getRetestState, isRetestDue, publicTopics, recordRetest, toLocalDate } from "@mykaoyan/core"
 import type { LocalDate, Mistake, MistakeCause, RetestResult } from "@mykaoyan/core"
 import { Button, Input, Label } from "@mykaoyan/ui"
 import type { FormEvent } from "react"
@@ -49,6 +49,7 @@ export function MistakeItem({ mistake, today, onRetest }: MistakeItemProps) {
       <div>
         <p className="text-sm text-muted-foreground">
           {mistake.subject} · {mistake.source || "未标注来源"}
+          {mistake.topicId ? ` · 考点 ${mistake.topicId}` : ""}
         </p>
         <p className="mt-2 whitespace-pre-wrap">{mistake.questionMd}</p>
         <p className="mt-2 whitespace-pre-wrap text-muted-foreground">订正：{mistake.correctionMd}</p>
@@ -86,6 +87,7 @@ export function MistakeItem({ mistake, today, onRetest }: MistakeItemProps) {
 export function MistakesPage() {
   const { status, document, message, save } = useProgress()
   const [subject, setSubject] = useState("302")
+  const [topicId, setTopicId] = useState("")
   const [source, setSource] = useState("")
   const [questionMd, setQuestionMd] = useState("")
   const [correctionMd, setCorrectionMd] = useState("")
@@ -104,6 +106,7 @@ export function MistakesPage() {
           {
             id: crypto.randomUUID(),
             subject,
+            ...(topicId ? { topicId } : {}),
             source,
             questionMd,
             correctionMd,
@@ -119,6 +122,7 @@ export function MistakesPage() {
       setSource("")
       setQuestionMd("")
       setCorrectionMd("")
+      setTopicId("")
     }
   }
 
@@ -157,8 +161,11 @@ export function MistakesPage() {
                   考试科目代码
                   <Input
                     value={subject}
-                    onChange={(event) => setSubject(event.target.value)}
-                    pattern="\\d{3}"
+                    onChange={(event) => {
+                      setSubject(event.target.value)
+                      setTopicId("")
+                    }}
+                    pattern="[0-9]{3}"
                     required
                   />
                 </Label>
@@ -172,6 +179,23 @@ export function MistakesPage() {
                   />
                 </Label>
               </div>
+              <Label className="flex-col items-stretch gap-2">
+                关联考点（可选）
+                <select
+                  className="min-h-11 border border-input bg-background px-3"
+                  value={topicId}
+                  onChange={(event) => setTopicId(event.target.value)}
+                >
+                  <option value="">不关联考点</option>
+                  {publicTopics
+                    .filter((topic) => topic.subject === subject)
+                    .map((topic) => (
+                      <option key={topic.id} value={topic.id}>
+                        {topic.id} · {topic.title}
+                      </option>
+                    ))}
+                </select>
+              </Label>
               <Label className="flex-col items-stretch gap-2">
                 题目与作答摘要
                 <textarea

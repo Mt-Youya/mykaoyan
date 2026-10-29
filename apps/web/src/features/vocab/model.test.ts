@@ -1,5 +1,19 @@
+import { readFileSync, readdirSync } from "node:fs"
+import { join } from "node:path"
+import { fileURLToPath } from "node:url"
+import { createVocabCard, parseLocalDate } from "@mykaoyan/core"
+import type { VocabData } from "@mykaoyan/core"
 import { describe, expect, it } from "vitest"
-import { mergeVocabEntries, parsePastedVocab } from "./model"
+import { mergeVocabEntries, parsePastedVocab, summarizeBackup } from "./model"
+
+const folder = fileURLToPath(new URL(".", import.meta.url))
+
+function sources(directory: string) {
+  return readdirSync(directory)
+    .filter((file) => (file.endsWith(".ts") || file.endsWith(".tsx")) && !file.includes(".test."))
+    .map((file) => readFileSync(join(directory, file), "utf8"))
+    .join("\n")
+}
 
 describe("词表粘贴导入", () => {
   it("解析 Tab 分隔的自有词表，且不重复导入同一词条", () => {
@@ -14,5 +28,46 @@ describe("词表粘贴导入", () => {
   it("拒绝没有释义或重复的行", () => {
     expect(() => parsePastedVocab("abandon", () => "id")).toThrow("Tab")
     expect(() => parsePastedVocab("abandon\t放弃\nabandon\t放弃", () => "id")).toThrow("重复")
+  })
+
+  it("重复导入只追加新词条，已有的单词卡与复习记录不变", () => {
+    const existing: VocabData = {
+      entries: [{ id: "one", term: "one", meaning: "一" }],
+      cards: [createVocabCard("one", parseLocalDate("2026-10-22"))],
+      reviewLogs: [{ date: parseLocalDate("2026-10-22"), reviews: 1, newCards: 1 }],
+    }
+    const merged = mergeVocabEntries(existing.entries, [
+      { id: "one-copy", term: "one", meaning: "一" },
+      { id: "two", term: "two", meaning: "二" },
+    ])
+    const next = { ...existing, entries: merged.entries }
+    expect(merged.added).toBe(1)
+    expect(next.entries).toHaveLength(2)
+    expect(next.cards).toEqual(existing.cards)
+    expect(next.reviewLogs).toEqual(existing.reviewLogs)
+  })
+})
+
+describe("备份摘要", () => {
+  it("列出词条、单词卡与复习记录数量", () => {
+    const data: VocabData = {
+      entries: [
+        { id: "one", term: "one", meaning: "一" },
+        { id: "two", term: "two", meaning: "二" },
+      ],
+      cards: [createVocabCard("one", parseLocalDate("2026-10-22"))],
+      reviewLogs: [{ date: parseLocalDate("2026-10-22"), reviews: 3, newCards: 1 }],
+    }
+    expect(summarizeBackup(data)).toEqual({ entries: 2, cards: 1, reviewDays: 1 })
+  })
+})
+
+describe("私有内容不上传", () => {
+  it("复习与备份相关源码不包含任何网络请求", () => {
+    const feature = sources(folder)
+    const core = sources(fileURLToPath(new URL("../../../../../packages/core/src/vocab", import.meta.url)))
+    for (const source of [feature, core]) {
+      expect(source).not.toMatch(/\bfetch\s*\(|XMLHttpRequest|sendBeacon|new WebSocket|axios/)
+    }
   })
 })

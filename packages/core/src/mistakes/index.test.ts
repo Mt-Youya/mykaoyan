@@ -3,7 +3,7 @@ import { parseLocalDate } from "../dates/index"
 import { mistakeSchema, progressFileSchema } from "../progress/index"
 import { fullProgressFileFixture } from "../progress/fixtures/index"
 import type { RetestAttempt } from "../progress/index"
-import { getDueRetests, getRetestState, isRetestDue, recordRetest } from "./index"
+import { getDueRetests, getRetestState, getStableOn, isMistakeStable, isRetestDue, recordRetest } from "./index"
 
 const base = progressFileSchema.parse(fullProgressFileFixture.value).data.mistakes[0]!
 
@@ -130,6 +130,39 @@ describe("乱序复测记录", () => {
       nextOn: "2030-03-10",
       overdueDays: 1,
     })
+  })
+})
+
+describe("稳定状态与稳定日期", () => {
+  it("两次独立完成后稳定，稳定日期是第二次复测的日期", () => {
+    const stable = mistake(
+      "2030-03-01",
+      attempts([
+        { on: "2030-03-03", result: "independent" },
+        { on: "2030-03-08", result: "independent" },
+      ])
+    )
+    expect(isMistakeStable(stable)).toBe(true)
+    expect(getStableOn(stable)).toBe("2030-03-08")
+  })
+
+  it("没有完成两次独立复测时未稳定，稳定日期为 null", () => {
+    expect(isMistakeStable(mistake("2030-03-01", []))).toBe(false)
+    expect(getStableOn(mistake("2030-03-01", []))).toBeNull()
+    const reset = mistake("2030-03-01", attempts([{ on: "2030-03-03", result: "with-hint" }]))
+    expect(isMistakeStable(reset)).toBe(false)
+    expect(getStableOn(reset)).toBeNull()
+  })
+
+  it("乱序的稳定记录也能取出稳定日期", () => {
+    const reversed = mistake(
+      "2030-03-01",
+      attempts([
+        { on: "2030-03-08", result: "independent" },
+        { on: "2030-03-03", result: "independent" },
+      ])
+    )
+    expect(getStableOn(reversed)).toBe("2030-03-08")
   })
 })
 

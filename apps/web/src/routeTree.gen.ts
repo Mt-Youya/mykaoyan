@@ -11,13 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdmissionsRouteImport } from './routes/admissions'
+import { Route as DailyRouteImport } from './routes/daily'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MistakesRouteImport } from './routes/mistakes'
 import { Route as PapersRouteImport } from './routes/papers'
+import { Route as PlanRouteImport } from './routes/plan'
 import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as TodayRouteImport } from './routes/today'
+import { Route as TopicProgressRouteImport } from './routes/topic-progress'
 import { Route as TopicsRouteImport } from './routes/topics'
 import { Route as VocabularyRouteImport } from './routes/vocabulary'
+import { Route as WeeklyRouteImport } from './routes/weekly'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
 import { Route as DocsContractRouteImport } from './routes/docs/contract'
@@ -35,6 +39,11 @@ const AdmissionsRoute = AdmissionsRouteImport.update({
   path: '/admissions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DailyRoute = DailyRouteImport.update({
+  id: '/daily',
+  path: '/daily',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -50,6 +59,11 @@ const PapersRoute = PapersRouteImport.update({
   path: '/papers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlanRoute = PlanRouteImport.update({
+  id: '/plan',
+  path: '/plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProgressRoute = ProgressRouteImport.update({
   id: '/progress',
   path: '/progress',
@@ -60,6 +74,11 @@ const TodayRoute = TodayRouteImport.update({
   path: '/today',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TopicProgressRoute = TopicProgressRouteImport.update({
+  id: '/topic-progress',
+  path: '/topic-progress',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TopicsRoute = TopicsRouteImport.update({
   id: '/topics',
   path: '/topics',
@@ -68,6 +87,11 @@ const TopicsRoute = TopicsRouteImport.update({
 const VocabularyRoute = VocabularyRouteImport.update({
   id: '/vocabulary',
   path: '/vocabulary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WeeklyRoute = WeeklyRouteImport.update({
+  id: '/weekly',
+  path: '/weekly',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminContentRoute = AdminContentRouteImport.update({
@@ -104,13 +128,17 @@ const SubjectsCodeRoute = SubjectsCodeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admissions': typeof AdmissionsRoute
+  '/daily': typeof DailyRoute
   '/login': typeof LoginRoute
   '/mistakes': typeof MistakesRoute
   '/papers': typeof PapersRoute
+  '/plan': typeof PlanRoute
   '/progress': typeof ProgressRoute
   '/today': typeof TodayRoute
+  '/topic-progress': typeof TopicProgressRoute
   '/topics': typeof TopicsRoute
   '/vocabulary': typeof VocabularyRoute
+  '/weekly': typeof WeeklyRoute
   '/admin/content': typeof AdminContentRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/docs/contract': typeof DocsContractRoute
@@ -121,13 +149,17 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admissions': typeof AdmissionsRoute
+  '/daily': typeof DailyRoute
   '/login': typeof LoginRoute
   '/mistakes': typeof MistakesRoute
   '/papers': typeof PapersRoute
+  '/plan': typeof PlanRoute
   '/progress': typeof ProgressRoute
   '/today': typeof TodayRoute
+  '/topic-progress': typeof TopicProgressRoute
   '/topics': typeof TopicsRoute
   '/vocabulary': typeof VocabularyRoute
+  '/weekly': typeof WeeklyRoute
   '/admin/content': typeof AdminContentRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/docs/contract': typeof DocsContractRoute
@@ -139,13 +171,17 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admissions': typeof AdmissionsRoute
+  '/daily': typeof DailyRoute
   '/login': typeof LoginRoute
   '/mistakes': typeof MistakesRoute
   '/papers': typeof PapersRoute
+  '/plan': typeof PlanRoute
   '/progress': typeof ProgressRoute
   '/today': typeof TodayRoute
+  '/topic-progress': typeof TopicProgressRoute
   '/topics': typeof TopicsRoute
   '/vocabulary': typeof VocabularyRoute
+  '/weekly': typeof WeeklyRoute
   '/admin/content': typeof AdminContentRoute
   '/courses/$slug': typeof CoursesSlugRoute
   '/docs/contract': typeof DocsContractRoute
@@ -158,13 +194,17 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admissions'
+    | '/daily'
     | '/login'
     | '/mistakes'
     | '/papers'
+    | '/plan'
     | '/progress'
     | '/today'
+    | '/topic-progress'
     | '/topics'
     | '/vocabulary'
+    | '/weekly'
     | '/admin/content'
     | '/courses/$slug'
     | '/docs/contract'
@@ -175,13 +215,17 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admissions'
+    | '/daily'
     | '/login'
     | '/mistakes'
     | '/papers'
+    | '/plan'
     | '/progress'
     | '/today'
+    | '/topic-progress'
     | '/topics'
     | '/vocabulary'
+    | '/weekly'
     | '/admin/content'
     | '/courses/$slug'
     | '/docs/contract'
@@ -192,13 +236,17 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admissions'
+    | '/daily'
     | '/login'
     | '/mistakes'
     | '/papers'
+    | '/plan'
     | '/progress'
     | '/today'
+    | '/topic-progress'
     | '/topics'
     | '/vocabulary'
+    | '/weekly'
     | '/admin/content'
     | '/courses/$slug'
     | '/docs/contract'
@@ -210,13 +258,17 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdmissionsRoute: typeof AdmissionsRoute
+  DailyRoute: typeof DailyRoute
   LoginRoute: typeof LoginRoute
   MistakesRoute: typeof MistakesRoute
   PapersRoute: typeof PapersRoute
+  PlanRoute: typeof PlanRoute
   ProgressRoute: typeof ProgressRoute
   TodayRoute: typeof TodayRoute
+  TopicProgressRoute: typeof TopicProgressRoute
   TopicsRoute: typeof TopicsRoute
   VocabularyRoute: typeof VocabularyRoute
+  WeeklyRoute: typeof WeeklyRoute
   AdminContentRoute: typeof AdminContentRoute
   CoursesSlugRoute: typeof CoursesSlugRoute
   DocsContractRoute: typeof DocsContractRoute
@@ -241,6 +293,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdmissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/daily': {
+      id: '/daily'
+      path: '/daily'
+      fullPath: '/daily'
+      preLoaderRoute: typeof DailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -262,6 +321,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PapersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plan': {
+      id: '/plan'
+      path: '/plan'
+      fullPath: '/plan'
+      preLoaderRoute: typeof PlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/progress': {
       id: '/progress'
       path: '/progress'
@@ -276,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TodayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/topic-progress': {
+      id: '/topic-progress'
+      path: '/topic-progress'
+      fullPath: '/topic-progress'
+      preLoaderRoute: typeof TopicProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/topics': {
       id: '/topics'
       path: '/topics'
@@ -288,6 +361,13 @@ declare module '@tanstack/react-router' {
       path: '/vocabulary'
       fullPath: '/vocabulary'
       preLoaderRoute: typeof VocabularyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/weekly': {
+      id: '/weekly'
+      path: '/weekly'
+      fullPath: '/weekly'
+      preLoaderRoute: typeof WeeklyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/content': {
@@ -338,13 +418,17 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdmissionsRoute: AdmissionsRoute,
+  DailyRoute: DailyRoute,
   LoginRoute: LoginRoute,
   MistakesRoute: MistakesRoute,
   PapersRoute: PapersRoute,
+  PlanRoute: PlanRoute,
   ProgressRoute: ProgressRoute,
   TodayRoute: TodayRoute,
+  TopicProgressRoute: TopicProgressRoute,
   TopicsRoute: TopicsRoute,
   VocabularyRoute: VocabularyRoute,
+  WeeklyRoute: WeeklyRoute,
   AdminContentRoute: AdminContentRoute,
   CoursesSlugRoute: CoursesSlugRoute,
   DocsContractRoute: DocsContractRoute,

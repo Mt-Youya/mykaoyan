@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { addDays, parseLocalDate, toLocalDate } from "../index"
+import { addDays, parseLocalDate, toLocalDate, weekdayOf } from "../index"
 
 describe("LocalDate", () => {
   it.each([
@@ -29,5 +29,17 @@ describe("LocalDate", () => {
   it("拒绝非法时刻和非整数天数", () => {
     expect(() => toLocalDate(new Date(Number.NaN))).toThrow()
     expect(() => addDays(parseLocalDate("2026-10-26"), 0.5)).toThrow()
+  })
+
+  it.each([
+    ["2026-10-26", 1],
+    ["2026-10-31", 6],
+    ["2026-11-01", 0],
+  ])("%s 的星期是 %i", (date, expected) => {
+    expect(weekdayOf(parseLocalDate(date))).toBe(expected)
+  })
+
+  it("拒绝非法日期的星期计算", () => {
+    expect(() => weekdayOf(parseLocalDate("2026-02-30"))).toThrow()
   })
 })

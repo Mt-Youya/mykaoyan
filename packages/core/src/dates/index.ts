@@ -26,3 +26,9 @@ export function addDays(date: LocalDate, days: number): LocalDate {
   instant.setUTCDate(instant.getUTCDate() + days)
   return parseLocalDate(instant.toISOString().substring(0, 10))
 }
+
+/** 星期：周日 0、周一 1……周六 6；不处理法定调休。 */
+export function weekdayOf(date: LocalDate): 0 | 1 | 2 | 3 | 4 | 5 | 6 {
+  localDateSchema.parse(date)
+  return new Date(`${date}T00:00:00.000Z`).getUTCDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6
+}

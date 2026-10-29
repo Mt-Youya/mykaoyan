@@ -142,42 +142,34 @@ export function StudyWorkspace({
           </div>
           <dl>
             {[
-              ["今日页", "按当前范围汇总复测与单词卡待办"],
-              ...(english ? [["背单词", "英语词表与到期卡复习；词表由自己保管"]] : []),
-              ["试卷", "按科目与年份整理来源及本人导入内容"],
-              ["错题", "按当前科目整理订正与复测"],
-              ["专题", "把相同考点的课程与讲义放在一起"],
-              [
-                "院校专业",
-                draft.target.school
+              { label: "今日页", href: "/today", description: "按当前范围汇总复测、单词卡与今天的计划" },
+              ...(english
+                ? [{ label: "背单词", href: "/vocabulary", description: "英语词表与到期卡复习；词表由自己保管" }]
+                : []),
+              { label: "每日记录", href: "/daily", description: "各科学习时长、完成事项、明日首要任务与一句复盘" },
+              { label: "错题", href: "/mistakes", description: "按当前科目整理订正与复测" },
+              {
+                label: "考点进度",
+                href: "/topic-progress",
+                description: "手动标记未测、学习中、已练；待重测与稳定由关联错题推算",
+              },
+              { label: "周复盘", href: "/weekly", description: "从周一开始的只读汇总，加一段下周调整" },
+              { label: "备考档案与计划", href: "/plan", description: "初试日期、科目目标分、阶段分钟与按天覆盖" },
+              { label: "试卷", href: "/papers", description: "按科目与年份整理来源及本人导入内容" },
+              { label: "专题", href: "/topics", description: "把相同考点的课程与讲义放在一起" },
+              {
+                label: "院校专业",
+                href: "/admissions",
+                description: draft.target.school
                   ? `当前目标：${draft.target.school}；可查询招生目录、收藏并比较`
                   : "目标未定，可先查询招生目录、收藏并比较",
-              ],
-            ].map(([label, description], index) => (
+              },
+            ].map(({ label, href, description }, index) => (
               <div key={label} className={index === 0 ? "border-b border-border pb-4" : "border-b border-border py-4"}>
                 <dt className="flex items-center gap-4 font-semibold">
-                  {["背单词", "今日页", "错题", "试卷", "专题", "院校专业"].includes(label ?? "") ? (
-                    <a
-                      className="underline underline-offset-4 hover:decoration-2"
-                      href={
-                        label === "背单词"
-                          ? "/vocabulary"
-                          : label === "今日页"
-                            ? "/today"
-                            : label === "错题"
-                              ? "/mistakes"
-                              : label === "试卷"
-                                ? "/papers"
-                                : label === "专题"
-                                  ? "/topics"
-                                  : "/admissions"
-                      }
-                    >
-                      {label}
-                    </a>
-                  ) : (
-                    label
-                  )}
+                  <a className="underline underline-offset-4 hover:decoration-2" href={href}>
+                    {label}
+                  </a>
                 </dt>
                 <dd className="mt-2 text-muted-foreground">{description}</dd>
               </div>

@@ -149,7 +149,7 @@ export function TopicsPage() {
                   <Input
                     value={subject}
                     onChange={(event) => setSubject(event.target.value)}
-                    pattern="\\d{3}"
+                    pattern="[0-9]{3}"
                     required
                   />
                 </Label>
