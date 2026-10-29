@@ -116,6 +116,140 @@
           }
         }
       }
+    },
+    "/api/v1/publish/prepare": {
+      "post": {
+        "operationId": "preparePublish",
+        "summary": "管理员准备发布一讲；同哈希不上传",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishLesson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "发布计划，签名 URL 有效15分钟",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishPrepared"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "内容无效"
+          },
+          "401": {
+            "description": "缺少管理员发布令牌"
+          },
+          "403": {
+            "description": "令牌用途或账号角色没有发布权限"
+          },
+          "409": {
+            "description": "对象不一致"
+          },
+          "503": {
+            "description": "R2 未配置"
+          }
+        }
+      }
+    },
+    "/api/v1/publish/{id}/complete": {
+      "post": {
+        "operationId": "completePublish",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "校验对象后登记并读回",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "缺少管理员发布令牌"
+          },
+          "403": {
+            "description": "令牌用途或账号角色没有发布权限"
+          },
+          "404": {
+            "description": "计划不属于当前账号"
+          },
+          "409": {
+            "description": "对象未就绪或发布冲突"
+          }
+        }
+      }
+    },
+    "/api/v1/publish/lessons/{slug}": {
+      "get": {
+        "operationId": "getPublishedLesson",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "发布登记读回",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "缺少管理员发布令牌"
+          },
+          "403": {
+            "description": "令牌用途或账号角色没有发布权限"
+          },
+          "404": {
+            "description": "讲不存在"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -822,6 +956,247 @@
         ],
         "additionalProperties": false,
         "description": "进度文件 PUT 成功后的变更摘要；完整文件用 GET 读取。"
+      },
+      "PublishLesson": {
+        "type": "object",
+        "properties": {
+          "course": {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "subjectCode": {
+                "type": "string",
+                "pattern": "^\\d{3}$"
+              }
+            },
+            "required": [
+              "slug",
+              "title",
+              "subjectCode"
+            ],
+            "additionalProperties": false
+          },
+          "chapter": {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "position": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              }
+            },
+            "required": [
+              "slug",
+              "title",
+              "position"
+            ],
+            "additionalProperties": false
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "scriptMarkdown": {
+            "type": "string",
+            "maxLength": 500000
+          },
+          "video": {
+            "type": "object",
+            "properties": {
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "md5": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9+/]{22}==$"
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5000000000
+              }
+            },
+            "required": [
+              "sha256",
+              "md5",
+              "size"
+            ],
+            "additionalProperties": false
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "md5": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9+/]{22}==$"
+                  },
+                  "size": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5000000000
+                  }
+                },
+                "required": [
+                  "sha256",
+                  "md5",
+                  "size"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "course",
+          "chapter",
+          "slug",
+          "title",
+          "position",
+          "scriptMarkdown",
+          "video",
+          "subtitle"
+        ],
+        "additionalProperties": false
+      },
+      "PublishPrepared": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unchanged": {
+            "type": "boolean"
+          },
+          "contentHash": {
+            "type": "string"
+          },
+          "uploads": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "video",
+                    "subtitle"
+                  ]
+                },
+                "url": {
+                  "type": "string"
+                },
+                "headers": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "kind",
+                "url",
+                "headers"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "unchanged",
+          "contentHash",
+          "uploads"
+        ],
+        "additionalProperties": false
+      },
+      "PublishResult": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "contentHash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "listed": {
+            "type": "boolean"
+          },
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cleanupPending": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "slug",
+          "contentHash",
+          "version",
+          "listed",
+          "keys",
+          "cleanupPending"
+        ],
+        "additionalProperties": false
       }
     },
     "securitySchemes": {

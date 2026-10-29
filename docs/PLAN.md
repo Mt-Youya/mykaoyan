@@ -120,13 +120,13 @@ M5 的资质约束（2026-10 调研，签约前复核）：
 
 ## 6. 域名与环境
 
-备案等待期间，前端按 [ADR 0008](./adr/0008-temporary-web-worker.md) 部署到独立 `mykaoyan-web` Worker，直接使用 `mykaoyan.cn`。按 [ADR 0010](./adr/0010-worker-api-proxy.md)（2026-10-28 确认方案 B），前端继续由 Worker 承载，NestJS API 部署到广州 ECS 的 `api.mykaoyan.cn`，Worker 把 `/api/**` 反代过去；浏览器只访问 `mykaoyan.cn`，因此不需要 CORS，会话 cookie 仍是一方 cookie。备案通过后不切回整站 ECS 方案。
+备案等待期间，前端曾按 [ADR 0008](./adr/0008-temporary-web-worker.md)、[ADR 0010](./adr/0010-worker-api-proxy.md) 部署到 Cloudflare Worker。2026-10-29 站主确认改为 [ADR 0012](./adr/0012-frontend-back-on-ecs.md)：前端与 API 都跑在广州 ECS，由同一个 Caddy 按路径分流（`/api/*` → API，其余 → 前端）；浏览器只访问 `mykaoyan.cn`，因此不需要 CORS，会话 cookie 仍是一方 cookie。DNS 留在阿里云，备案通过后加 A 记录并放行 80/443；Cloudflare 只保留 `media.mykaoyan.cn`。
 
 | 主机名 | 归属 | 说明 |
 | --- | --- | --- |
-| `mykaoyan.cn` | Cloudflare Worker Custom Domain → `mykaoyan-web` | 前端（TanStack Start）与 `/api/**` 反代；线上仍是 M0 Hello 版本，正式首页待发布 |
-| `api.mykaoyan.cn` | Cloudflare DNS 仅解析（灰云）→ 广州 ECS（Caddy → NestJS） | 备案通过后加 A 记录并放行 80/443；Caddy 用 HTTP-01 签证书 |
-| `www.mykaoyan.cn` | 规划为同一 `mykaoyan-web` Worker | 方案 B 下与主域共用前端，不指向 ECS；本次未调整 |
+| `mykaoyan.cn` | 阿里云 ECS（Caddy → 前端 + `/api/*` 反代 API） | 备案通过后加 A 记录并放行 80/443；Caddy 用 HTTP-01 签证书。备案前只能通过 ECS 公网 IP 访问，且未备案域名会被阿里云按 Host 头拦截 |
+| `api.mykaoyan.cn` | 暂不使用 | API 已由主域 `/api/*` 同源提供；日后需要 CLI/Agent 直连时再启用 |
+| `www.mykaoyan.cn` | 阿里云同一 ECS | 与主域共用 Caddy 站点；备案通过后加记录 |
 | `media.mykaoyan.cn` | Cloudflare Worker Custom Domain | 媒体 Worker + R2，不挂 Cloudflare Access |
 | `admin.*` 等其他子域 | 暂不使用 | 新增前先更新本表 |
 
@@ -134,7 +134,7 @@ M5 的资质约束（2026-10 调研，签约前复核）：
 | --- | --- | --- |
 | 本地 | Supabase `mykaoyan-dev`（免费版） | `pnpm dev` 直连；本机不跑 Docker |
 | CI | GitHub Actions 临时 Postgres 容器 | 迁移从空库重放、集成测试 |
-| 生产 | Supabase `mykaoyan-prod`（免费版，新加坡） | 只通过 CI 推送迁移，不在生产调试 |
+| 生产 | Supabase 项目 `mykaoyan`（免费版，东京 `ap-northeast-1`） | 迁移手工执行后核对（见 [ADR 0012](./adr/0012-frontend-back-on-ecs.md)），不在生产调试 |
 
 免费版限制（2026-10 核对 Supabase 定价页）：7 天无访问暂停；没有自动备份和 PITR；每个项目数据库 500 MB；最多 2 个活跃项目。对应措施：上线前每天访问一次健康检查；每天自己 `pg_dump`；数据库用量超过 400 MB 时告警并评估升级 Pro。
 

@@ -5,7 +5,7 @@
 ## 先说结论
 
 - 绝大多数阿里云 skill 依赖 `aliyun` CLI（≥ 3.3.3）和 RAM 子账号 AK。**本机当前没有安装 `aliyun`，也没有 `~/.aliyun/config.json`**，所以这些 skill 是「已安装、未就绪」。
-- 阿里云账号只承担三件事：**ICP 备案、DNS、广州 ECS 与云监控**。数据库（Supabase 新加坡）和视频（R2）不在阿里云。
+- 阿里云账号只承担三件事：**ICP 备案、DNS、广州 ECS 与云监控**。数据库主用 Supabase Cloud（新加坡），视频（R2）在 Cloudflare：都不在阿里云。阿里云还有一套 ADBPG 版 Supabase（`aliyun gpdb`），只作同地域备选，见下表。
 - 涉及创建、修改、删除云资源，或任何产生费用的操作，都要站主本轮明确授权（[PLAN.md §2](../PLAN.md)）。
 
 ## 使用前准备
@@ -33,14 +33,16 @@
 | 多地区可用性探测 | `alibabacloud-website-probe` | 备案后做国内多运营商 HTTP/Ping/DNS 探测 | 公开探测平台 |
 | 操作审计 | `alibabacloud-actiontrail-diagnosis` | 查谁在何时改了哪个云资源 | ActionTrail 权限 |
 | 阿里云 MCP / Agent Toolkit | `alibabacloud-mcp-connector`、`alibabacloud-agent-toolkit-install` | 需要 MCP 形态接入时再启用；本地 CLI 路径不需要 | — |
+| 数据库备选（ADBPG Supabase） | `alibabacloud-analyticdb-postgresql-supabase-ops` | `aliyun gpdb` 创建/查询阿里云 ADBPG 版 Supabase 项目、取连接信息；**当前不启用**，只在把库迁到阿里云同地域时用 | `aliyun` CLI ≥ 3.3.3、ai-mode、同 VPC 的 VSwitch |
 
 ## 本项目不用的
 
-ACK/Kubernetes、PAI、Flink、MaxCompute、DataWorks、RDS/PolarDB/Tair、OSS、WAF/DDoS、CDN、SLS（初期）、视频与数字人、IDaaS、FinOps 等。本站不用阿里云数据库、对象存储或大数据产品，相关 skill 只在特殊排障时临时加载。
+ACK/Kubernetes、PAI、Flink、MaxCompute、DataWorks、RDS/PolarDB/Tair、OSS、WAF/DDoS、CDN、SLS（初期）、视频与数字人、IDaaS、FinOps 等。本站不用阿里云的对象存储或大数据产品；数据库主用 Supabase Cloud，ADBPG 版 Supabase 仅作备选（见上表），相关 skill 只在特殊排障时临时加载。
 
-两条容易混用的：
+三条容易混用的：
 
 - `alibabacloud-sms-send-short-message` 是**短信服务（dysms）**；本站登录用的是**号码认证（Dypnsapi）** 的 `SendSmsVerifyCode` / `CheckSmsVerifyCode`，两者不是同一产品（见 [ADR 0004](../adr/0004-phone-first-login.md)），联调时不要混用。
+- `alibabacloud-analyticdb-postgresql-supabase-ops` 管的是**阿里云 ADBPG 上的 Supabase**（`aliyun gpdb`），不是 supabase.com 上的托管项目；supabase.com 的项目用 `supabase` skill。两者的连接串也不通用。
 - `alibabacloud-ecs-code-deploy` 用 AppManager 往 ECS 推代码；本站部署固定走 GitHub Actions → ACR → `docker compose`（[ADR 0010](../adr/0010-worker-api-proxy.md)），不采用这条路径，只留作排障参考。
 
 ## 与项目文档的对应

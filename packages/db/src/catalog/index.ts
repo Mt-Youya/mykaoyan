@@ -26,6 +26,7 @@ export const chapters = pgTable(
   "chapters",
   {
     id: uuid().defaultRandom().primaryKey(),
+    publishKey: text("publish_key").unique(),
     courseId: uuid("course_id")
       .notNull()
       .references(() => courses.id, { onDelete: "cascade" }),
@@ -52,6 +53,8 @@ export const lessons = pgTable(
     videoKey: text("video_key").notNull(),
     subtitleKey: text("subtitle_key"),
     scriptMarkdown: text("script_markdown").notNull(),
+    contentHash: text("content_hash"),
+    contentVersion: integer("content_version").notNull().default(0),
     listed: boolean().notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

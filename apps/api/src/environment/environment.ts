@@ -13,9 +13,24 @@ const environmentSchema = z
       .optional(),
     DATABASE_CA: z.string().trim().min(1).optional(),
     MEDIA_SIGNING_KEY: z.string().min(32),
+    R2_ACCOUNT_ID: z
+      .string()
+      .regex(/^[a-f0-9]{32}$/)
+      .optional(),
+    R2_ACCESS_KEY_ID: z.string().trim().min(1).optional(),
+    R2_SECRET_ACCESS_KEY: z.string().trim().min(1).optional(),
+    R2_BUCKET: z.string().trim().min(1).optional(),
+    R2_ENDPOINT: z.url().optional(),
     MEDIA_BASE_URL: z.string().trim().min(1).optional(),
   })
   .superRefine((config, ctx) => {
+    const r2Keys = ["R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET", "R2_ENDPOINT"] as const
+    if (r2Keys.some((key) => config[key] !== undefined)) {
+      for (const key of r2Keys)
+        if (config[key] === undefined) ctx.addIssue({ code: "custom", path: [key], message: "R2 配置须整组提供" })
+      if (config.R2_ACCOUNT_ID && config.R2_ENDPOINT !== `https://${config.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`)
+        ctx.addIssue({ code: "custom", path: ["R2_ENDPOINT"], message: "R2 端点不匹配" })
+    }
     // 未配置数据库时只装配不依赖数据库的模块（本地招生目录查询）；生产必须配置。
     if (config.DATABASE_URL === undefined) {
       if (config.NODE_ENV === "production") {

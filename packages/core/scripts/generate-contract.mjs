@@ -2,6 +2,7 @@
 /**
  * 由 packages/core 的 zod 定义生成公开契约产物：
  * - apps/web/public/schemas/progress/v1/progress.schema.json
+ * - skills/mykaoyan/references/progress.schema.json
  * - apps/web/public/openapi.json
  *
  * 产物提交进仓库；CI 重新生成后必须没有差异。
@@ -11,6 +12,7 @@ import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { z } from "zod"
 import { progressChangeSummarySchema } from "../src/progress/change-summary"
+import { publishLessonSchema, publishPreparedSchema, publishResultSchema } from "../src/catalog/index"
 import { progressFileSchema } from "../src/progress/schema"
 
 const SCHEMA_URL = "https://mykaoyan.cn/schemas/progress/v1/progress.schema.json"
@@ -123,6 +125,63 @@ const openapi = {
   },
 }
 
+// 发布接口与 CLI 同样只依赖公开契约。
+for (const [name, definition] of Object.entries({
+  PublishLesson: publishLessonSchema,
+  PublishPrepared: publishPreparedSchema,
+  PublishResult: publishResultSchema,
+})) {
+  const { $schema: _dialect, ...body } = z.toJSONSchema(definition, { io: "input" })
+  openapi.components.schemas[name] = body
+}
+const publishSecurity = [{ bearerAuth: [] }]
+const content = (name) => ({ "application/json": { schema: { $ref: `#/components/schemas/${name}` } } })
+openapi.paths["/api/v1/publish/prepare"] = {
+  post: {
+    operationId: "preparePublish",
+    summary: "管理员准备发布一讲；同哈希不上传",
+    security: publishSecurity,
+    requestBody: { required: true, content: content("PublishLesson") },
+    responses: {
+      201: { description: "发布计划，签名 URL 有效15分钟", content: content("PublishPrepared") },
+      400: { description: "内容无效" },
+      401: { description: "缺少管理员发布令牌" },
+      403: { description: "令牌用途或账号角色没有发布权限" },
+      409: { description: "对象不一致" },
+      503: { description: "R2 未配置" },
+    },
+  },
+}
+openapi.paths["/api/v1/publish/{id}/complete"] = {
+  post: {
+    operationId: "completePublish",
+    security: publishSecurity,
+    parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+    responses: {
+      201: { description: "校验对象后登记并读回", content: content("PublishResult") },
+      401: { description: "缺少管理员发布令牌" },
+      403: { description: "令牌用途或账号角色没有发布权限" },
+      404: { description: "计划不属于当前账号" },
+      409: { description: "对象未就绪或发布冲突" },
+    },
+  },
+}
+openapi.paths["/api/v1/publish/lessons/{slug}"] = {
+  get: {
+    operationId: "getPublishedLesson",
+    security: publishSecurity,
+    parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }],
+    responses: {
+      200: { description: "发布登记读回", content: content("PublishResult") },
+      401: { description: "缺少管理员发布令牌" },
+      403: { description: "令牌用途或账号角色没有发布权限" },
+      404: { description: "讲不存在" },
+    },
+  },
+}
+
 writeJson(resolve(root, "apps/web/public/schemas/progress/v1/progress.schema.json"), progressSchema)
+writeJson(resolve(root, "skills/mykaoyan/references/progress.schema.json"), progressSchema)
 writeJson(resolve(root, "apps/web/public/openapi.json"), openapi)
-console.log("已生成公开契约产物：progress.schema.json、openapi.json")
+writeJson(resolve(root, "cli/contracts/openapi.json"), openapi)
+console.log("已生成公开契约产物：网站与 skill 的 progress.schema.json、openapi.json")

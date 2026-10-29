@@ -1,0 +1,1216 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "我的考研公开契约",
+    "version": "1.0.0",
+    "description": "进度文件格式与公开接口说明。契约只有一个来源：packages/core 的 zod 定义，由脚本生成 JSON Schema 与 OpenAPI。\n\n进度文件 JSON Schema：https://mykaoyan.cn/schemas/progress/v1/progress.schema.json\n\n文档页：https://mykaoyan.cn/docs/contract\n\n版本规则：兼容变更留在 v1，破坏性变更走 /v2/，v1 至少保留一个大版本周期。"
+  },
+  "servers": [
+    {
+      "url": "https://mykaoyan.cn",
+      "description": "本站在线环境"
+    }
+  ],
+  "paths": {
+    "/api/v1/progress": {
+      "get": {
+        "operationId": "getProgress",
+        "summary": "读取当前进度文件",
+        "description": "返回当前账号的进度文件与 ETag。网页会话与 Agent 令牌（Authorization: Bearer）都可以调用；ETag 用于 PUT 的 If-Match。",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "当前进度文件。",
+            "headers": {
+              "ETag": {
+                "description": "当前文档的版本标识；PUT 时作为 If-Match 回传。",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressFile"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登录，或 Agent 令牌缺失、无效。"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putProgress",
+        "summary": "整份替换进度文件",
+        "description": "用请求体整份替换当前账号的进度文件，服务端只追加历史版本。\n\n必须带 If-Match：缺失返回 428，与当前 ETag 不匹配返回 412；成功后返回新的 ETag。\n\n网页会话与 Agent 令牌（Authorization: Bearer）都可以调用。",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "description": "GET 返回的 ETag。缺失返回 428，不匹配返回 412。",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressFile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "替换成功；返回各类记录的新增、修改、删除条数。",
+            "headers": {
+              "ETag": {
+                "description": "当前文档的版本标识；PUT 时作为 If-Match 回传。",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressChangeSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求体不符合进度文件 v1 JSON Schema。"
+          },
+          "401": {
+            "description": "未登录，或 Agent 令牌缺失、无效。"
+          },
+          "412": {
+            "description": "If-Match 与当前 ETag 不匹配。"
+          },
+          "428": {
+            "description": "缺少 If-Match。"
+          }
+        }
+      }
+    },
+    "/api/v1/publish/prepare": {
+      "post": {
+        "operationId": "preparePublish",
+        "summary": "管理员准备发布一讲；同哈希不上传",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishLesson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "发布计划，签名 URL 有效15分钟",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishPrepared"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "内容无效"
+          },
+          "401": {
+            "description": "缺少管理员发布令牌"
+          },
+          "403": {
+            "description": "令牌用途或账号角色没有发布权限"
+          },
+          "409": {
+            "description": "对象不一致"
+          },
+          "503": {
+            "description": "R2 未配置"
+          }
+        }
+      }
+    },
+    "/api/v1/publish/{id}/complete": {
+      "post": {
+        "operationId": "completePublish",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "校验对象后登记并读回",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "缺少管理员发布令牌"
+          },
+          "403": {
+            "description": "令牌用途或账号角色没有发布权限"
+          },
+          "404": {
+            "description": "计划不属于当前账号"
+          },
+          "409": {
+            "description": "对象未就绪或发布冲突"
+          }
+        }
+      }
+    },
+    "/api/v1/publish/lessons/{slug}": {
+      "get": {
+        "operationId": "getPublishedLesson",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "发布登记读回",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "缺少管理员发布令牌"
+          },
+          "403": {
+            "description": "令牌用途或账号角色没有发布权限"
+          },
+          "404": {
+            "description": "讲不存在"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProgressFile": {
+        "type": "object",
+        "properties": {
+          "$schema": {
+            "description": "公开的进度文件 JSON Schema 地址。",
+            "type": "string"
+          },
+          "app": {
+            "type": "string",
+            "const": "mykaoyan",
+            "description": "固定为 mykaoyan，用于识别本站进度文件。"
+          },
+          "version": {
+            "type": "number",
+            "const": 1,
+            "description": "进度文件格式版本，目前为 1。"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "每次写入加 1，只用于展示；并发以 ETag 为准。"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+            "description": "最后修改时间。"
+          },
+          "updatedBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "site"
+              },
+              {
+                "type": "string",
+                "const": "api"
+              },
+              {
+                "type": "string",
+                "pattern": "^agent:[\\s\\S]{1,}$"
+              }
+            ],
+            "description": "写入来源：site 网页、api 云端接口、agent:<名称> 考生的 agent。"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "profile": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "examDate": {
+                        "type": "string",
+                        "format": "date",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                        "description": "初试日期。"
+                      },
+                      "subjects": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "pattern": "^\\d{3}$",
+                              "description": "考试科目代码。"
+                            },
+                            "name": {
+                              "type": "string",
+                              "pattern": "\\S",
+                              "description": "考试科目名称；统考科目名称固定，自命题科目由考生自己命名。"
+                            },
+                            "targetScore": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991,
+                              "description": "该科目标分。"
+                            }
+                          },
+                          "required": [
+                            "code",
+                            "name",
+                            "targetScore"
+                          ],
+                          "additionalProperties": false,
+                          "description": "备考档案中的考试科目。"
+                        },
+                        "description": "所考的考试科目，顺序即展示顺序。"
+                      },
+                      "otherMin": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991,
+                        "description": "每天不归入任何考试科目的固定分钟。"
+                      },
+                      "phases": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "pattern": "\\S",
+                              "description": "阶段名称。"
+                            },
+                            "start": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                              "description": "阶段开始日期，含当天。"
+                            },
+                            "end": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                              "description": "阶段结束日期，含当天；不得早于开始日期。"
+                            },
+                            "weekday": {
+                              "type": "object",
+                              "properties": {
+                                "minutes": {
+                                  "type": "object",
+                                  "propertyNames": {
+                                    "type": "string",
+                                    "pattern": "^\\d{3}$",
+                                    "description": "三位考试科目代码，例如 302、408。"
+                                  },
+                                  "additionalProperties": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "description": "各科计划分钟。"
+                                },
+                                "flexMin": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991,
+                                  "description": "弹性时间分钟，不预先分给任何科目。"
+                                }
+                              },
+                              "required": [
+                                "minutes",
+                                "flexMin"
+                              ],
+                              "additionalProperties": false,
+                              "description": "工作日（周一到周五）的计划分钟。"
+                            },
+                            "weekend": {
+                              "type": "object",
+                              "properties": {
+                                "minutes": {
+                                  "type": "object",
+                                  "propertyNames": {
+                                    "type": "string",
+                                    "pattern": "^\\d{3}$",
+                                    "description": "三位考试科目代码，例如 302、408。"
+                                  },
+                                  "additionalProperties": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "description": "各科计划分钟。"
+                                },
+                                "flexMin": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991,
+                                  "description": "弹性时间分钟，不预先分给任何科目。"
+                                }
+                              },
+                              "required": [
+                                "minutes",
+                                "flexMin"
+                              ],
+                              "additionalProperties": false,
+                              "description": "周六与周日的计划分钟。"
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "start",
+                            "end",
+                            "weekday",
+                            "weekend"
+                          ],
+                          "additionalProperties": false,
+                          "description": "按日期划分的备考阶段。"
+                        },
+                        "description": "按日期先后排列、互不重叠的阶段。"
+                      }
+                    },
+                    "required": [
+                      "examDate",
+                      "subjects",
+                      "otherMin",
+                      "phases"
+                    ],
+                    "additionalProperties": false,
+                    "description": "考生的备考档案。"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "备考档案；尚未建立时为 null。"
+              },
+              "progress": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "topicId": {
+                      "type": "string",
+                      "pattern": "\\S",
+                      "description": "考点编号，例如 M03、D02。"
+                    },
+                    "manual": {
+                      "type": "string",
+                      "enum": [
+                        "untested",
+                        "learning",
+                        "practiced"
+                      ],
+                      "description": "未测 untested、学习中 learning、已练 practiced；稳定与待重测由错题推算。"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                      "description": "最后更新时间。"
+                    }
+                  },
+                  "required": [
+                    "topicId",
+                    "manual",
+                    "updatedAt"
+                  ],
+                  "additionalProperties": false,
+                  "description": "考点进度，只保存考生手动设置的状态。"
+                },
+                "description": "考点进度。"
+              },
+              "mistakes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "\\S",
+                      "description": "错题编号。"
+                    },
+                    "legacyId": {
+                      "description": "回填来源中的原编号。",
+                      "type": "string"
+                    },
+                    "subject": {
+                      "type": "string",
+                      "pattern": "^\\d{3}$",
+                      "description": "考试科目代码。"
+                    },
+                    "topicId": {
+                      "description": "显式关联的考点编号。",
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string",
+                      "description": "题目来源；不得复制真题全文。"
+                    },
+                    "questionMd": {
+                      "type": "string",
+                      "description": "考生记录的题目，Markdown。"
+                    },
+                    "attemptMd": {
+                      "description": "原始作答，Markdown。",
+                      "type": "string"
+                    },
+                    "firstWrongStep": {
+                      "description": "第一个错误步骤。",
+                      "type": "string"
+                    },
+                    "causes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "concept",
+                          "condition",
+                          "calculation",
+                          "evidence",
+                          "misread",
+                          "strategy"
+                        ],
+                        "description": "错因：概念 concept、条件 condition、计算 calculation、依据 evidence、审题 misread、策略 strategy。"
+                      },
+                      "description": "错因。"
+                    },
+                    "correctionMd": {
+                      "type": "string",
+                      "description": "订正，Markdown。"
+                    },
+                    "keyCondition": {
+                      "description": "关键条件。",
+                      "type": "string"
+                    },
+                    "correctedOn": {
+                      "type": "string",
+                      "format": "date",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                      "description": "订正日期；复测日期由它推算。"
+                    },
+                    "retests": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "on": {
+                            "type": "string",
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                            "description": "复测日期。"
+                          },
+                          "result": {
+                            "type": "string",
+                            "enum": [
+                              "independent",
+                              "with-hint",
+                              "failed"
+                            ],
+                            "description": "独立完成 independent、提示后完成 with-hint、不会 failed。"
+                          }
+                        },
+                        "required": [
+                          "on",
+                          "result"
+                        ],
+                        "additionalProperties": false,
+                        "description": "一次原始复测记录。"
+                      },
+                      "description": "按日期升序排列的原始复测记录。"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+                      "description": "创建时间。"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "subject",
+                    "source",
+                    "questionMd",
+                    "causes",
+                    "correctionMd",
+                    "correctedOn",
+                    "retests",
+                    "createdAt"
+                  ],
+                  "additionalProperties": false,
+                  "description": "一道错题及其原始复测记录；稳定状态由复测记录推算，不写入文件。"
+                },
+                "description": "错题。"
+              },
+              "daily": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                      "description": "每日记录日期；可以补录过去的日期。"
+                    },
+                    "minutes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string",
+                        "pattern": "^\\d{3}$",
+                        "description": "三位考试科目代码，例如 302、408。"
+                      },
+                      "additionalProperties": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "description": "当天各科实际学习时长。"
+                    },
+                    "done": {
+                      "type": "string",
+                      "description": "完成事项。"
+                    },
+                    "tomorrowTop": {
+                      "type": "string",
+                      "description": "明日首要任务。"
+                    },
+                    "retro": {
+                      "type": "string",
+                      "description": "一句复盘。"
+                    }
+                  },
+                  "required": [
+                    "date",
+                    "minutes",
+                    "done",
+                    "tomorrowTop",
+                    "retro"
+                  ],
+                  "additionalProperties": false,
+                  "description": "每日记录。"
+                },
+                "description": "每日记录。"
+              },
+              "dayPlans": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                      "description": "按天计划日期。"
+                    },
+                    "minutes": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string",
+                        "pattern": "^\\d{3}$",
+                        "description": "三位考试科目代码，例如 302、408。"
+                      },
+                      "additionalProperties": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "description": "各科计划分钟。"
+                    },
+                    "flexMin": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991,
+                      "description": "弹性时间分钟。"
+                    }
+                  },
+                  "required": [
+                    "date",
+                    "minutes",
+                    "flexMin"
+                  ],
+                  "additionalProperties": false,
+                  "description": "按天覆盖的计划分钟。"
+                },
+                "description": "按天计划。"
+              },
+              "weekly": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "weekStart": {
+                      "type": "string",
+                      "format": "date",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                      "description": "周开始日期，必须是周一。"
+                    },
+                    "nextWeekAdjustment": {
+                      "type": "string",
+                      "description": "下周调整。"
+                    }
+                  },
+                  "required": [
+                    "weekStart",
+                    "nextWeekAdjustment"
+                  ],
+                  "additionalProperties": false,
+                  "description": "周复盘，只保存考生填写的下周调整；其余汇总由本站推算。"
+                },
+                "description": "周复盘。"
+              }
+            },
+            "required": [
+              "profile",
+              "progress",
+              "mistakes",
+              "daily",
+              "dayPlans",
+              "weekly"
+            ],
+            "additionalProperties": false,
+            "description": "备考档案与五类记录；不含私有内容与单词卡。"
+          }
+        },
+        "required": [
+          "app",
+          "version",
+          "revision",
+          "updatedAt",
+          "updatedBy",
+          "data"
+        ],
+        "additionalProperties": false,
+        "description": "进度文件 v1，包含一个账号的全部学习数据。"
+      },
+      "ProgressChangeSummary": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "type": "string",
+            "const": "mykaoyan",
+            "description": "固定为 mykaoyan，用于识别本站响应。"
+          },
+          "version": {
+            "type": "number",
+            "const": 1,
+            "description": "进度文件格式版本，目前为 1。"
+          },
+          "etag": {
+            "type": "string",
+            "minLength": 1,
+            "description": "替换后的当前 ETag；下次 PUT 的 If-Match 用它。"
+          },
+          "changes": {
+            "type": "object",
+            "properties": {
+              "added": {
+                "type": "object",
+                "properties": {
+                  "profile": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "备考档案的条数。"
+                  },
+                  "progress": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "考点进度的条数。"
+                  },
+                  "mistakes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "错题的条数。"
+                  },
+                  "daily": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "每日记录的条数。"
+                  },
+                  "dayPlans": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "按天计划的条数。"
+                  },
+                  "weekly": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "周复盘的条数。"
+                  }
+                },
+                "required": [
+                  "profile",
+                  "progress",
+                  "mistakes",
+                  "daily",
+                  "dayPlans",
+                  "weekly"
+                ],
+                "additionalProperties": false,
+                "description": "新增条数。"
+              },
+              "updated": {
+                "type": "object",
+                "properties": {
+                  "profile": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "备考档案的条数。"
+                  },
+                  "progress": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "考点进度的条数。"
+                  },
+                  "mistakes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "错题的条数。"
+                  },
+                  "daily": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "每日记录的条数。"
+                  },
+                  "dayPlans": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "按天计划的条数。"
+                  },
+                  "weekly": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "周复盘的条数。"
+                  }
+                },
+                "required": [
+                  "profile",
+                  "progress",
+                  "mistakes",
+                  "daily",
+                  "dayPlans",
+                  "weekly"
+                ],
+                "additionalProperties": false,
+                "description": "修改条数。"
+              },
+              "removed": {
+                "type": "object",
+                "properties": {
+                  "profile": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "备考档案的条数。"
+                  },
+                  "progress": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "考点进度的条数。"
+                  },
+                  "mistakes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "错题的条数。"
+                  },
+                  "daily": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "每日记录的条数。"
+                  },
+                  "dayPlans": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "按天计划的条数。"
+                  },
+                  "weekly": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "周复盘的条数。"
+                  }
+                },
+                "required": [
+                  "profile",
+                  "progress",
+                  "mistakes",
+                  "daily",
+                  "dayPlans",
+                  "weekly"
+                ],
+                "additionalProperties": false,
+                "description": "删除条数。"
+              }
+            },
+            "required": [
+              "added",
+              "updated",
+              "removed"
+            ],
+            "additionalProperties": false,
+            "description": "按记录类别统计的新增、修改、删除条数。"
+          }
+        },
+        "required": [
+          "app",
+          "version",
+          "etag",
+          "changes"
+        ],
+        "additionalProperties": false,
+        "description": "进度文件 PUT 成功后的变更摘要；完整文件用 GET 读取。"
+      },
+      "PublishLesson": {
+        "type": "object",
+        "properties": {
+          "course": {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "subjectCode": {
+                "type": "string",
+                "pattern": "^\\d{3}$"
+              }
+            },
+            "required": [
+              "slug",
+              "title",
+              "subjectCode"
+            ],
+            "additionalProperties": false
+          },
+          "chapter": {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "position": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              }
+            },
+            "required": [
+              "slug",
+              "title",
+              "position"
+            ],
+            "additionalProperties": false
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "scriptMarkdown": {
+            "type": "string",
+            "maxLength": 500000
+          },
+          "video": {
+            "type": "object",
+            "properties": {
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "md5": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9+/]{22}==$"
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5000000000
+              }
+            },
+            "required": [
+              "sha256",
+              "md5",
+              "size"
+            ],
+            "additionalProperties": false
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "md5": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9+/]{22}==$"
+                  },
+                  "size": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5000000000
+                  }
+                },
+                "required": [
+                  "sha256",
+                  "md5",
+                  "size"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "course",
+          "chapter",
+          "slug",
+          "title",
+          "position",
+          "scriptMarkdown",
+          "video",
+          "subtitle"
+        ],
+        "additionalProperties": false
+      },
+      "PublishPrepared": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unchanged": {
+            "type": "boolean"
+          },
+          "contentHash": {
+            "type": "string"
+          },
+          "uploads": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "video",
+                    "subtitle"
+                  ]
+                },
+                "url": {
+                  "type": "string"
+                },
+                "headers": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "kind",
+                "url",
+                "headers"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "unchanged",
+          "contentHash",
+          "uploads"
+        ],
+        "additionalProperties": false
+      },
+      "PublishResult": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "contentHash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "listed": {
+            "type": "boolean"
+          },
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cleanupPending": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "slug",
+          "contentHash",
+          "version",
+          "listed",
+          "keys",
+          "cleanupPending"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Agent 令牌，只能读写本人进度。"
+      },
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "better-auth.session_token",
+        "description": "网页登录会话。"
+      }
+    }
+  }
+}

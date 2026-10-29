@@ -1,5 +1,10 @@
 # M0 本地交付报告
 
+## 状态更新（2026-10-29）
+
+- 前端改为与 API 同机部署在广州 ECS，由 Caddy 按路径分流（[ADR 0012](../adr/0012-frontend-back-on-ecs.md)）；跑法与验证基线见 [当前部署](../ops/current-deployment.md)。
+- **更正 2026-10-27 那条记录**：「已绑定 `https://mykaoyan.cn` 并用浏览器实测显示 M0 Hello 页」不成立。当时 NS 一直在阿里云、Cloudflare zone 未 active，主域没有任何解析（2026-10-29 复核：阿里云侧记录集为空）。当时能回读到的只是 Cloudflare 侧的自定义域配置，不等于域名可用。
+
 ## 状态更新（2026-10-28）
 
 - 上述本地改动已提交并推送到 GitHub `main`（`initial`、`fix(ci)`、`ci(gitleaks)`、`feat(api)` 四个提交），CI 连续两次通过，包含契约无差异、Workers 构建与 dry-run、gitleaks 与假密钥变异检查。本报告中「未提交、未 push」的描述已过时。

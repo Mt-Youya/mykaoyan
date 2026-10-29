@@ -126,6 +126,8 @@ sudo chown -R "$USER":"$USER" /opt/mykaoyan-api
 
 ## 6. ECS 上的 `/opt/mykaoyan-api/.env`
 
+完整的创建步骤、变量模板与校验命令见 [ECS API 运行时配置](./ecs-api-env.md)。
+
 `chmod 600`，只放在 ECS，不进仓库、不进镜像。
 
 | 变量 | 来源 | 说明 |

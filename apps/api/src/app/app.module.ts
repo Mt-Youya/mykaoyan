@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common"
 import type { DynamicModule } from "@nestjs/common"
 import { AdminModule } from "../admin"
 import { AdmissionsModule } from "../admissions"
+import { AgentTokensModule } from "../agent-tokens"
 import { AppController } from "./app.controller"
 import { AppService } from "./app.service"
 import { AuthModule } from "../auth"
@@ -10,6 +11,7 @@ import { ConfigModule } from "../config"
 import { DatabaseModule } from "../database"
 import type { Environment } from "../environment"
 import { PlaybackModule } from "../playback"
+import { PublishingModule } from "../publishing"
 import { ProgressModule } from "../progress"
 
 /**
@@ -27,7 +29,16 @@ export class AppModule {
       imports: [
         ConfigModule.forRoot(environment),
         ...(database
-          ? [DatabaseModule, AuthModule, CatalogModule, PlaybackModule, AdminModule, ProgressModule]
+          ? [
+              DatabaseModule,
+              AuthModule,
+              CatalogModule,
+              PlaybackModule,
+              AdminModule,
+              AgentTokensModule,
+              ProgressModule,
+              PublishingModule,
+            ]
           : [CatalogEmptyModule]),
         AdmissionsModule,
       ],

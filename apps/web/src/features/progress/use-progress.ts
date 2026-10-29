@@ -49,5 +49,5 @@ export function useProgress() {
     [etag]
   )
 
-  return { ...state, reload, save }
+  return { ...state, etag, reload, save }
 }

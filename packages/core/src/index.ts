@@ -63,3 +63,6 @@ export type {
   UpdatedBy,
   WeeklyReview,
 } from "./progress/index"
+
+export { publishLessonSchema, publishPreparedSchema, publishResultSchema } from "./catalog/index"
+export type { PublishLesson } from "./catalog/index"

@@ -26,6 +26,37 @@ export async function fetchProgress(): Promise<ProgressResponse> {
   return { status: "ok", document: parsed.data, etag }
 }
 
+export type ProgressRevision = { revision: number; updatedAt: string; etag: string }
+
+export type RevisionsResponse =
+  | { status: "ok"; revisions: ProgressRevision[] }
+  | { status: "unauthorized" }
+  | { status: "error"; message: string }
+
+function isRevision(value: unknown): value is ProgressRevision {
+  if (typeof value !== "object" || value === null) return false
+  const row = value as Record<string, unknown>
+  return (
+    typeof row.revision === "number" &&
+    Number.isInteger(row.revision) &&
+    row.revision >= 0 &&
+    typeof row.updatedAt === "string" &&
+    typeof row.etag === "string" &&
+    row.etag.length > 0
+  )
+}
+
+export async function fetchRevisions(): Promise<RevisionsResponse> {
+  const response = await fetch("/api/v1/progress/revisions", { credentials: "same-origin" })
+  if (response.status === 401) return { status: "unauthorized" }
+  if (!response.ok) return { status: "error", message: message(await readProblem(response)) }
+  const data = (await response.json().catch(() => null)) as unknown
+  if (!Array.isArray(data) || !data.every(isRevision)) {
+    return { status: "error", message: "历史版本响应无法识别，请稍后重试" }
+  }
+  return { status: "ok", revisions: data }
+}
+
 export type SaveProgressResponse =
   | { status: "ok"; summary: ProgressChangeSummary; etag: string }
   | { status: "conflict" }

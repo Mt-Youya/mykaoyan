@@ -17,6 +17,7 @@
 
 - **恢复 schema 默认权限**（mk/DB-01）：`pg_restore --clean` 重建 `public` 后不一定重放其默认 PUBLIC 权限；备份记录源 schema 的 PUBLIC 权限并按原样恢复。恢复前检查专用目标库没有任何非系统对象，不能用清空现有库来绕过冲突。
 - **恢复 ACL 的角色依赖**（mk/DB-02）：Supabase 备份的 ACL 会引用 `service_role` 等角色；清单记录非系统角色名，临时恢复库先补齐缺失的无登录、无全局特权占位角色，再恢复 ACL。验证要包含“源角色在目标不存在”的用例。
+- **原生 SQL 的时间列是字符串**（mk/DB-03）：`DatabaseService.client` 是 postgres.js 裸连接，`timestamptz` 默认没配 parser，返回 `string` 而不是 `Date`；直接 `.toISOString()` 会 500。映射层同时接受 `Date | string`，或统一在连接层配置 parser 后再依赖 `Date`。
 
 - **迁移从空库重放**（pf/DB-01、pf/DB-04）：CI 每次在临时 Postgres 上从空库跑全部迁移。迁移只执行一次、不重跑；修复要写新迁移，改旧迁移的注释不算修复。
 - **授权顺序**（pf/DB-02）：先撤表级权限再按列授权；用 `has_table_privilege`、`has_column_privilege` 写断言。
@@ -74,6 +75,10 @@
 - **工具返回形状**（pf/TOOL-11）：先看真实返回结构再写解析，不猜字段。
 - **研招网目录的假空结果**（mk/DATA-01）：`/zsml/rs/*` 匿名只返回前 10 行，第二页是 HTTP 200 加 `{"flag":false,"msg":"请登录"}`；`yjfxs.do` 传与代码不符的专业名称会静默返回空列表；目录没有年度参数。解析时把「请登录」、HTML 页面当失败，用 `totalCount` 标截断，只向上游传代码，年度不符直接拒绝。
 
+- **Rust 契约的整数表示**（mk/DATA-02）：JSON Schema 的 integer 接受 `45.0`、`45e0`，serde 生成整数类型和 Value 等值比较会区分表示。先用原始 schema 校验，仅对类型解析副本与读回比较做安全整数规范化；请求 JSON 不改。typify 纯字符串 anyOf 可能生成结构体，类型层宽化成 String 时必须保留原始 schema 运行时约束。
+
+- **R2 单次 PUT 校验与重放**（mk/MEDIA-01）：不能把 S3 的 FULL_OBJECT SHA-256 支持直接套到 R2；按当前兼容表使用 Content-MD5 与单次 PUT ETag 校验，签入 If-None-Match 防已上传对象被签名重放覆盖。登记前 HEAD；删除失败留计划并重试，不能在同哈希 no-op 时隐藏清理状态。
+
 ## 7. Agent 行为
 
 - **单写者**（pf/AGENT-02、pf/AGENT-03、pf/AGENT-09、pg/TOOL-10）：同一工作区同一时间只有一个会话写入；接手前看 `git status`；恢复只回滚自己改的部分。
@@ -114,6 +119,7 @@
 - **并行子任务**（pg/VER-04、pf/TOOL-20）：汇总时逐份核对长度与结尾；不要把子任务的完整记录回灌进主会话。
 
 - **测试文件收集范围**（mk/TOOL-08）：前端 Vitest 曾只包含 `.test.tsx` 与 `.test.mjs`，新增 `.test.ts` 会被静默跳过。增加测试后先核对实际收集数量与失败用例，再把通过作为验收证据。
+- **并行测试文件共享手机号限流**（mk/TOOL-09）：API 的 Vitest 文件并行跑、共用一个临时库；不同文件用同一个手机号走验证码登录会触发 60 秒冷却，表现为随机 429。新增登录测试一律用全仓库唯一的测试号，冲突时按文件核对 `grep` 结果而不是重跑碰运气。
 
 ## 不再适用的条目
 

@@ -1,13 +1,14 @@
 import { Body, Controller, Get, Headers, HttpException, HttpStatus, Inject, Put, Res, UseGuards } from "@nestjs/common"
-import { CurrentSession, SessionGuard } from "../auth"
+import { AgentTokenGuard } from "../agent-tokens"
+import { CurrentSession } from "../auth"
 import type { AuthSession } from "../auth"
 import { ProgressService } from "./service"
 
 type HeaderResponse = { setHeader(name: string, value: string): void }
 
-/** 进度文档的整个读写面都要求登录；不能通过 ID 参数访问别人的记录。 */
+/** 进度文档的整个读写面都要求登录或有效 Agent 令牌；不能通过 ID 参数访问别人的记录。 */
 @Controller("v1/progress")
-@UseGuards(SessionGuard)
+@UseGuards(AgentTokenGuard)
 export class ProgressController {
   constructor(@Inject(ProgressService) private readonly progress: ProgressService) {}
 

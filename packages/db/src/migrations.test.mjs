@@ -46,6 +46,30 @@ describe("空库迁移与权限", () => {
     }
   })
 
+  it("agent_tokens 启用 RLS 且 anon、authenticated 没有表权限", () => {
+    expect(sql("select relrowsecurity from pg_class where oid = 'public.agent_tokens'::regclass")).toBe("t")
+    for (const role of ["anon", "authenticated"]) {
+      expect(
+        sql(
+          `select has_table_privilege('${role}', 'public.agent_tokens', 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')`
+        )
+      ).toBe("f")
+    }
+  })
+
+  it("发布计划启用 RLS 且公开角色无权限，普通令牌默认不带发布权限", () => {
+    expect(sql("select relrowsecurity from pg_class where oid = 'public.lesson_publications'::regclass")).toBe("t")
+    for (const role of ["anon", "authenticated"])
+      expect(
+        sql(`select has_table_privilege('${role}', 'public.lesson_publications', 'SELECT,INSERT,UPDATE,DELETE')`)
+      ).toBe("f")
+    expect(
+      sql(
+        "select column_default from information_schema.columns where table_name='agent_tokens' and column_name='scope'"
+      )
+    ).toContain("progress")
+  })
+
   it("public schema 的函数没有向 PUBLIC、anon、authenticated 开放执行", () => {
     expect(sql(functionViolations)).toBe("")
   })

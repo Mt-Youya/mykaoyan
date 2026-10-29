@@ -14,6 +14,7 @@ import { Route as AdmissionsRouteImport } from './routes/admissions'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MistakesRouteImport } from './routes/mistakes'
 import { Route as PapersRouteImport } from './routes/papers'
+import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as TodayRouteImport } from './routes/today'
 import { Route as TopicsRouteImport } from './routes/topics'
 import { Route as VocabularyRouteImport } from './routes/vocabulary'
@@ -47,6 +48,11 @@ const MistakesRoute = MistakesRouteImport.update({
 const PapersRoute = PapersRouteImport.update({
   id: '/papers',
   path: '/papers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProgressRoute = ProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TodayRoute = TodayRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/mistakes': typeof MistakesRoute
   '/papers': typeof PapersRoute
+  '/progress': typeof ProgressRoute
   '/today': typeof TodayRoute
   '/topics': typeof TopicsRoute
   '/vocabulary': typeof VocabularyRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/mistakes': typeof MistakesRoute
   '/papers': typeof PapersRoute
+  '/progress': typeof ProgressRoute
   '/today': typeof TodayRoute
   '/topics': typeof TopicsRoute
   '/vocabulary': typeof VocabularyRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/mistakes': typeof MistakesRoute
   '/papers': typeof PapersRoute
+  '/progress': typeof ProgressRoute
   '/today': typeof TodayRoute
   '/topics': typeof TopicsRoute
   '/vocabulary': typeof VocabularyRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mistakes'
     | '/papers'
+    | '/progress'
     | '/today'
     | '/topics'
     | '/vocabulary'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mistakes'
     | '/papers'
+    | '/progress'
     | '/today'
     | '/topics'
     | '/vocabulary'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mistakes'
     | '/papers'
+    | '/progress'
     | '/today'
     | '/topics'
     | '/vocabulary'
@@ -201,6 +213,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MistakesRoute: typeof MistakesRoute
   PapersRoute: typeof PapersRoute
+  ProgressRoute: typeof ProgressRoute
   TodayRoute: typeof TodayRoute
   TopicsRoute: typeof TopicsRoute
   VocabularyRoute: typeof VocabularyRoute
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/papers'
       fullPath: '/papers'
       preLoaderRoute: typeof PapersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/progress': {
+      id: '/progress'
+      path: '/progress'
+      fullPath: '/progress'
+      preLoaderRoute: typeof ProgressRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/today': {
@@ -321,6 +341,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MistakesRoute: MistakesRoute,
   PapersRoute: PapersRoute,
+  ProgressRoute: ProgressRoute,
   TodayRoute: TodayRoute,
   TopicsRoute: TopicsRoute,
   VocabularyRoute: VocabularyRoute,

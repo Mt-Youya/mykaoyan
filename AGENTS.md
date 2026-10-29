@@ -128,7 +128,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 | 设计系统与组件 | `shadcn`、`good-css`（只约束手写样式） |
 | 动效 | `emil-design-eng` 写、`review-animations` 审；GSAP 用 `gsap-core`、`gsap-react`、`gsap-timeline`、`gsap-scrolltrigger`、`gsap-plugins`、`gsap-performance`、`gsap-utils`、`gsap-frameworks` |
 | 审查打磨 | `impeccable`（`audit`、`polish`）、`web-design-guidelines` |
-| 数据库 | `supabase`、`supabase-postgres-best-practices` |
+| 数据库 | `supabase`、`supabase-postgres-best-practices`；`alibabacloud-analyticdb-postgresql-supabase-ops` 只在把库迁到阿里云 ADBPG 时用（见 [docs/agents/alibabacloud-skills.md](docs/agents/alibabacloud-skills.md)） |
 | 认证 | `better-auth-best-practices`、`better-auth-security-best-practices` |
 | 媒体 Worker、R2、DNS | `cloudflare`、`wrangler`、`workers-best-practices` |
 | 阿里云（备案、DNS、ECS、云监控） | `alibabacloud-domain`、`alibabacloud-cli-guidance`、`alibabacloud-dns-resolve-diagnose-customer`、`alibabacloud-ecs-diagnose`、`alibabacloud-ecs-health-inspection`、`alibabacloud-cms-alert-rule-create`；完整清单与前置条件见 [docs/agents/alibabacloud-skills.md](docs/agents/alibabacloud-skills.md) |

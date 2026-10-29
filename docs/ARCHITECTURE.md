@@ -57,6 +57,7 @@ docs/             规划、ADR、坑点、规格
 | `profile`、`plan`、`mistakes`、`daily`、`today`、`topics`、`weekly` | 学习追踪 | core / api / web |
 | `vocab`、`backup` | 浏览器本地的词表、单词复习、备份 | core / web |
 | `media` | 播放令牌签发与校验 | api / media-worker |
+| `publishing` | 管理员内容发布计划、R2 上传校验与幂等登记 | api / db |
 | `admissions` | 招生目录查询：研招网硕士专业目录的服务端适配、限速与缓存；页面只拿整理后的字段 | api / web |
 
 新领域先登记在这张表，再建目录。

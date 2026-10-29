@@ -175,4 +175,25 @@ describe("个人进度文档 HTTP 接口", () => {
       Object.keys(mistake).toSorted()
     )
   })
+
+  it("两个并发 PUT 只有一个成功", async () => {
+    const cookie = await login("18800000010")
+    const headers = { cookie, "content-type": "application/json" }
+    const initial = await fetch(`${origin}/api/v1/progress`, { headers: { cookie } })
+    expect(initial.status).toBe(200)
+    const document = (await initial.json()) as ProgressDocument
+    const etag = initial.headers.get("etag")
+    if (!etag) throw new Error("初始读取缺少 ETag")
+
+    const results = await Promise.all(
+      [0, 1].map(() =>
+        fetch(`${origin}/api/v1/progress`, {
+          method: "PUT",
+          headers: { ...headers, "if-match": etag },
+          body: JSON.stringify(document),
+        })
+      )
+    )
+    expect(results.map((response) => response.status).toSorted()).toEqual([200, 412])
+  })
 })
