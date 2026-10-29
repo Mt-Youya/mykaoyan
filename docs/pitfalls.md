@@ -121,6 +121,8 @@
 - **测试文件收集范围**（mk/TOOL-08）：前端 Vitest 曾只包含 `.test.tsx` 与 `.test.mjs`，新增 `.test.ts` 会被静默跳过。增加测试后先核对实际收集数量与失败用例，再把通过作为验收证据。
 - **并行测试文件共享手机号限流**（mk/TOOL-09）：API 的 Vitest 文件并行跑、共用一个临时库；不同文件用同一个手机号走验证码登录会触发 60 秒冷却，表现为随机 429。新增登录测试一律用全仓库唯一的测试号，冲突时按文件核对 `grep` 结果而不是重跑碰运气。
 
+- **Windows 检出的行尾与技能链接**（mk/TOOL-10）：`core.autocrlf=true` 时 Git 检出为 CRLF，而 `.oxfmtrc.json` 要求 LF，第一次 `pnpm fmt:check` 会在几十个既有文件上报错；先跑 `pnpm fmt` 归一，提交内容不变。`postinstall` 会把 `.agents/skills/mykaoyan`、`.claude/skills/mykaoyan` 换成 junction，而 git 以 symlink 记录（`core.symlinks=false`），此时 `git status` 会显示删除，`git add -A` 还会把链接内容当成新文件加入；提交只 `git add` 具体文件，收尾用 `git checkout -- .agents/skills/mykaoyan .claude/skills/mykaoyan` 恢复占位文件。
+
 ## 不再适用的条目
 
 | 条目 | 原因 |
