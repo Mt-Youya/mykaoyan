@@ -15,8 +15,10 @@
     "fmt:check": "oxfmt --check .",
     "typecheck": "pnpm -r typecheck",
     "test": "python3 tests/with-postgres.py",
-    "test:packages": "pnpm -r --workspace-concurrency=1 test && vitest run tests",
+    "test:packages": "node --test scripts/link-skills.test.mjs && pnpm -r --workspace-concurrency=1 test && vitest run tests",
     "build": "pnpm -r build",
+    "skills:link": "node scripts/link-skills.mjs",
+    "postinstall": "node scripts/link-skills.mjs",
     "pre-commit": "pnpm fmt && pnpm lint"
   },
   "devDependencies": {

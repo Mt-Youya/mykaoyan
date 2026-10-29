@@ -1,0 +1,16 @@
+{
+  "$schema": "https://mykaoyan.cn/schemas/progress/v1/progress.schema.json",
+  "app": "mykaoyan",
+  "version": 1,
+  "revision": 0,
+  "updatedAt": "2030-01-01T00:00:00.000Z",
+  "updatedBy": "agent:example",
+  "data": {
+    "profile": null,
+    "progress": [],
+    "mistakes": [],
+    "daily": [],
+    "dayPlans": [],
+    "weekly": []
+  }
+}
