@@ -598,7 +598,7 @@
                         "additionalProperties": false,
                         "description": "一次原始复测记录。"
                       },
-                      "description": "按日期升序排列的原始复测记录。"
+                      "description": "原始复测记录；推算时按日期先后排序，同一天的多条按记录顺序。"
                     },
                     "createdAt": {
                       "type": "string",

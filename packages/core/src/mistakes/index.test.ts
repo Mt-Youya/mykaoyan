@@ -3,7 +3,7 @@ import { parseLocalDate } from "../dates/index"
 import { mistakeSchema, progressFileSchema } from "../progress/index"
 import { fullProgressFileFixture } from "../progress/fixtures/index"
 import type { RetestAttempt } from "../progress/index"
-import { getDueRetests, getRetestState, recordRetest } from "./index"
+import { getDueRetests, getRetestState, isRetestDue, recordRetest } from "./index"
 
 const base = progressFileSchema.parse(fullProgressFileFixture.value).data.mistakes[0]!
 
@@ -103,6 +103,36 @@ describe("错题复测推算（PLAN §5.6）", () => {
   })
 })
 
+describe("乱序复测记录", () => {
+  it("按日期先后推算，不依赖数组顺序", () => {
+    const reversed = mistake(
+      "2030-03-01",
+      attempts([
+        { on: "2030-03-08", result: "independent" },
+        { on: "2030-03-03", result: "independent" },
+      ])
+    )
+    expect(getRetestState(reversed, parseLocalDate("2030-03-10"))).toEqual({ stable: true })
+    expect(reversed.retests.map((retest) => retest.on)).toEqual(["2030-03-08", "2030-03-03"])
+  })
+
+  it("乱序时重置与推进仍按真实先后", () => {
+    const reversed = mistake(
+      "2030-03-01",
+      attempts([
+        { on: "2030-03-08", result: "failed" },
+        { on: "2030-03-03", result: "independent" },
+      ])
+    )
+    expect(getRetestState(reversed, parseLocalDate("2030-03-11"))).toEqual({
+      stable: false,
+      attempt: 1,
+      nextOn: "2030-03-10",
+      overdueDays: 1,
+    })
+  })
+})
+
 describe("到期复测排序", () => {
   it("只返回到期或逾期的未稳定错题，逾期最久在前", () => {
     const today = parseLocalDate("2030-03-10")
@@ -123,18 +153,51 @@ describe("到期复测排序", () => {
       "due-today",
     ])
   })
+
+  it("到期当天算到期，未到期不算", () => {
+    const today = parseLocalDate("2030-03-03")
+    expect(isRetestDue(getRetestState(mistake("2030-03-01", []), today), today)).toBe(true)
+    expect(isRetestDue(getRetestState(mistake("2030-03-02", []), today), today)).toBe(false)
+  })
 })
 
 describe("追加复测记录", () => {
-  it("允许补录过去日期，但不得早于上一次复测", () => {
+  it("允许补录过去日期，但必须晚于已有的复测", () => {
     const empty = mistake("2030-03-01", [])
     const backfilled = recordRetest(empty, "independent", parseLocalDate("2030-03-02"))
     expect(backfilled.retests).toEqual([{ on: "2030-03-02", result: "independent" }])
-    expect(() => recordRetest(backfilled, "failed", parseLocalDate("2030-03-01"))).toThrow("不能早于")
+    expect(() => recordRetest(backfilled, "failed", parseLocalDate("2030-03-01"))).toThrow("必须晚于")
+  })
+
+  it("乱序记录时按最晚日期判断补录下限", () => {
+    const backfilled = mistake(
+      "2030-03-01",
+      attempts([
+        { on: "2030-03-10", result: "failed" },
+        { on: "2030-03-03", result: "independent" },
+      ])
+    )
+    expect(() => recordRetest(backfilled, "failed", parseLocalDate("2030-03-05"))).toThrow("必须晚于")
+  })
+
+  it("同一天不得重复记录复测", () => {
+    const once = recordRetest(mistake("2030-03-01", []), "independent", parseLocalDate("2030-03-03"))
+    expect(() => recordRetest(once, "failed", parseLocalDate("2030-03-03"))).toThrow("必须晚于")
   })
 
   it("拒绝非法日期", () => {
     expect(() => recordRetest(mistake("2030-03-01", []), "independent", parseLocalDate("2030-02-30"))).toThrow()
+  })
+
+  it("错题稳定后不再追加复测", () => {
+    const stable = mistake(
+      "2030-03-01",
+      attempts([
+        { on: "2030-03-03", result: "independent" },
+        { on: "2030-03-08", result: "independent" },
+      ])
+    )
+    expect(() => recordRetest(stable, "failed", parseLocalDate("2030-03-09"))).toThrow("已稳定")
   })
 })
 

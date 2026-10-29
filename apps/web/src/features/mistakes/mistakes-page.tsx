@@ -1,5 +1,5 @@
-import { getRetestState, recordRetest, toLocalDate } from "@mykaoyan/core"
-import type { MistakeCause, RetestResult } from "@mykaoyan/core"
+import { getRetestState, isRetestDue, recordRetest, toLocalDate } from "@mykaoyan/core"
+import type { LocalDate, Mistake, MistakeCause, RetestResult } from "@mykaoyan/core"
 import { Button, Input, Label } from "@mykaoyan/ui"
 import type { FormEvent } from "react"
 import { useState } from "react"
@@ -32,6 +32,54 @@ function Gate({ status, message }: { status: string; message: string }) {
     <p role="alert" className="border-l-2 border-destructive pl-3 text-destructive">
       {message}
     </p>
+  )
+}
+
+type MistakeItemProps = {
+  mistake: Mistake
+  today: LocalDate
+  onRetest: (result: RetestResult) => void
+}
+
+/** 单条错题与复测状态；复测按钮只在到期时出现，稳定后不再显示。 */
+export function MistakeItem({ mistake, today, onRetest }: MistakeItemProps) {
+  const state = getRetestState(mistake, today)
+  return (
+    <li className="grid gap-4 py-5">
+      <div>
+        <p className="text-sm text-muted-foreground">
+          {mistake.subject} · {mistake.source || "未标注来源"}
+        </p>
+        <p className="mt-2 whitespace-pre-wrap">{mistake.questionMd}</p>
+        <p className="mt-2 whitespace-pre-wrap text-muted-foreground">订正：{mistake.correctionMd}</p>
+      </div>
+      {state.stable ? (
+        <p className="text-sm text-muted-foreground">已稳定：两次复测均独立完成。</p>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm text-muted-foreground">
+            第 {state.attempt} 次复测 · {state.overdueDays ? `逾期 ${state.overdueDays} 天` : `计划 ${state.nextOn}`}
+          </p>
+          {isRetestDue(state, today) &&
+            (
+              [
+                ["independent", "独立完成"],
+                ["with-hint", "提示后完成"],
+                ["failed", "不会"],
+              ] as const
+            ).map(([result, label]) => (
+              <Button
+                key={result}
+                className={button}
+                variant={result === "independent" ? "default" : "outline"}
+                onClick={() => onRetest(result)}
+              >
+                {label}
+              </Button>
+            ))}
+        </div>
+      )}
+    </li>
   )
 }
 
@@ -170,50 +218,14 @@ export function MistakesPage() {
                 <ul className="mt-5 divide-y divide-border border-y border-border">
                   {document.data.mistakes
                     .toSorted((a, b) => b.createdAt.localeCompare(a.createdAt))
-                    .map((mistake) => {
-                      const state = getRetestState(mistake, today)
-                      const due = !state.stable && state.nextOn <= today
-                      return (
-                        <li key={mistake.id} className="grid gap-4 py-5">
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              {mistake.subject} · {mistake.source || "未标注来源"}
-                            </p>
-                            <p className="mt-2 whitespace-pre-wrap">{mistake.questionMd}</p>
-                            <p className="mt-2 whitespace-pre-wrap text-muted-foreground">
-                              订正：{mistake.correctionMd}
-                            </p>
-                          </div>
-                          {state.stable ? (
-                            <p className="text-sm text-muted-foreground">已稳定：两次复测均独立完成。</p>
-                          ) : (
-                            <div className="flex flex-wrap items-center gap-3">
-                              <p className="text-sm text-muted-foreground">
-                                第 {state.attempt} 次复测 ·{" "}
-                                {state.overdueDays ? `逾期 ${state.overdueDays} 天` : `计划 ${state.nextOn}`}
-                              </p>
-                              {due &&
-                                (
-                                  [
-                                    ["independent", "独立完成"],
-                                    ["with-hint", "提示后完成"],
-                                    ["failed", "不会"],
-                                  ] as const
-                                ).map(([result, label]) => (
-                                  <Button
-                                    key={result}
-                                    className={button}
-                                    variant={result === "independent" ? "default" : "outline"}
-                                    onClick={() => void retest(mistake.id, result)}
-                                  >
-                                    {label}
-                                  </Button>
-                                ))}
-                            </div>
-                          )}
-                        </li>
-                      )
-                    })}
+                    .map((mistake) => (
+                      <MistakeItem
+                        key={mistake.id}
+                        mistake={mistake}
+                        today={today}
+                        onRetest={(result) => void retest(mistake.id, result)}
+                      />
+                    ))}
                 </ul>
               )}
             </section>

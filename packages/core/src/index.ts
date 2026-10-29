@@ -14,7 +14,7 @@ export {
   vocabReviewLogSchema,
 } from "./vocab/index"
 export type { VocabCard, VocabData, VocabEntry, VocabGrade, VocabQueueItem, VocabReviewLog } from "./vocab/index"
-export { getDueRetests, getRetestState, recordRetest } from "./mistakes/index"
+export { getDueRetests, getRetestState, isRetestDue, recordRetest } from "./mistakes/index"
 export type { DueRetest, RetestState } from "./mistakes/index"
 export {
   PROGRESS_FILE_APP,

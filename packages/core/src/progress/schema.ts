@@ -118,7 +118,7 @@ export const mistakeSchema = z
     correctionMd: z.string().describe("订正，Markdown。"),
     keyCondition: z.string().optional().describe("关键条件。"),
     correctedOn: localDateSchema.describe("订正日期；复测日期由它推算。"),
-    retests: z.array(retestAttemptSchema).describe("按日期升序排列的原始复测记录。"),
+    retests: z.array(retestAttemptSchema).describe("原始复测记录；推算时按日期先后排序，同一天的多条按记录顺序。"),
     createdAt: isoDateTimeSchema.describe("创建时间。"),
   })
   .describe("一道错题及其原始复测记录；稳定状态由复测记录推算，不写入文件。")
