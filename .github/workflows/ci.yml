@@ -9,6 +9,19 @@ permissions:
   contents: read
 
 jobs:
+  skill-links:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - run: node scripts/link-skills.mjs
+      - run: node --test scripts/link-skills.test.mjs
+
   checks:
     runs-on: ubuntu-latest
     services:
@@ -39,8 +52,13 @@ jobs:
       - name: 重新生成公开契约后确认无差异
         run: |
           pnpm --filter @mykaoyan/core generate:contract
-          git diff --exit-code -- apps/web/public
-          test -z "$(git status --porcelain -- apps/web/public)"
+          git diff --exit-code -- apps/web/public skills/mykaoyan/references/progress.schema.json cli/contracts/openapi.json
+          test -z "$(git status --porcelain -- apps/web/public skills/mykaoyan/references/progress.schema.json cli/contracts/openapi.json)"
+      - name: 检查 Rust CLI
+        run: |
+          cargo fmt --manifest-path cli/Cargo.toml --check
+          cargo clippy --manifest-path cli/Cargo.toml --locked --all-targets -- -D warnings
+          cargo test --manifest-path cli/Cargo.toml --locked
       - run: pnpm fmt:check
       - run: pnpm lint
       - run: pnpm typecheck

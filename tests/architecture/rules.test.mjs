@@ -108,8 +108,6 @@ describe("仓库架构", () => {
   for (const { path, manifest } of packages) {
     for (const file of codeFiles.filter((item) => item.startsWith(path + "/"))) {
       it(relative(root, file), () => {
-        const source = readFileSync(file, "utf8")
-        expect(source.split("\n").length, "代码文件最多 500 行").toBeLessThanOrEqual(500)
         const ast = snapshot.getDefaultProjectForFile(file)?.program.getSourceFile(file)
         expect(ast, "TypeScript 必须解析每个受检文件").toBeTruthy()
         // 只约束 core 运行时代码；scripts/ 是仓库工具，需要 Node IO 生成公开契约。

@@ -13,6 +13,9 @@
     "**/*.md",
     "**/routeTree.gen.ts",
     "**/worker-configuration.d.ts",
-    "apps/web/public/**"
+    "apps/web/public/**",
+    "cli/contracts/openapi.json",
+    "skills/mykaoyan/references/progress.schema.json",
+    "packages/db/supabase/migrations/meta/**"
   ]
 }
