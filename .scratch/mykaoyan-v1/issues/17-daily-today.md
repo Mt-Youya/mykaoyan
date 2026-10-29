@@ -25,3 +25,10 @@
 验证：core daily 3 项、today 4 项；web 今日页 SSR 3 项、每日记录页 SSR 3 项；浏览器实测：今日页按顺序展示、`/daily` 保存后 revision 2→3 且刷新显示「修改已有记录」。
 
 遗留：真实 API + Postgres 未在本机跑，线上验收待部署。
+
+### 2026-10-29：代码评审修正
+
+- `upsertDailyLog` 改用 `upsertUniqueBy`：同日期多条归并为一条，写入时替换第一条并删除后续重复项。
+- `/daily` 保存改为等待 `save()` 结果，只有真正成功才显示「已保存」；去掉按 revision 重挂，反馈不会被清掉。
+- 阶段外日期显示「不在任何阶段内」；今日页新卡上限文案改用 core 的 `DAILY_NEW_CARD_LIMIT`。
+- 本轮未重新做浏览器实测。

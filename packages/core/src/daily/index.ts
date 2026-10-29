@@ -1,10 +1,10 @@
+import { upsertUniqueBy } from "../collections"
 import type { LocalDate } from "../dates/index"
 import type { DailyLog } from "../progress/index"
 
-/** 每天最多一条每日记录：已有同一天的记录就替换，否则按日期追加；不改入参。 */
+/** 每天最多一条每日记录：已有同一天的记录就替换并归并重复项，否则按日期追加；不改入参。 */
 export function upsertDailyLog(daily: readonly DailyLog[], log: DailyLog): DailyLog[] {
-  if (!daily.some((item) => item.date === log.date)) return [...daily, log]
-  return daily.map((item) => (item.date === log.date ? log : item))
+  return upsertUniqueBy(daily, (item) => item.date, log)
 }
 
 /** 某一天的每日记录；没有返回 null。 */

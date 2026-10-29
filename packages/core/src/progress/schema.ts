@@ -84,6 +84,18 @@ export const phaseSchema = z
   })
   .describe("按日期划分的备考阶段。")
 
+/** 阶段校验：结束不早于开始、按日期先后排列、互不重叠。合法返回 null，否则返回错误说明。 */
+export function validatePhases(phases: StudyProfile["phases"]): string | null {
+  let previous: StudyProfile["phases"][number] | null = null
+  for (const phase of phases) {
+    if (phase.end < phase.start) return `阶段「${phase.name}」的结束日期早于开始日期`
+    if (previous && phase.start <= previous.end)
+      return `阶段「${phase.name}」与「${previous.name}」重叠或未按日期先后排列`
+    previous = phase
+  }
+  return null
+}
+
 /** 考生的备考档案。 */
 export const studyProfileSchema = z
   .strictObject({
@@ -91,6 +103,10 @@ export const studyProfileSchema = z
     subjects: z.array(profileSubjectSchema).describe("所考的考试科目，顺序即展示顺序。"),
     otherMin: nonNegativeInteger.describe("每天不归入任何考试科目的固定分钟。"),
     phases: z.array(phaseSchema).describe("按日期先后排列、互不重叠的阶段。"),
+  })
+  .superRefine((profile, context) => {
+    const message = validatePhases(profile.phases)
+    if (message) context.addIssue({ code: "custom", message, path: ["phases"] })
   })
   .describe("考生的备考档案。")
 

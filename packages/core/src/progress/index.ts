@@ -21,6 +21,7 @@ export {
   topicManualStateSchema,
   topicProgressSchema,
   updatedBySchema,
+  validatePhases,
   weeklyReviewSchema,
 } from "./schema"
 export type {

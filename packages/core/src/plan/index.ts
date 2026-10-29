@@ -1,21 +1,10 @@
+import { upsertUniqueBy } from "../collections"
 import { addDays, weekdayOf } from "../dates/index"
 import type { LocalDate } from "../dates/index"
 import type { DayPlan, MinutesBySubject, StudyProfile } from "../progress/index"
 
 /** 某天生效的计划：各科分钟与弹性时间。 */
 export type DailyPlan = { minutes: MinutesBySubject; flexMin: number }
-
-/** 阶段校验：结束不早于开始、按日期先后排列、互不重叠。合法返回 null，否则返回错误说明。 */
-export function validatePhases(phases: StudyProfile["phases"]): string | null {
-  let previous: StudyProfile["phases"][number] | null = null
-  for (const phase of phases) {
-    if (phase.end < phase.start) return `阶段「${phase.name}」的结束日期早于开始日期`
-    if (previous && phase.start <= previous.end)
-      return `阶段「${phase.name}」与「${previous.name}」重叠或未按日期先后排列`
-    previous = phase
-  }
-  return null
-}
 
 /** 周六与周日按周末算，不处理法定调休。 */
 export function isWeekend(date: LocalDate) {
@@ -29,8 +18,8 @@ export function getPlanTotal(plan: DailyPlan) {
 }
 
 /**
- * 某天的计划：按天覆盖优先；否则取所在阶段的工作日或周末分配；阶段外不安排分钟。
- * 没有档案也没有按天覆盖时返回 null，由页面提示先建立备考档案。
+ * 某天的计划：按天覆盖优先；否则取所在阶段的工作日或周末分配。
+ * 阶段外日期不安排分钟，与没有档案一样返回 null，由页面提示。
  */
 export function getDayPlan(
   profile: StudyProfile | null,
@@ -41,15 +30,14 @@ export function getDayPlan(
   if (override) return { minutes: { ...override.minutes }, flexMin: override.flexMin }
   if (!profile) return null
   const phase = profile.phases.find((item) => item.start <= date && date <= item.end)
-  if (!phase) return { minutes: {}, flexMin: 0 }
+  if (!phase) return null
   const plan = isWeekend(date) ? phase.weekend : phase.weekday
   return { minutes: { ...plan.minutes }, flexMin: plan.flexMin }
 }
 
-/** 按天计划按日期唯一：已有同一天的记录就替换，否则追加；不改入参。 */
+/** 按天计划按日期唯一：同一天替换并归并重复项，否则追加；不改入参。 */
 export function upsertDayPlan(dayPlans: readonly DayPlan[], plan: DayPlan): DayPlan[] {
-  if (!dayPlans.some((item) => item.date === plan.date)) return [...dayPlans, plan]
-  return dayPlans.map((item) => (item.date === plan.date ? plan : item))
+  return upsertUniqueBy(dayPlans, (item) => item.date, plan)
 }
 
 /** 本周从周一开始的七天日期。 */

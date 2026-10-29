@@ -2,6 +2,7 @@ import {
   dayPlanSchema,
   getDayPlan,
   getPlanTotal,
+  localDateSchema,
   parseLocalDate,
   studyProfileSchema,
   toLocalDate,
@@ -11,7 +12,7 @@ import {
 import type { DayPlan, ProgressFile, StudyProfile } from "@mykaoyan/core"
 import { Button, Input, Label } from "@mykaoyan/ui"
 import type { FormEvent } from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useProgress } from "../progress"
 
 const buttonSize = "min-h-11 px-5 text-base"
@@ -113,6 +114,27 @@ export function PlanView({ status, document, message, onSaveProfile, onSaveDayPl
   const [overrideDate, setOverrideDate] = useState<string>(toLocalDate(new Date()))
   const [overrideMinutes, setOverrideMinutes] = useState<Record<string, string>>({})
   const [overrideFlex, setOverrideFlex] = useState("0")
+
+  // 档案从云端到达或被外部更新时同步表单；不重置已保存提示，避免刚保存的反馈被清掉。
+  useEffect(() => {
+    if (!document) return
+    const next = document.data.profile
+    const nextSubjects = subjectRows(next)
+    setExamDate(next?.examDate ?? "")
+    setOtherMin(String(next?.otherMin ?? 0))
+    setSubjects(nextSubjects)
+    setPhases(phaseRows(next, nextSubjects))
+  }, [document])
+
+  // 按天覆盖：切换日期或数据变化时，用已有覆盖回填，避免把旧值当成 0 保存。
+  useEffect(() => {
+    if (!document) return
+    const parsed = localDateSchema.safeParse(overrideDate)
+    const plan = parsed.success ? document.data.dayPlans.find((item) => item.date === parsed.data) : undefined
+    const overrideCodes = subjects.map((subject) => subject.code.trim()).filter(Boolean)
+    setOverrideMinutes(Object.fromEntries(overrideCodes.map((code) => [code, String(plan?.minutes[code] ?? 0)])))
+    setOverrideFlex(String(plan?.flexMin ?? 0))
+  }, [document, overrideDate, subjects])
 
   if (status !== "ready" || !document) {
     return (
@@ -368,7 +390,7 @@ export function PlanView({ status, document, message, onSaveProfile, onSaveDayPl
           <h2 className="text-section">按天覆盖</h2>
           <p className="text-muted-foreground">
             当天计划优先于阶段分配；不填的科目按 0 分钟记录。预览：
-            {preview ? `${getPlanTotal(preview)} 分钟` : "没有备考档案"}
+            {preview ? `${getPlanTotal(preview)} 分钟` : profile ? "这一天不在任何阶段内" : "没有备考档案"}
           </p>
           <Label className="flex-col items-stretch gap-2">
             日期

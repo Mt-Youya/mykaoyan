@@ -26,3 +26,10 @@
 验证：core plan 17 项、web `/plan` SSR 3 项；浏览器实测在 `/plan` 点击保存后桩 API revision 1→2，控制台无错误。
 
 遗留：真实 API + Postgres 往返未在本机跑（无 Postgres），线上验收待部署。
+
+### 2026-10-29：代码评审修正
+
+- `getDayPlan` 在阶段外改为返回 `null`（不再返回空计划），今日页、每日记录页与 `/plan` 预览都显示「不在任何阶段内」，不再显示 0 分钟计划表。
+- 阶段重叠与顺序校验移入 `studyProfileSchema`（`validatePhases` 定义在 `progress/schema.ts`，schema 用 `.superRefine` 拒绝），agent 上传的重叠阶段也会被拒；计划页仍用同一函数给出具体错误文案。
+- `/plan` 表单在档案从云端到达或被外部更新时同步；按天覆盖在切换日期时用已有记录回填，不再把旧覆盖当成 0 保存。
+- 本轮未重新做浏览器实测。

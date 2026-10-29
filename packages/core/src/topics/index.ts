@@ -1,3 +1,4 @@
+import { upsertUniqueBy } from "../collections"
 import { getStableOn, isMistakeStable } from "../mistakes/index"
 import type { LocalDate } from "../dates/index"
 import type { Mistake, TopicManualState, TopicProgress } from "../progress/index"
@@ -52,8 +53,7 @@ export function getTopicProgressList(
   })
 }
 
-/** 考点进度记录按考点唯一：已有同考点的记录就替换，否则追加；不改入参。 */
+/** 考点进度记录按考点唯一：同一考点替换并归并重复项，否则追加；不改入参。 */
 export function upsertTopicProgress(progress: readonly TopicProgress[], record: TopicProgress): TopicProgress[] {
-  if (!progress.some((item) => item.topicId === record.topicId)) return [...progress, record]
-  return progress.map((item) => (item.topicId === record.topicId ? record : item))
+  return upsertUniqueBy(progress, (item) => item.topicId, record)
 }

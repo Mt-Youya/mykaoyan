@@ -24,6 +24,14 @@ describe("每日记录", () => {
     expect(daily.at(-1)?.date).toBe("2030-03-11")
   })
 
+  it("上传文件里同一日期有多条时归并为一条", () => {
+    const duplicate = { ...existing, retro: "重复记录" }
+    const next = { ...existing, retro: "最终记录" }
+    const daily = upsertDailyLog([existing, duplicate], next)
+    expect(daily).toHaveLength(1)
+    expect(daily[0]?.retro).toBe("最终记录")
+  })
+
   it("按日期读取记录；学习时长只来自每日记录", () => {
     expect(getDailyLog([existing], parseLocalDate("2030-03-10"))?.minutes).toEqual({ "302": 120, "408": 90 })
     expect(getDailyLog([existing], parseLocalDate("2030-03-11"))).toBeNull()

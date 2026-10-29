@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest"
 import { parseLocalDate } from "../dates/index"
 import { progressFileSchema } from "../progress/index"
 import { fullProgressFileFixture } from "../progress/fixtures/index"
-import { getDayPlan, getPlanTotal, getWeekDays, isWeekend, upsertDayPlan, validatePhases } from "./index"
+import { validatePhases } from "../progress/index"
+import { getDayPlan, getPlanTotal, getWeekDays, isWeekend, upsertDayPlan } from "./index"
 
 const file = progressFileSchema.parse(fullProgressFileFixture.value)
 const profile = file.data.profile!
@@ -24,7 +25,7 @@ describe("默认计划推算", () => {
   })
 
   it("阶段外不安排分钟", () => {
-    expect(getDayPlan(profile, [], parseLocalDate("2030-07-01"))).toEqual({ minutes: {}, flexMin: 0 })
+    expect(getDayPlan(profile, [], parseLocalDate("2030-07-01"))).toBeNull()
   })
 
   it("按天覆盖优先于阶段分配", () => {

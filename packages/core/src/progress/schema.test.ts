@@ -54,8 +54,6 @@ describe("进度文件 v1 识别字段", () => {
 describe("进度文件 v1 日期与时间字段", () => {
   const localDatePaths: readonly (readonly string[])[] = [
     ["data", "profile", "examDate"],
-    ["data", "profile", "phases", "0", "start"],
-    ["data", "profile", "phases", "0", "end"],
     ["data", "mistakes", "0", "correctedOn"],
     ["data", "mistakes", "0", "retests", "0", "on"],
     ["data", "daily", "0", "date"],
@@ -82,6 +80,19 @@ describe("进度文件 v1 日期与时间字段", () => {
       }
     }
   )
+
+  // 阶段开始/结束还受「结束不早于开始、阶段不重叠」约束，合法日期也可能整体被拒绝；
+  // 这里只断言非法日期仍会被拒绝，顺序约束由「备考档案阶段校验」单独覆盖。
+  it("阶段开始与结束日期仍按 LocalDate 校验", () => {
+    for (const path of [
+      ["data", "profile", "phases", "0", "start"],
+      ["data", "profile", "phases", "0", "end"],
+    ] as const) {
+      for (const value of ["2025-02-29", "2030-04-31", "2030-1-01", "2030-03-10T00:00:00Z", ""]) {
+        expect(progressFileSchema.safeParse(fixtureAt(path, value)).success, `${path.join(".")}=${value}`).toBe(false)
+      }
+    }
+  })
 
   const dateTimePaths: readonly (readonly string[])[] = [
     ["updatedAt"],
@@ -135,5 +146,24 @@ describe("进度文件 v1 公开契约产物", () => {
     const schema = z.toJSONSchema(progressFileSchema, { io: "input" })
     expect(schema.$schema).toBe("https://json-schema.org/draft/2020-12/schema")
     expect(schema.additionalProperties).toBe(false)
+  })
+})
+
+describe("备考档案阶段校验", () => {
+  const plan = { minutes: {}, flexMin: 0 }
+  const phases = [
+    { name: "阶段一", start: "2030-03-01", end: "2030-06-30", weekday: plan, weekend: plan },
+    { name: "阶段二", start: "2030-06-30", end: "2030-08-01", weekday: plan, weekend: plan },
+  ]
+
+  it("重叠或未按日期先后排列的阶段被 schema 拒绝", () => {
+    const result = progressFileSchema.safeParse(fixtureAt(["data", "profile", "phases"], phases))
+    expect(result.success).toBe(false)
+    if (!result.success) expect(result.error.issues.some((issue) => issue.message.includes("重叠"))).toBe(true)
+  })
+
+  it("首尾相接的阶段可以上传", () => {
+    const adjacent = [phases[0]!, { ...phases[1]!, start: "2030-07-01", end: "2030-08-01" }]
+    expect(progressFileSchema.safeParse(fixtureAt(["data", "profile", "phases"], adjacent)).success).toBe(true)
   })
 })

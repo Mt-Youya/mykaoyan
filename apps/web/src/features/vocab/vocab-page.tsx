@@ -3,7 +3,7 @@ import type { VocabData } from "@mykaoyan/core"
 import type { ChangeEvent, FormEvent } from "react"
 import { useState } from "react"
 import { Button, Input, Label } from "@mykaoyan/ui"
-import { mergeVocabEntries, parsePastedVocab, summarizeBackup } from "./model"
+import { mergeVocabEntries, parseVocabText, summarizeBackup } from "./model"
 import { useVocab } from "./use-vocab"
 
 const buttonSize = "min-h-11 px-5 text-base"
@@ -18,7 +18,8 @@ function downloadBackup(contents: string) {
   link.href = url
   link.download = `mykaoyan-vocabulary-${toLocalDate(new Date())}.json`
   link.click()
-  URL.revokeObjectURL(url)
+  // 浏览器无法确认下载是否完成；延迟释放 URL，给下载任务留出时间。
+  setTimeout(() => URL.revokeObjectURL(url), 30_000)
 }
 
 export function VocabPage() {
@@ -44,17 +45,32 @@ export function VocabPage() {
   const current = queue[0] ?? null
   const counts = getVocabCounts(vocab, today)
 
+  function importEntries(incoming: ReturnType<typeof parseVocabText>, sourceLabel: string) {
+    const merged = mergeVocabEntries(vocab.entries, incoming)
+    if (!merged.added) return setMessage("这些词条已在本机词表中，无需重复导入。")
+    if (save({ ...vocab, entries: merged.entries })) {
+      setSource("")
+      setError("")
+      setMessage(`已从${sourceLabel}导入 ${merged.added} 个词条。`)
+    }
+  }
+
   function importPasted(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     try {
-      const incoming = parsePastedVocab(source, createId)
-      const merged = mergeVocabEntries(vocab.entries, incoming)
-      if (!merged.added) return setMessage("这些词条已在本机词表中，无需重复导入。")
-      if (save({ ...vocab, entries: merged.entries })) {
-        setSource("")
-        setError("")
-        setMessage(`已导入 ${merged.added} 个词条。`)
-      }
+      importEntries(parseVocabText(source, createId), "粘贴内容")
+    } catch (cause) {
+      setMessage("")
+      setError(cause instanceof Error ? cause.message : "词表无法导入")
+    }
+  }
+
+  async function importFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ""
+    if (!file) return
+    try {
+      importEntries(parseVocabText(await file.text(), createId), `文件「${file.name}」`)
     } catch (cause) {
       setMessage("")
       setError(cause instanceof Error ? cause.message : "词表无法导入")
@@ -164,7 +180,8 @@ export function VocabPage() {
               导入自己的词表
             </h2>
             <p className="mt-3 text-muted-foreground">
-              每行一个词条，用 Tab 分隔单词与释义。不会提供或下载任何第三方词书。
+              粘贴 CSV/TSV，或选择自己的 CSV、TSV、JSON 文件；每行一个词条，用 Tab
+              或逗号分隔单词与释义。不会提供或下载任何第三方词书。
             </p>
           </div>
           <form className="grid gap-4" onSubmit={importPasted}>
@@ -178,9 +195,19 @@ export function VocabPage() {
                 spellCheck={false}
               />
             </Label>
-            <Button className={`${buttonSize} justify-self-start`} type="submit">
-              导入词条
-            </Button>
+            <div className="flex flex-wrap items-center gap-4">
+              <Button className={`${buttonSize} justify-self-start`} type="submit">
+                导入词条
+              </Button>
+              <Label className="flex-col items-stretch gap-1 text-sm font-normal">
+                从词表文件导入
+                <Input
+                  type="file"
+                  accept=".csv,.tsv,.txt,.json,text/csv,text/tab-separated-values,application/json"
+                  onChange={importFile}
+                />
+              </Label>
+            </div>
           </form>
         </section>
 
@@ -226,7 +253,8 @@ export function VocabPage() {
               待恢复的备份：{summarizeBackup(pendingBackup).entries} 个词条、{summarizeBackup(pendingBackup).cards}{" "}
               张单词卡、
               {summarizeBackup(pendingBackup).reviewDays} 天复习记录；当前有 {summarizeBackup(vocab).entries} 个词条、
-              {summarizeBackup(vocab).cards} 张单词卡。恢复前会先自动下载一份当前数据。
+              {summarizeBackup(vocab).cards}{" "}
+              张单词卡。恢复前会先自动下载一份当前数据；若浏览器拦截下载，请先手动点「下载备份」再恢复。
             </p>
           )}
         </section>

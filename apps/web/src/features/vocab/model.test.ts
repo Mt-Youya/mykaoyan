@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url"
 import { createVocabCard, parseLocalDate } from "@mykaoyan/core"
 import type { VocabData } from "@mykaoyan/core"
 import { describe, expect, it } from "vitest"
-import { mergeVocabEntries, parsePastedVocab, summarizeBackup } from "./model"
+import { mergeVocabEntries, parsePastedVocab, parseVocabText, summarizeBackup } from "./model"
 
 const folder = fileURLToPath(new URL(".", import.meta.url))
 
@@ -28,6 +28,29 @@ describe("词表粘贴导入", () => {
   it("拒绝没有释义或重复的行", () => {
     expect(() => parsePastedVocab("abandon", () => "id")).toThrow("Tab")
     expect(() => parsePastedVocab("abandon\t放弃\nabandon\t放弃", () => "id")).toThrow("重复")
+  })
+
+  it("解析 CSV 词表，支持双引号包裹的释义", () => {
+    const incoming = parseVocabText('abandon,"放弃, 抛弃"\nreview,复习', () => "id")
+    expect(incoming.map(({ term, meaning }) => [term, meaning])).toEqual([
+      ["abandon", "放弃, 抛弃"],
+      ["review", "复习"],
+    ])
+  })
+
+  it("解析 JSON 对象数组与 term 到 meaning 的对象", () => {
+    expect(
+      parseVocabText('[{"term":"abandon","meaning":"放弃"},{"term":"review","meaning":"复习"}]', () => "id")
+    ).toHaveLength(2)
+    expect(parseVocabText('{"abandon":"放弃","review":"复习"}', () => "id").map(({ term }) => term)).toEqual([
+      "abandon",
+      "review",
+    ])
+  })
+
+  it("JSON 词表格式不对时报错", () => {
+    expect(() => parseVocabText('[{"term":"abandon"}]', () => "id")).toThrow("meaning")
+    expect(() => parseVocabText("[]", () => "id")).toThrow("不能为空")
   })
 
   it("重复导入只追加新词条，已有的单词卡与复习记录不变", () => {
