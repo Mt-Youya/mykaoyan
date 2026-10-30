@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest"
+
 import { parseLocalDate } from "../dates/index"
 import { getRetestState } from "../mistakes/index"
+import { fullProgressFileFixture } from "../progress/fixtures/index"
 import { mistakeSchema, progressFileSchema } from "../progress/index"
 import type { Mistake } from "../progress/index"
-import { fullProgressFileFixture } from "../progress/fixtures/index"
 import {
   getTopicProgressList,
   getTopicStableOn,
@@ -102,7 +103,7 @@ describe("考点进度列表", () => {
         { topicId: "D02", manual: "learning", updatedAt: "2030-03-02T00:00:00.000Z" },
         { topicId: "F99", manual: "practiced", updatedAt: "2030-03-02T00:00:00.000Z" },
       ],
-      file.data.mistakes
+      file.data.mistakes,
     )
     expect(list.map((item) => [item.topic.id, item.state])).toEqual([
       ["M01", "untested"],
@@ -121,7 +122,7 @@ describe("考点进度列表", () => {
     expect(replaced).toEqual([{ topicId: "M03", manual: "learning", updatedAt: "2030-03-02T00:00:00.000Z" }])
     expect(original[0]!.manual).toBe("practiced")
     expect(
-      upsertTopicProgress(original, { topicId: "D02", manual: "untested", updatedAt: "2030-03-02T00:00:00.000Z" })
+      upsertTopicProgress(original, { topicId: "D02", manual: "untested", updatedAt: "2030-03-02T00:00:00.000Z" }),
     ).toHaveLength(2)
   })
 })

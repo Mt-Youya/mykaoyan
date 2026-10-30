@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { createApp } from "./index"
+
 import { readEnvironment } from "../environment"
+import { createApp } from "./index"
 
 const TEST_ENV = {
   ...process.env,
@@ -34,7 +35,7 @@ describe("健康检查 HTTP 接口（真实 Postgres）", () => {
       responses.map(async (response) => {
         expect(response.status).toBe(200)
         expect(await response.json()).toEqual({ status: "ok", database: "connected" })
-      })
+      }),
     )
   })
 

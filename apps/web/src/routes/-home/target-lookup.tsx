@@ -1,5 +1,7 @@
-import { Button, Input, Label } from "@mykaoyan/ui"
 import { useState } from "react"
+
+import { Button, Input, Label } from "@mykaoyan/ui"
+
 import { listMajors, listRecords, searchUnits } from "../../features/admissions"
 import type {
   AdmissionRecord,

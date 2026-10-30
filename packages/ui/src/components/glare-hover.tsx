@@ -1,6 +1,5 @@
-import type { ComponentProps, CSSProperties } from "react"
-
 import { cn } from "cn"
+import type { ComponentProps, CSSProperties } from "react"
 
 export interface GlareHoverProps extends ComponentProps<"div"> {
   /**
@@ -139,7 +138,7 @@ function GlareHover({
           "before:transition-none hover:before:transition-[background-position] hover:before:duration-(--gh-duration)",
         // HOVER EFFECT
         "hover:before:bg-position-[100%_100%,0_0]",
-        className
+        className,
       )}
       style={cssVars}
     >

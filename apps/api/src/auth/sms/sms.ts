@@ -1,4 +1,5 @@
 import { randomInt } from "node:crypto"
+
 import { OTP_CODE_LENGTH, OTP_TTL_SECONDS } from "../policy"
 
 /**
@@ -17,7 +18,7 @@ export class SmsProviderError extends Error {
   constructor(
     readonly code: string,
     message: string,
-    readonly status = 502
+    readonly status = 502,
   ) {
     super(message)
     this.name = "SmsProviderError"

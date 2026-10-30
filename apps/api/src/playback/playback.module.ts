@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common"
+
 import { AuthModule } from "../auth"
 import { CatalogModule } from "../catalog"
 import { PlaybackController } from "./controller"

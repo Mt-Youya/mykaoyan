@@ -1,12 +1,13 @@
-import { describe, expect, it, vi } from "vitest"
 import { APIError } from "better-auth/api"
+import { describe, expect, it, vi } from "vitest"
+
 import type { Auth } from "../auth"
 import type { AuthEnvironment } from "../environment"
 import { OTP_SEND_WINDOW_LIMIT, OTP_TTL_SECONDS, PRIVACY_POLICY_VERSION } from "../policy"
-import { PhoneAuthService } from "./phone.service"
 import { MemorySmsVerifier, SmsProviderError } from "../sms"
 import type { SmsVerifier } from "../sms"
 import { createMemoryStores } from "../stores"
+import { PhoneAuthService } from "./phone.service"
 
 const env: AuthEnvironment = {
   BETTER_AUTH_SECRET: "x".repeat(32),
@@ -129,7 +130,7 @@ describe("校验验证码", () => {
     test.advance(OTP_TTL_SECONDS + 1)
     const result = await test.service.verify(
       { phone, code: "123456", acceptedPolicyVersion: PRIVACY_POLICY_VERSION, acceptedTermsVersion: "2026-10-30" },
-      new Headers()
+      new Headers(),
     )
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.problem.code).toBe("OTP_EXPIRED")
@@ -144,7 +145,7 @@ describe("校验验证码", () => {
     await test.service.requestCode({ phone })
     const result = await test.service.verify(
       { phone, code: "000000", acceptedPolicyVersion: PRIVACY_POLICY_VERSION, acceptedTermsVersion: "2026-10-30" },
-      new Headers()
+      new Headers(),
     )
     expect(result.ok).toBe(false)
     if (!result.ok) {
@@ -163,7 +164,7 @@ describe("校验验证码", () => {
     await test.service.requestCode({ phone })
     const first = await test.service.verify(
       { phone, code: "123456", acceptedPolicyVersion: PRIVACY_POLICY_VERSION, acceptedTermsVersion: "2026-10-30" },
-      new Headers()
+      new Headers(),
     )
     expect(first).toMatchObject({ ok: true, accountId: "acct-1" })
     if (first.ok) expect(first.setCookies.length).toBeGreaterThan(0)
@@ -182,7 +183,7 @@ describe("校验验证码", () => {
     await test.service.requestCode({ phone })
     const second = await test.service.verify(
       { phone, code: "123456", acceptedPolicyVersion: PRIVACY_POLICY_VERSION, acceptedTermsVersion: "2026-10-30" },
-      new Headers()
+      new Headers(),
     )
     expect(second.ok).toBe(true)
     expect(test.stores.listConsents()).toHaveLength(1)

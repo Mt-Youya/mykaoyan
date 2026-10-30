@@ -1,8 +1,7 @@
 "use client"
 
-import React from "react"
-
 import { cn } from "cn"
+import React from "react"
 
 export interface ProgressiveBlurProps {
   className?: string
@@ -26,7 +25,7 @@ export function ProgressiveBlur({
       className={cn(
         "gradient-blur pointer-events-none absolute inset-x-0 z-10",
         className,
-        position === "top" ? "top-0" : position === "bottom" ? "bottom-0" : "inset-y-0"
+        position === "top" ? "top-0" : position === "bottom" ? "bottom-0" : "inset-y-0",
       )}
       style={{
         height: position === "both" ? "100%" : height,

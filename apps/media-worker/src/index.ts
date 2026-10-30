@@ -1,4 +1,5 @@
 import { z } from "zod"
+
 import { verifyToken } from "./auth"
 import { allowsRange, conditionalStatus, parseRange } from "./http"
 
@@ -15,8 +16,8 @@ const configSchema = z.object({
           (value) =>
             URL.canParse(value) &&
             ["http:", "https:"].includes(new URL(value).protocol) &&
-            new URL(value).origin === value
-        )
+            new URL(value).origin === value,
+        ),
     )
     .min(1),
 })
@@ -49,7 +50,7 @@ export default {
       headers.set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
       headers.set(
         "Access-Control-Allow-Headers",
-        "Range, If-Range, If-Match, If-None-Match, If-Modified-Since, If-Unmodified-Since"
+        "Range, If-Range, If-Match, If-None-Match, If-Modified-Since, If-Unmodified-Since",
       )
       return new Response(null, { status: 204, headers })
     }
@@ -92,7 +93,7 @@ export default {
       if (!object) return problem(404, "媒体不存在")
       if (!("body" in object)) return problem(503, "媒体已更新，请重试")
       if (range) {
-        const actual = Object.assign({ offset: undefined, length: undefined }, object.range)
+        const actual = { offset: undefined, length: undefined, ...object.range }
         if (
           !Number.isSafeInteger(actual.offset) ||
           !Number.isSafeInteger(actual.length) ||

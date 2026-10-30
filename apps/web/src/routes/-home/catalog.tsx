@@ -1,4 +1,5 @@
 import { Button } from "@mykaoyan/ui"
+
 import type { LoadState } from "../../features/catalog"
 
 type Entry = { slug: string; title: string; summary?: string }

@@ -1,8 +1,10 @@
-import { getVocabCounts, getVocabQueue, reviewVocabCard, toLocalDate, vocabDataSchema } from "@mykaoyan/core"
-import type { VocabData } from "@mykaoyan/core"
 import type { ChangeEvent, FormEvent } from "react"
 import { useState } from "react"
+
+import { getVocabCounts, getVocabQueue, reviewVocabCard, toLocalDate, vocabDataSchema } from "@mykaoyan/core"
+import type { VocabData } from "@mykaoyan/core"
 import { Button, Input, Label } from "@mykaoyan/ui"
+
 import { mergeVocabEntries, parseVocabText, summarizeBackup } from "./model"
 import { useVocab } from "./use-vocab"
 
@@ -101,7 +103,7 @@ export function VocabPage() {
       setError("")
       const backupCounts = summarizeBackup(parsed.data)
       setMessage(
-        `备份含 ${backupCounts.entries} 个词条、${backupCounts.cards} 张单词卡、${backupCounts.reviewDays} 天复习记录。确认恢复后会整体替换当前浏览器中的词表、单词卡和复习记录。`
+        `备份含 ${backupCounts.entries} 个词条、${backupCounts.cards} 张单词卡、${backupCounts.reviewDays} 天复习记录。确认恢复后会整体替换当前浏览器中的词表、单词卡和复习记录。`,
       )
     } catch (cause) {
       setPendingBackup(null)
@@ -141,7 +143,7 @@ export function VocabPage() {
               </p>
               {revealed ? (
                 <>
-                  <p className="whitespace-pre-wrap text-lg leading-relaxed">{current.entry.meaning}</p>
+                  <p className="text-lg leading-relaxed whitespace-pre-wrap">{current.entry.meaning}</p>
                   <div className="flex flex-wrap gap-3" aria-label="为当前单词卡评分">
                     <Button className={buttonSize} variant="outline" onClick={() => rate("again")}>
                       忘记

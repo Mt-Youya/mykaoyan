@@ -1,12 +1,13 @@
-import { describe, it, expect } from "vitest"
-import { R2PublishStorage } from "./storage"
+import { describe, expect, it } from "vitest"
+
 import { readEnvironment } from "../environment"
+import { R2PublishStorage } from "./storage"
 describe("R2 发布预签名", () => {
   it("未配置时失败；签名约束对象摘要、内容类型与禁止覆盖，不暴露服务器密钥", async () => {
     const base = { NODE_ENV: "test", PORT: "3001", MEDIA_SIGNING_KEY: "fictional-media-signing-key-32-characters" }
     const asset = { sha256: "a".repeat(64), md5: "AAAAAAAAAAAAAAAAAAAAAA==", size: 32 }
     await expect(
-      new R2PublishStorage(readEnvironment(base)).upload("fictional/key", asset, "video/mp4")
+      new R2PublishStorage(readEnvironment(base)).upload("fictional/key", asset, "video/mp4"),
     ).rejects.toThrow("尚未配置")
     const config = readEnvironment({
       ...base,

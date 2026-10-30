@@ -1,30 +1,31 @@
 import { createHmac } from "node:crypto"
+
 import { Inject, Injectable } from "@nestjs/common"
 import { APIError } from "better-auth/api"
 import { getCookies } from "better-auth/cookies"
-import type { Auth } from "../auth"
-import type { AuthEnvironment } from "../environment"
+
 import { CONFIG } from "../../config"
 import type { Environment } from "../../environment"
+import type { Auth } from "../auth"
+import type { AuthEnvironment } from "../environment"
 import {
   maskPhone,
+  OTP_MAX_ATTEMPTS,
   OTP_SEND_COOLDOWN_SECONDS,
   OTP_SEND_WINDOW_LIMIT,
   OTP_SEND_WINDOW_SECONDS,
-  OTP_MAX_ATTEMPTS,
   OTP_TTL_SECONDS,
-  TERMS_VERSION,
   phonePolicyForEnvironment,
   requestCodeBodySchema,
+  TERMS_VERSION,
   toE164,
   verifyBodySchema,
 } from "../policy"
-import { SMS_VERIFIER } from "../tokens"
 import type { SmsVerifier } from "../sms"
 import { SmsProviderError } from "../sms"
-import { AUTH, AUTH_ENV, AUTH_STORES, CLOCK } from "../tokens"
 import { SEND_OTP_KIND } from "../stores"
 import type { AuthStores } from "../stores"
+import { AUTH, AUTH_ENV, AUTH_STORES, CLOCK, SMS_VERIFIER } from "../tokens"
 
 /** 服务层统一返回 problem 形状，控制器负责写状态码与 `application/problem+json`。 */
 export type Problem = {
@@ -59,7 +60,7 @@ export class PhoneAuthService {
     @Inject(AUTH) private readonly auth: Auth,
     @Inject(AUTH_ENV) private readonly env: AuthEnvironment,
     @Inject(CLOCK) private readonly now: () => Date,
-    @Inject(CONFIG) private readonly config: Environment
+    @Inject(CONFIG) private readonly config: Environment,
   ) {}
 
   policy() {

@@ -74,7 +74,7 @@ export async function loadLoginState(request: Request): Promise<{ state: LoginSt
 /** 浏览器端调用 API；错误统一转成 { code, message }。 */
 export async function postJson(
   path: string,
-  body: unknown
+  body: unknown,
 ): Promise<{ ok: true } | { ok: false; code: string; message: string; retryAfterSeconds?: number }> {
   const response = await fetch(path, {
     method: "POST",

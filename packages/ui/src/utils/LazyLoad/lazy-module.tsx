@@ -1,4 +1,5 @@
-import { lazy, type ComponentType } from "react"
+import { type ComponentType, lazy } from "react"
+
 import { LazyLoad } from "./LazyLoad"
 
 /**
@@ -25,7 +26,7 @@ type LazyModule<M> = {
 /** 给单个 lazy 组件包上 Suspense（Skeleton fallback），得到可直接渲染、自带加载态的组件。 */
 function withSuspense(
   Lazy: ComponentType<Record<string, unknown>>,
-  name: string
+  name: string,
 ): ComponentType<Record<string, unknown>> {
   // 组件工厂模式：WithSuspense 必须闭包住按 key 创建的 Lazy，无法提升到模块层
   // oxlint-disable-next-line unicorn/consistent-function-scoping -- false positive: it closes over `Lazy`

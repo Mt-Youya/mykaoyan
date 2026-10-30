@@ -1,4 +1,5 @@
 import { z } from "zod"
+
 import type { AdmissionRecord } from "./api"
 
 const codeNameSchema = z.object({ code: z.string(), name: z.string().nullable() })

@@ -1,5 +1,5 @@
-import { Badge } from "@mykaoyan/ui"
 import type { RatingSummary } from "@mykaoyan/core"
+import { Badge } from "@mykaoyan/ui"
 export function RatingStats({ value }: { value: RatingSummary }) {
   return (
     <div className="flex flex-wrap items-center gap-3">

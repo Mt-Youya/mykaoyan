@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Button } from "@mykaoyan/ui"
 import { useEffect, useState } from "react"
+
+import { Button } from "@mykaoyan/ui"
+
 import { favoriteFromInput, readFavorites, writeFavorites } from "../features/admissions"
 import type { AdmissionFavorite } from "../features/admissions"
 import { useStudyDraft } from "../features/profile"
@@ -88,7 +90,7 @@ export function AdmissionsPage() {
                               ? current.filter((id) => id !== item.id)
                               : current.length < 2
                                 ? [...current, item.id]
-                                : current
+                                : current,
                           )
                         }
                       />

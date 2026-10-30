@@ -1,7 +1,9 @@
 import postgres from "postgres"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
 import { createApp } from "../app"
-import { MemorySmsVerifier, PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
+import type { MemorySmsVerifier } from "../auth"
+import { PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
 import { readEnvironment } from "../environment"
 
 const TEST_ENV = {
@@ -38,13 +40,13 @@ describe("视频播放令牌签发", () => {
       new TextEncoder().encode(secret),
       { name: "HMAC", hash: "SHA-256" },
       false,
-      ["verify"]
+      ["verify"],
     )
     const valid = await crypto.subtle.verify(
       "HMAC",
       hmac,
       Buffer.from(signature, "base64url"),
-      new TextEncoder().encode(payload)
+      new TextEncoder().encode(payload),
     )
     expect(valid).toBe(true)
     return claims
@@ -115,7 +117,7 @@ describe("视频播放令牌签发", () => {
     const visitor = /mk_visitor=([0-9a-f-]{36})/.exec(cookie!)![1]!
     const claims = await verifyLikeWorker(
       ((await first.json()) as { token: string }).token,
-      "videos/playback-example.mp4"
+      "videos/playback-example.mp4",
     )
     expect(claims.subject).toBe(visitor)
 
@@ -126,7 +128,7 @@ describe("视频播放令牌签发", () => {
     expect(second.headers.get("set-cookie")).toBeNull()
     const again = await verifyLikeWorker(
       ((await second.json()) as { token: string }).token,
-      "videos/playback-example.mp4"
+      "videos/playback-example.mp4",
     )
     expect(again.subject).toBe(visitor)
   })

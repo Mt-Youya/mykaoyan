@@ -1,4 +1,5 @@
 import { Injectable, Module } from "@nestjs/common"
+
 import { CatalogController } from "./controller"
 import { CATALOG_READER } from "./service"
 import type { CatalogReader, CourseDetail, CourseSummary, HandoutDetail, HandoutSummary, LessonDetail } from "./service"

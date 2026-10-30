@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process"
-import { readFileSync, readdirSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
 import { resolve } from "node:path"
+
 import { beforeAll, describe, expect, it } from "vitest"
 
 const directory = resolve(import.meta.dirname, "../supabase/migrations")
@@ -39,8 +40,8 @@ describe("空库迁移与权限", () => {
     for (const role of ["anon", "authenticated"]) {
       expect(
         sql(
-          `select has_table_privilege('${role}', 'public.courses', 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')`
-        )
+          `select has_table_privilege('${role}', 'public.courses', 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')`,
+        ),
       ).toBe("f")
       expect(() => sql(`set role ${role}; select * from public.courses`)).toThrow()
     }
@@ -51,8 +52,8 @@ describe("空库迁移与权限", () => {
     for (const role of ["anon", "authenticated"]) {
       expect(
         sql(
-          `select has_table_privilege('${role}', 'public.agent_tokens', 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')`
-        )
+          `select has_table_privilege('${role}', 'public.agent_tokens', 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')`,
+        ),
       ).toBe("f")
     }
   })
@@ -61,12 +62,12 @@ describe("空库迁移与权限", () => {
     expect(sql("select relrowsecurity from pg_class where oid = 'public.lesson_publications'::regclass")).toBe("t")
     for (const role of ["anon", "authenticated"])
       expect(
-        sql(`select has_table_privilege('${role}', 'public.lesson_publications', 'SELECT,INSERT,UPDATE,DELETE')`)
+        sql(`select has_table_privilege('${role}', 'public.lesson_publications', 'SELECT,INSERT,UPDATE,DELETE')`),
       ).toBe("f")
     expect(
       sql(
-        "select column_default from information_schema.columns where table_name='agent_tokens' and column_name='scope'"
-      )
+        "select column_default from information_schema.columns where table_name='agent_tokens' and column_name='scope'",
+      ),
     ).toContain("progress")
   })
 
@@ -96,7 +97,7 @@ describe("空库迁移与权限", () => {
     expect(sql("select relrowsecurity from pg_class where oid='public.submission_ratings'::regclass")).toBe("t")
     for (const role of ["anon", "authenticated"])
       expect(
-        sql(`select has_table_privilege('${role}','public.submission_ratings','SELECT,INSERT,UPDATE,DELETE')`)
+        sql(`select has_table_privilege('${role}','public.submission_ratings','SELECT,INSERT,UPDATE,DELETE')`),
       ).toBe("f")
   })
 

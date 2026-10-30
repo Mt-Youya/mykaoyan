@@ -1,10 +1,10 @@
 import { addDays, weekdayOf } from "../dates/index"
 import type { LocalDate } from "../dates/index"
-import { getPlanTotal, getWeekDays, getDayPlan } from "../plan/index"
 import { getStableOn } from "../mistakes/index"
+import { getDayPlan, getPlanTotal, getWeekDays } from "../plan/index"
+import type { DailyLog, DayPlan, Mistake, StudyProfile, TopicProgress, WeeklyReview } from "../progress/index"
 import { getTopicStableOn } from "../topics/index"
 import type { Topic } from "../topics/index"
-import type { DailyLog, DayPlan, Mistake, StudyProfile, TopicProgress, WeeklyReview } from "../progress/index"
 
 export type WeeklySubjectSummary = {
   code: string
@@ -55,7 +55,7 @@ export function getWeeklySummary(input: WeeklySummaryInput): WeeklySummary {
     name: subject.name,
     plannedMinutes: days.reduce(
       (sum, day) => sum + (getDayPlan(input.profile, input.dayPlans, day)?.minutes[subject.code] ?? 0),
-      0
+      0,
     ),
     actualMinutes: input.daily
       .filter((log) => inWeek(log.date))

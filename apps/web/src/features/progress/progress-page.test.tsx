@@ -1,6 +1,8 @@
-import { PROGRESS_FILE_APP, PROGRESS_FILE_VERSION, progressFileSchema } from "@mykaoyan/core"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
+
+import { PROGRESS_FILE_APP, PROGRESS_FILE_VERSION, progressFileSchema } from "@mykaoyan/core"
+
 import { ProgressView } from "./progress-page"
 import type { ProgressViewProps } from "./progress-page"
 import { summarizeUpload } from "./upload"
@@ -46,7 +48,7 @@ describe("学习进度页", () => {
 
   it("读取失败时展示服务端提示", () => {
     const html = renderToStaticMarkup(
-      <ProgressView {...props({ status: "error", document: null, message: "学习数据暂不可用" })} />
+      <ProgressView {...props({ status: "error", document: null, message: "学习数据暂不可用" })} />,
     )
     expect(html).toContain('role="alert"')
     expect(html).toContain("学习数据暂不可用")
@@ -76,7 +78,7 @@ describe("学习进度页", () => {
             summary,
           },
         })}
-      />
+      />,
     )
     expect(html).toContain("待上传：")
     expect(html).toContain("mykaoyan-progress-v2.json")
@@ -87,7 +89,7 @@ describe("学习进度页", () => {
 
   it("冲突提示会要求重新加载云端数据", () => {
     const html = renderToStaticMarkup(
-      <ProgressView {...props({ message: "另一处已更新学习数据。请刷新后再修改，本次内容没有上传。" })} />
+      <ProgressView {...props({ message: "另一处已更新学习数据。请刷新后再修改，本次内容没有上传。" })} />,
     )
     expect(html).toContain("另一处已更新学习数据")
     expect(html).toContain("重新加载云端数据")
@@ -107,7 +109,7 @@ describe("学习进度页", () => {
           busy: true,
           pending: { fileName: "p.json", document, summary },
         })}
-      />
+      />,
     )
     expect(html).toContain("正在上传…")
     expect(html).toContain("disabled")

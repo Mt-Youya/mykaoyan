@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react"
+
 import { Button } from "@mykaoyan/ui"
+
 import { MembershipAction, MembershipHelp } from "../membership"
 import type { MembershipAccess } from "../membership"
 import { LessonPlayer } from "../playback"
-import { SubmissionRequestError, submissionRequest } from "./api"
-import type { OwnSubmission, Submission, SubmissionList } from "./api"
-import { SubmissionUploadForm } from "./upload-form"
 import { RatingControl, RatingFilters, RatingStats } from "../ratings"
-import type { RatedSubmission } from "./api"
+import { submissionRequest, SubmissionRequestError } from "./api"
+import type { OwnSubmission, RatedSubmission, Submission, SubmissionList } from "./api"
+import { SubmissionUploadForm } from "./upload-form"
 export const submissionStatus = { uploading: "上传未完成", pending: "待审核", approved: "已通过", rejected: "已驳回" }
 export function SubmissionCard({
   item,
@@ -22,7 +23,7 @@ export function SubmissionCard({
   return (
     <li className="flex flex-col gap-3 border-b border-border py-5">
       <h3 className="text-lg wrap-break-word">{item.title}</h3>
-      <p className="whitespace-pre-wrap wrap-break-word">{item.summary}</p>
+      <p className="wrap-break-word whitespace-pre-wrap">{item.summary}</p>
       <p className="text-sm text-muted-foreground">
         {item.author} · 考试科目 {item.subjectCode}
         {item.topicId ? ` · ${item.topicId}` : ""} · {submissionStatus[item.status]}
@@ -65,7 +66,7 @@ export function SubmissionsPanel({ subjectCode }: { subjectCode: string }) {
     setOpen(false)
     void (async () => {
       const data = await submissionRequest<SubmissionList<RatedSubmission>>(
-        `submissions?subject=${encodeURIComponent(subject)}&topic=${encodeURIComponent(topic)}&page=${page}`
+        `submissions?subject=${encodeURIComponent(subject)}&topic=${encodeURIComponent(topic)}&page=${page}`,
       )
       if (!active) return
       setList(data)

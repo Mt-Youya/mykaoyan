@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Header, Inject, Param, Put, UseGuards } from "@nestjs/common"
+
 import { CurrentSession, SessionGuard } from "../auth"
 import type { AuthSession } from "../auth"
 import { RatingsService } from "./service"
@@ -12,7 +13,7 @@ export class RatingsController {
   @Put() @Header("Cache-Control", "no-store") put(
     @CurrentSession() s: AuthSession,
     @Param("id") id: string,
-    @Body() body: unknown
+    @Body() body: unknown,
   ) {
     return this.ratings.put(s.user.id, id, body)
   }

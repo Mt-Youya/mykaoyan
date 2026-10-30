@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
 import { getRequest, setResponseHeader } from "@tanstack/react-start/server"
+
 import { apiOrigin } from "./-auth"
 import { PrivacyDocument } from "./-legal/documents"
 

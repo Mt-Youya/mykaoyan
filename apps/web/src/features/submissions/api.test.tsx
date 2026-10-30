@@ -1,6 +1,8 @@
-import { afterEach, describe, it, expect, vi } from "vitest"
-import { uploadSubmission, submissionRequest } from "./api"
+import { afterEach, describe, expect, it, vi } from "vitest"
+
 import type { SubmissionInput } from "@mykaoyan/core"
+
+import { submissionRequest, uploadSubmission } from "./api"
 afterEach(() => vi.unstubAllGlobals())
 describe("投稿请求与续传", () => {
   it("只发送缺失分片，重新读取服务器进度，直传请求不发到API", async () => {
@@ -18,7 +20,7 @@ describe("投稿请求与续传", () => {
               ? { url: "https://r2.example.invalid/part-2" }
               : { status: "pending" }
         return new Response(JSON.stringify(body))
-      })
+      }),
     )
     class FakeXHR {
       status = 200
@@ -45,7 +47,7 @@ describe("投稿请求与续传", () => {
   it("403保留给会员入口处理，网络错误不自动重发", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response(JSON.stringify({ title: "投稿需要有效会员" }), { status: 403 }))
+      vi.fn().mockResolvedValue(new Response(JSON.stringify({ title: "投稿需要有效会员" }), { status: 403 })),
     )
     await expect(submissionRequest("submissions/uploads", "POST", {})).rejects.toMatchObject({
       status: 403,

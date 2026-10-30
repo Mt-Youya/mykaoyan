@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { expect, it } from "vitest"
+
 import { HomePage } from "./routes"
 
 it("首页服务端直接输出已确认的阅读入口，不发布原型里的虚构课程", () => {

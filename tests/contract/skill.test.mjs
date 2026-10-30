@@ -1,21 +1,23 @@
 import { execFileSync, spawnSync } from "node:child_process"
 import { cpSync, existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { createRequire } from "node:module"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { createRequire } from "node:module"
 import { fileURLToPath } from "node:url"
+
 import { describe, expect, it } from "vitest"
+
 import {
   fullProgressFileFixture,
-  validProgressFixtures,
   invalidProgressFixtures,
+  validProgressFixtures,
 } from "../../packages/core/src/progress/fixtures/index.ts"
 
 const requireFromCore = createRequire(new URL("../../packages/core/package.json", import.meta.url))
 const Ajv2020 = requireFromCore("ajv/dist/2020")
 const addFormats = requireFromCore("ajv-formats")
 const publicSchema = JSON.parse(
-  readFileSync(new URL("../../apps/web/public/schemas/progress/v1/progress.schema.json", import.meta.url))
+  readFileSync(new URL("../../apps/web/public/schemas/progress/v1/progress.schema.json", import.meta.url)),
 )
 const ajv = new Ajv2020({ allErrors: true })
 addFormats(ajv)
@@ -100,7 +102,7 @@ describe("mykaoyan skill 的独立校验入口", () => {
       expect(spawnSync(process.execPath, [copiedScript, template], { cwd: directory }).status).toBe(0)
       writeFileSync(
         join(directory, "mykaoyan/references/progress.schema.json"),
-        JSON.stringify({ ...publicSchema, not: {} })
+        JSON.stringify({ ...publicSchema, not: {} }),
       )
       const result = spawnSync(process.execPath, [copiedScript, template], { cwd: directory, encoding: "utf8" })
       expect(result.status).toBe(1)
@@ -126,7 +128,7 @@ describe("mykaoyan skill 的独立校验入口", () => {
 
   it("帮助无需安装依赖即可运行", () => {
     expect(execFileSync(process.execPath, [fileURLToPath(script), "--help"], { encoding: "utf8" })).toContain(
-      "validate.mjs"
+      "validate.mjs",
     )
   })
 })

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react"
+
 import { Button, Input, Label } from "@mykaoyan/ui"
+
 import { createDraft, presets, standardSubjects } from "../../features/profile"
 import type { ExamSubject, StudyDraft } from "../../features/profile"
 import { TargetLookup } from "./target-lookup"
@@ -36,7 +38,7 @@ function nextYear() {
 function choiceFor(subjects: ExamSubject[]) {
   return (
     Object.entries(presets).find(
-      ([, items]) => items.map((s) => s.code).join() === subjects.map((s) => s.code).join()
+      ([, items]) => items.map((s) => s.code).join() === subjects.map((s) => s.code).join(),
     )?.[0] ?? "custom"
   )
 }
@@ -96,11 +98,11 @@ export function ProfileForm({
   }
   const checked = draft.source
     ? new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", dateStyle: "medium" }).format(
-        new Date(draft.source.checkedAt)
+        new Date(draft.source.checkedAt),
       )
     : ""
   const added = draft.subjects.filter(
-    (s) => !initial?.subjects.some((old) => old.code === s.code && old.name === s.name)
+    (s) => !initial?.subjects.some((old) => old.code === s.code && old.name === s.name),
   )
   const removed =
     initial?.subjects.filter((s) => !draft.subjects.some((next) => next.code === s.code && next.name === s.name)) ?? []
@@ -239,7 +241,7 @@ export function ProfileForm({
                           subjects(
                             e.target.checked
                               ? [...draft.subjects, subject]
-                              : draft.subjects.filter((s) => s.code !== subject.code)
+                              : draft.subjects.filter((s) => s.code !== subject.code),
                           )
                         }
                         className={nativeControl}

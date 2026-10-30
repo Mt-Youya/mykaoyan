@@ -1,9 +1,8 @@
 "use client"
 
-import { type CSSProperties, type HTMLAttributes } from "react"
-import { motion, type DOMMotionComponents, type MotionProps } from "motion/react"
-
 import { cn } from "cn"
+import { type DOMMotionComponents, motion, type MotionProps } from "motion/react"
+import { type CSSProperties, type HTMLAttributes } from "react"
 
 const motionElements = {
   article: motion.article,
@@ -46,7 +45,7 @@ export function LineShadowText({
         "after:bg-[linear-gradient(45deg,transparent_45%,var(--shadow-color)_45%,var(--shadow-color)_55%,transparent_0)]",
         "after:-z-10 after:bg-size-[0.06em_0.06em] after:bg-clip-text after:text-transparent",
         "after:animate-line-shadow",
-        className
+        className,
       )}
       data-text={children}
       {...props}

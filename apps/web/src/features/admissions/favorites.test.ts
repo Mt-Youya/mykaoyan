@@ -1,4 +1,5 @@
 import { expect, it } from "vitest"
+
 import { favoriteFromInput, readFavorites, writeFavorites } from "./favorites"
 
 const record = {

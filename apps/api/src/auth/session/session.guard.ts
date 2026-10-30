@@ -1,6 +1,7 @@
 import { createParamDecorator, Inject, Injectable, UnauthorizedException } from "@nestjs/common"
 import type { CanActivate, ExecutionContext } from "@nestjs/common"
 import { fromNodeHeaders } from "better-auth/node"
+
 import type { Auth } from "../auth"
 import { appendSetCookies } from "../http"
 import type { NodeRequestLike, NodeResponseLike } from "../http"
@@ -35,6 +36,7 @@ export class SessionGuard implements CanActivate {
 }
 
 /** 在已通过 `SessionGuard` 的接口里取当前会话。 */
-export const CurrentSession = createParamDecorator((_data: unknown, context: ExecutionContext): AuthSession => {
-  return context.switchToHttp().getRequest<AuthenticatedRequest>().authSession as AuthSession
-})
+export const CurrentSession = createParamDecorator(
+  (_data: unknown, context: ExecutionContext): AuthSession =>
+    context.switchToHttp().getRequest<AuthenticatedRequest>().authSession as AuthSession,
+)

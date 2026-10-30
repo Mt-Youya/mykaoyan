@@ -1,5 +1,7 @@
 import { and, count, desc, eq, gte } from "drizzle-orm"
+
 import { personalInfoTransferConsents, phoneLoginAttempts } from "@mykaoyan/db"
+
 import type { Database } from "../database"
 
 /**
@@ -42,8 +44,8 @@ export function createDrizzleStores(db: Database): AuthStores {
             and(
               eq(phoneLoginAttempts.phoneHash, phoneHash),
               eq(phoneLoginAttempts.kind, kind),
-              gte(phoneLoginAttempts.createdAt, since)
-            )
+              gte(phoneLoginAttempts.createdAt, since),
+            ),
           )
         return row?.value ?? 0
       },
@@ -64,8 +66,8 @@ export function createDrizzleStores(db: Database): AuthStores {
             and(
               eq(phoneLoginAttempts.phoneHash, phoneHash),
               eq(phoneLoginAttempts.kind, kind),
-              gte(phoneLoginAttempts.createdAt, since)
-            )
+              gte(phoneLoginAttempts.createdAt, since),
+            ),
           )
           .orderBy(phoneLoginAttempts.createdAt)
           .limit(1)
@@ -85,8 +87,8 @@ export function createDrizzleStores(db: Database): AuthStores {
           .where(
             and(
               eq(personalInfoTransferConsents.accountId, accountId),
-              eq(personalInfoTransferConsents.policyVersion, policyVersion)
-            )
+              eq(personalInfoTransferConsents.policyVersion, policyVersion),
+            ),
           )
           .limit(1)
         if (!saved || (termsVersion !== undefined && saved.termsVersion !== termsVersion))
@@ -112,7 +114,7 @@ export function createMemoryStores(): MemoryAuthStores {
       },
       async countSince(phoneHash, kind, since) {
         return attempts.filter(
-          (item) => item.phoneHash === phoneHash && item.kind === kind && item.at.getTime() >= since.getTime()
+          (item) => item.phoneHash === phoneHash && item.kind === kind && item.at.getTime() >= since.getTime(),
         ).length
       },
       async latest(phoneHash, kind) {
@@ -137,7 +139,7 @@ export function createMemoryStores(): MemoryAuthStores {
       },
     },
     listConsents() {
-      return consents.map((item) => Object.assign({}, item))
+      return consents.map((item) => ({ ...item }))
     },
   }
 }

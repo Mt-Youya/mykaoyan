@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common"
+
 import { AuthModule } from "../auth"
 import { AgentTokensController } from "./controller"
 import { AgentTokenGuard } from "./guard"

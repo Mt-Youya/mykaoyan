@@ -1,15 +1,16 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common"
 import { z } from "zod"
-import { SubmissionAccess, ownSubmissionView, submissionView } from "./access"
-import type { Actor, SubmissionRow } from "./access"
+
 import { DEFAULT_TOKEN_TTL_SECONDS, MAX_TOKEN_TTL_SECONDS, PlaybackService } from "../playback"
 import { RatingsService } from "../ratings"
+import { ownSubmissionView, SubmissionAccess, submissionView } from "./access"
+import type { Actor, SubmissionRow } from "./access"
 @Injectable()
 export class SubmissionsService {
   constructor(
     @Inject(SubmissionAccess) private access: SubmissionAccess,
     @Inject(PlaybackService) private playback: PlaybackService,
-    @Inject(RatingsService) private ratings: RatingsService
+    @Inject(RatingsService) private ratings: RatingsService,
   ) {}
   async list(subject: string, page: number, topic = "") {
     const result = await this.ratings.ranked(subject, page, topic)

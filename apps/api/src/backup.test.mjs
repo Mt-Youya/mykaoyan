@@ -1,8 +1,10 @@
-import { afterAll, beforeAll, expect, it } from "vitest"
 import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
+
 import postgres from "postgres"
+import { afterAll, beforeAll, expect, it } from "vitest"
+
 import { backupDatabase, restoreBackup } from "../scripts/backup.mjs"
 
 let sql
@@ -33,9 +35,9 @@ beforeAll(async () => {
   restoreCreated = true
   directory = mkdtempSync(join(tmpdir(), "mykaoyan-fake-r2-"))
   const aws = join(directory, "aws")
-  writeFileSync(aws, "#!/usr/bin/env node\n" + readFileSync(new URL("./fixtures/aws.cjs", import.meta.url), "utf8"))
+  writeFileSync(aws, `#!/usr/bin/env node\n${readFileSync(new URL("./fixtures/aws.cjs", import.meta.url), "utf8")}`)
   chmodSync(aws, 0o700)
-  process.env.PATH = directory + ":" + originalPath
+  process.env.PATH = `${directory}:${originalPath}`
   process.env.FAKE_R2_DIR = directory
   const target = new URL(source)
   target.pathname = "/mykaoyan_restore_test"
@@ -71,7 +73,7 @@ it("真实 dump/restore 往返保留逐表行数，并拒绝损坏备份和非�
   await sql`revoke select on public.backup_probe from service_role`
   await sql`drop role service_role`
   const restoreInput = { ...input, BACKUP_OBJECT_KEY: key }
-  const dump = join(directory, key + ".dump")
+  const dump = join(directory, `${key}.dump`)
   const original = readFileSync(dump)
   writeFileSync(dump, "corrupted")
   await expect(restoreBackup(restoreInput)).rejects.toThrow("校验和")
@@ -105,6 +107,6 @@ it("上传成功但对象读回不匹配时仍判定备份失败", async () => {
 it("拒绝缺失配置和指向其他库的恢复请求", async () => {
   await expect(backupDatabase({})).rejects.toThrow("配置缺失")
   await expect(restoreBackup({ ...input, RESTORE_DATABASE_URL: input.BACKUP_DATABASE_URL })).rejects.toThrow(
-    "恢复演练只允许"
+    "恢复演练只允许",
   )
 })

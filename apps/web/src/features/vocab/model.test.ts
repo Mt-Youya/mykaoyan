@@ -1,9 +1,12 @@
-import { readFileSync, readdirSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
+
+import { describe, expect, it } from "vitest"
+
 import { createVocabCard, parseLocalDate } from "@mykaoyan/core"
 import type { VocabData } from "@mykaoyan/core"
-import { describe, expect, it } from "vitest"
+
 import { mergeVocabEntries, parsePastedVocab, parseVocabText, summarizeBackup } from "./model"
 
 const folder = fileURLToPath(new URL(".", import.meta.url))
@@ -40,7 +43,7 @@ describe("词表粘贴导入", () => {
 
   it("解析 JSON 对象数组与 term 到 meaning 的对象", () => {
     expect(
-      parseVocabText('[{"term":"abandon","meaning":"放弃"},{"term":"review","meaning":"复习"}]', () => "id")
+      parseVocabText('[{"term":"abandon","meaning":"放弃"},{"term":"review","meaning":"复习"}]', () => "id"),
     ).toHaveLength(2)
     expect(parseVocabText('{"abandon":"放弃","review":"复习"}', () => "id").map(({ term }) => term)).toEqual([
       "abandon",

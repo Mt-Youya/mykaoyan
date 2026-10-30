@@ -31,7 +31,7 @@ export function allowsRange(headers: Headers, object: R2Object) {
 
 export function parseRange(
   header: string | null,
-  size: number
+  size: number,
 ): { offset: number; length: number } | "unsatisfiable" | undefined {
   if (!header) return
   // shortcut: 多区间请求退回完整响应，需要并行分段下载时再支持 multipart。

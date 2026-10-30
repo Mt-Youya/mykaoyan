@@ -1,7 +1,9 @@
-import { LEGAL_VERSION, MEDIA_DATA_LOCATION, SITE_OPERATOR, SUPPORT_EMAIL } from "@mykaoyan/core"
-import { Button, Label } from "@mykaoyan/ui"
 import { useState } from "react"
 import type { ReactNode } from "react"
+
+import { LEGAL_VERSION, MEDIA_DATA_LOCATION, SITE_OPERATOR, SUPPORT_EMAIL } from "@mykaoyan/core"
+import { Button, Label } from "@mykaoyan/ui"
+
 import type { PhonePolicy } from "../-auth"
 
 const link =
@@ -32,12 +34,12 @@ export function LegalLinks() {
 function Document({ title, introduction, children }: { title: string; introduction: string; children: ReactNode }) {
   return (
     <main className="page-container py-section">
-      <article className="mx-auto flex max-w-prose min-w-0 flex-col gap-7 text-base leading-[1.8] [&_h2]:font-serif [&_h2]:text-xl [&_section]:scroll-mt-6 [&_section]:flex [&_section]:flex-col [&_section]:gap-3">
+      <article className="mx-auto flex max-w-prose min-w-0 flex-col gap-7 text-base leading-[1.8] [&_h2]:font-serif [&_h2]:text-xl [&_section]:flex [&_section]:scroll-mt-6 [&_section]:flex-col [&_section]:gap-3">
         <header>
           <a href="/" className={link}>
             返回我的考研
           </a>
-          <h1 className="mbs-4 min-w-0 wrap-break-word font-serif text-section">{title}</h1>
+          <h1 className="mbs-4 min-w-0 font-serif text-section wrap-break-word">{title}</h1>
           <p className="mbs-3 text-muted-foreground">{introduction}</p>
           <p className="mbs-3 text-sm text-muted-foreground">更新日期：{LEGAL_VERSION}</p>
         </header>
@@ -360,7 +362,7 @@ export function PolicyChecks({
         <input
           type="checkbox"
           name="terms-consent"
-          className="mbs-1 size-5 shrink-0 accent-primary active:opacity-70 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-ring"
+          className="mbs-1 size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-ring active:opacity-70 disabled:opacity-50"
           disabled={!policy.loginEnabled}
           checked={agreed}
           onChange={(event) => onAgreement(event.target.checked)}
@@ -382,7 +384,7 @@ export function PolicyChecks({
         <input
           type="checkbox"
           name="personal-info-transfer-consent"
-          className="mbs-1 size-5 shrink-0 accent-primary active:opacity-70 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-ring"
+          className="mbs-1 size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-ring active:opacity-70 disabled:opacity-50"
           disabled={!policy.loginEnabled}
           checked={consented}
           onChange={(event) => onConsent(event.target.checked)}

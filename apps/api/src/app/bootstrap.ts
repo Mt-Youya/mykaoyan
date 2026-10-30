@@ -1,8 +1,9 @@
 import "reflect-metadata"
 import { NestFactory } from "@nestjs/core"
-import { AppModule } from "./app.module"
+
 import { ProblemFilter } from "../common"
 import type { Environment } from "../environment"
+import { AppModule } from "./app.module"
 
 /** 组装好的应用实例；`main.ts` 与集成测试共用同一条装配路径。 */
 export async function createApp(environment: Environment) {

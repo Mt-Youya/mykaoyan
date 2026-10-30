@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router"
-import type { CourseSummary, HandoutSummary } from "./api"
-import { useCatalog } from "./use-catalog"
-import { LoadGuard } from "./ui"
+
 import { SubmissionsPanel } from "../submissions"
+import type { CourseSummary, HandoutSummary } from "./api"
+import { LoadGuard } from "./ui"
+import { useCatalog } from "./use-catalog"
 
 const eyebrow = "text-[0.8125rem] tracking-[0.08em] text-muted-foreground"
 const lede = "max-w-[42rem] text-muted-foreground"

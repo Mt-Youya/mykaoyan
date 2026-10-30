@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common"
 import type { OnModuleDestroy } from "@nestjs/common"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
+
 import { CONFIG } from "../config"
 import type { Environment } from "../environment"
 

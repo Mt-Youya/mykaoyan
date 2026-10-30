@@ -1,8 +1,9 @@
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common"
 import type { CanActivate, ExecutionContext } from "@nestjs/common"
 import { fromNodeHeaders } from "better-auth/node"
+
 import { AUTH } from "../auth"
-import type { Auth, AuthSession, AuthenticatedRequest } from "../auth"
+import type { Auth, AuthenticatedRequest, AuthSession } from "../auth"
 import { appendSetCookies } from "../auth/http"
 import type { NodeResponseLike } from "../auth/http"
 import { AgentTokensService } from "./service"
@@ -17,7 +18,7 @@ import { AgentTokensService } from "./service"
 export class AgentTokenGuard implements CanActivate {
   constructor(
     @Inject(AUTH) private readonly auth: Auth,
-    @Inject(AgentTokensService) private readonly tokens: AgentTokensService
+    @Inject(AgentTokensService) private readonly tokens: AgentTokensService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

@@ -1,8 +1,10 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common"
-import { publicTopics, RATING_PRIOR_COUNT, ratingInputSchema, ratingSummary } from "@mykaoyan/core"
 import { z } from "zod"
-import { DatabaseService } from "../database"
+
+import { publicTopics, RATING_PRIOR_COUNT, ratingInputSchema, ratingSummary } from "@mykaoyan/core"
+
 import { CONFIG } from "../config"
+import { DatabaseService } from "../database"
 import type { Environment } from "../environment"
 import { MembershipService } from "../membership"
 type RankedSubmission = {
@@ -25,7 +27,7 @@ export class RatingsService {
   constructor(
     @Inject(DatabaseService) private database: DatabaseService,
     @Inject(CONFIG) private config: Environment,
-    @Inject(MembershipService) private membership: MembershipService
+    @Inject(MembershipService) private membership: MembershipService,
   ) {}
   private open(id: string) {
     if (!this.config.COMMUNITY_ENABLED) throw new ForbiddenException("评分尚未开放")

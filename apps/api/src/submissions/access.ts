@@ -1,8 +1,9 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common"
 import { z } from "zod"
+
 import { CONFIG } from "../config"
-import type { Environment } from "../environment"
 import { DatabaseService } from "../database"
+import type { Environment } from "../environment"
 import { MembershipService } from "../membership"
 export type Actor = { id: string; role: string }
 export type SubmissionRow = {
@@ -39,7 +40,7 @@ export function submissionView(
     | "listed"
     | "account_id"
     | "created_at"
-  >
+  >,
 ) {
   return {
     id: r.id,
@@ -70,7 +71,7 @@ export class SubmissionAccess {
   constructor(
     @Inject(CONFIG) public config: Environment,
     @Inject(DatabaseService) public database: DatabaseService,
-    @Inject(MembershipService) private membership: MembershipService
+    @Inject(MembershipService) private membership: MembershipService,
   ) {}
   open() {
     if (!this.config.COMMUNITY_ENABLED) throw new ForbiddenException("投稿尚未开放")

@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Button, buttonVariants } from "@mykaoyan/ui"
 import { useState } from "react"
-import { useStudyDraft } from "../features/profile"
-import { ProfileForm } from "./-home/profile-form"
-import { StudyWorkspace } from "./-home/workspace"
+
+import { Button, buttonVariants } from "@mykaoyan/ui"
+
 import { useCatalog } from "../features/catalog"
 import type { CourseSummary, HandoutSummary } from "../features/catalog"
+import { useStudyDraft } from "../features/profile"
 import { CatalogEntries } from "./-home/catalog"
+import { ProfileForm } from "./-home/profile-form"
+import { StudyWorkspace } from "./-home/workspace"
 
 const quietLink = buttonVariants({ variant: "outline", className: "min-h-12 border-border px-6 text-base" })
 const primaryButton = "min-h-12 px-6 text-base"
@@ -32,7 +34,7 @@ export function HomePage() {
   return (
     <div className="min-h-svh bg-background leading-[1.7] text-foreground">
       <a
-        className="fixed start-4 top-4 z-10 -translate-y-[200%] bg-background p-4 focus:translate-y-0"
+        className="fixed inset-s-4 top-4 z-10 translate-y-[-200%] bg-background p-4 focus:translate-y-0"
         href="#home-main"
       >
         跳转到主要内容
@@ -45,7 +47,7 @@ export function HomePage() {
           <a className="mr-auto font-serif text-[1.65rem] font-semibold" href="/" aria-label="我的考研首页">
             我的考研
           </a>
-          <div className="order-3 flex basis-full gap-8 reading:order-none reading:basis-auto">
+          <div className="order-3 flex basis-full gap-8 reading:order-0 reading:basis-auto">
             <a
               className="inline-flex min-h-11 items-center hover:underline"
               href="#courses"
@@ -185,11 +187,11 @@ function PublicReading({ onConfigure }: { onConfigure: () => void }) {
             <p className="mt-6 text-sm text-muted-foreground">课程与讲义免费浏览，学习按自己的节奏。</p>
           </div>
           <div
-            className="grid max-w-[30rem] grid-cols-2 items-center gap-4 reading:max-w-none"
+            className="grid max-w-120 grid-cols-2 items-center gap-4 reading:max-w-none"
             aria-label="按考试科目进入课程与讲义"
           >
             <a
-              className="flex min-h-80 flex-col gap-4 border-l-[10px] border-l-book-blue-spine bg-book-blue p-4 hover:outline hover:outline-1 hover:outline-offset-[3px] hover:outline-muted-foreground reading:min-h-88 reading:gap-6 reading:p-6"
+              className="flex min-h-80 flex-col gap-4 border-l-10 border-l-book-blue-spine bg-book-blue p-4 hover:outline hover:outline-offset-[3px] hover:outline-muted-foreground reading:min-h-88 reading:gap-6 reading:p-6"
               href="/subjects/302"
             >
               <span className="text-sm text-muted-foreground">考试科目 302</span>
@@ -204,7 +206,7 @@ function PublicReading({ onConfigure }: { onConfigure: () => void }) {
               <span className="mt-auto text-xs text-muted-foreground">查看课程与讲义</span>
             </a>
             <a
-              className="flex min-h-[18.5rem] flex-col gap-4 border-l-[10px] border-l-book-gray-spine bg-book-gray p-4 hover:outline hover:outline-1 hover:outline-offset-[3px] hover:outline-muted-foreground reading:min-h-80 reading:gap-6 reading:p-6"
+              className="flex min-h-74 flex-col gap-4 border-l-10 border-l-book-gray-spine bg-book-gray p-4 hover:outline hover:outline-offset-[3px] hover:outline-muted-foreground reading:min-h-80 reading:gap-6 reading:p-6"
               href="/subjects/408"
             >
               <span className="text-sm text-muted-foreground">考试科目 408</span>
@@ -257,7 +259,7 @@ function PublicReading({ onConfigure }: { onConfigure: () => void }) {
                     checked={subject === value}
                     onChange={() => setSubject(value)}
                   />
-                  <span className="inline-flex min-h-11 min-w-16 items-center justify-center border border-transparent px-4 hover:border-border peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-ring">
+                  <span className="inline-flex min-h-11 min-w-16 items-center justify-center border border-transparent px-4 peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-ring hover:border-border">
                     {label}
                   </span>
                 </label>

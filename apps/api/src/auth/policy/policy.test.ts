@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest"
+
+import { MemorySmsVerifier } from "../sms"
 import {
   mainlandPhoneSchema,
   maskPhone,
@@ -10,7 +12,6 @@ import {
   toE164,
   verifyBodySchema,
 } from "./policy"
-import { MemorySmsVerifier } from "../sms"
 
 describe("手机号与验证码策略（单一来源）", () => {
   it("验证码位数只有一处定义，6 位数字", () => {
@@ -39,7 +40,7 @@ describe("手机号与验证码策略（单一来源）", () => {
   it("注册请求必须带当前政策版本；已注册账号可以不带", () => {
     expect(verifyBodySchema.safeParse({ phone: "13800138000", code: "123456" }).success).toBe(true)
     expect(
-      verifyBodySchema.parse({ phone: "13800138000", code: "123456", acceptedPolicyVersion: PRIVACY_POLICY_VERSION })
+      verifyBodySchema.parse({ phone: "13800138000", code: "123456", acceptedPolicyVersion: PRIVACY_POLICY_VERSION }),
     ).toMatchObject({ acceptedPolicyVersion: PRIVACY_POLICY_VERSION })
   })
 })

@@ -1,4 +1,5 @@
 import { boolean, index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
+
 import { accounts } from "../accounts"
 
 /**
@@ -21,5 +22,5 @@ export const listingChanges = pgTable(
       .references(() => accounts.id, { onDelete: "restrict" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("listing_changes_target_idx").on(table.targetType, table.targetId, table.createdAt)]
+  (table) => [index("listing_changes_target_idx").on(table.targetType, table.targetId, table.createdAt)],
 ).enableRLS()

@@ -14,7 +14,7 @@ export type UpstreamFailure = "login_required" | "blocked" | "unavailable" | "ba
 export class UpstreamError extends HttpException {
   constructor(
     readonly failure: UpstreamFailure,
-    message: string
+    message: string,
   ) {
     super(message, failure === "busy" ? 503 : 502)
   }

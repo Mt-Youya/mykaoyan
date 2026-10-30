@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+
 import { SupportDocument } from "./-legal/documents"
 
 export const Route = createFileRoute("/support")({

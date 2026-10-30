@@ -1,6 +1,8 @@
-import { Button, Input, Field, FieldGroup, FieldLabel } from "@mykaoyan/ui"
 import { useEffect, useState } from "react"
-import { membershipRequest, formatMembershipDate } from "./api"
+
+import { Button, Field, FieldGroup, FieldLabel, Input } from "@mykaoyan/ui"
+
+import { formatMembershipDate, membershipRequest } from "./api"
 import type { CodeList } from "./api"
 export function AdminMembershipPanel() {
   const [phone, setPhone] = useState(""),
@@ -125,7 +127,7 @@ export function AdminMembershipPanel() {
       {codes.length ? (
         <div className="mbs-4">
           <p>兑换码编号与完整兑换码仅本次显示，请保存：</p>
-          <pre className="overflow-x-auto whitespace-pre-wrap break-all border border-border p-3">
+          <pre className="overflow-x-auto border border-border p-3 break-all whitespace-pre-wrap">
             {codes.map((item) => `${item.id}\t${item.code}`).join("\n")}
           </pre>
           <Button variant="outline" onClick={() => setCodes([])}>
@@ -139,13 +141,13 @@ export function AdminMembershipPanel() {
           <ul className="mbs-3 flex flex-col gap-3">
             {list.items.map((code) => (
               <li key={code.id} className="border-b border-border pbe-3">
-                <p className="break-all text-sm">编号：{code.id}</p>
+                <p className="text-sm break-all">编号：{code.id}</p>
                 <p>
                   末四位 {code.last4} ·{" "}
                   {code.redeemedAt ? `已兑换 · ${formatMembershipDate(code.redeemedAt)}` : "未兑换"}
                 </p>
                 {code.redeemedAt ? (
-                  <p className="break-all text-sm text-muted-foreground">兑换账号：{code.redeemedBy ?? "账号已删除"}</p>
+                  <p className="text-sm break-all text-muted-foreground">兑换账号：{code.redeemedBy ?? "账号已删除"}</p>
                 ) : null}
               </li>
             ))}

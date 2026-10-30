@@ -85,8 +85,8 @@ export async function fingerprint(file: File, onProgress: (percent: number) => v
     if (signal?.aborted) throw new Error("上传已暂停")
     hashes.push(
       new Uint8Array(
-        await crypto.subtle.digest("SHA-256", await file.slice(offset, offset + SUBMISSION_PART_SIZE).arrayBuffer())
-      )
+        await crypto.subtle.digest("SHA-256", await file.slice(offset, offset + SUBMISSION_PART_SIZE).arrayBuffer()),
+      ),
     )
     onProgress(Math.min(100, Math.round(((offset + SUBMISSION_PART_SIZE) / file.size) * 100)))
   }

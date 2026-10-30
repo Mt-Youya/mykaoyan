@@ -1,3 +1,6 @@
+import type { FormEvent } from "react"
+import { useState } from "react"
+
 import {
   dailyLogSchema,
   getDailyLog,
@@ -10,8 +13,7 @@ import {
 } from "@mykaoyan/core"
 import type { DailyLog, ProgressFile } from "@mykaoyan/core"
 import { Button, Input, Label } from "@mykaoyan/ui"
-import type { FormEvent } from "react"
-import { useState } from "react"
+
 import { useProgress } from "../progress"
 
 const buttonSize = "min-h-11 px-5 text-base"
@@ -60,7 +62,7 @@ function DailyEditor({
   onSave: (log: DailyLog) => Promise<boolean>
 }) {
   const [minutes, setMinutes] = useState<Record<string, string>>(() =>
-    Object.fromEntries(codes.map((code) => [code, String(initial?.minutes[code] ?? 0)]))
+    Object.fromEntries(codes.map((code) => [code, String(initial?.minutes[code] ?? 0)])),
   )
   const [done, setDone] = useState(initial?.done ?? "")
   const [tomorrowTop, setTomorrowTop] = useState(initial?.tomorrowTop ?? "")
@@ -78,7 +80,7 @@ function DailyEditor({
           done,
           tomorrowTop,
           retro,
-        })
+        }),
       )
       if (!saved) setError("每日记录没有保存。云端数据可能已更新，请刷新后重试。")
     } catch {

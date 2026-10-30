@@ -1,5 +1,6 @@
 import { BadRequestException, Controller, Get, Inject, Param, Query } from "@nestjs/common"
 import { z } from "zod"
+
 import { AdmissionsService } from "./service"
 
 const keywordSchema = z.string().trim().min(2).max(30)
@@ -44,12 +45,12 @@ export class AdmissionsController {
   majors(
     @Param("unit") unit: string,
     @Query("year") year: string | undefined,
-    @Query("discipline") discipline: string | undefined
+    @Query("discipline") discipline: string | undefined,
   ) {
     return this.admissions.listMajors(
       parse(yearSchema, year, "year 必须是招生年度"),
       parse(unitCodeSchema, unit, "招生单位代码必须是五位数字"),
-      parse(disciplineSchema, discipline, "学科类别代码必须是四位数字，例如 0812、0854")
+      parse(disciplineSchema, discipline, "学科类别代码必须是四位数字，例如 0812、0854"),
     )
   }
 
@@ -58,13 +59,13 @@ export class AdmissionsController {
     @Query("year") year: string | undefined,
     @Query("unit") unit: string | undefined,
     @Query("major") major: string | undefined,
-    @Query("mode") mode: string | undefined
+    @Query("mode") mode: string | undefined,
   ) {
     return this.admissions.listRecords(
       parse(yearSchema, year, "year 必须是招生年度"),
       parse(unitCodeSchema, unit, "招生单位代码必须是五位数字"),
       parse(majorCodeSchema, major, "招生专业代码必须是六位"),
-      parse(modeSchema, mode, "mode 只能是 full_time 或 part_time")
+      parse(modeSchema, mode, "mode 只能是 full_time 或 part_time"),
     )
   }
 }

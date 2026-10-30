@@ -1,8 +1,8 @@
-import { type ComponentPropsWithoutRef, type ReactNode } from "react"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowRightIcon } from "@hugeicons/core-free-icons"
-
+import { HugeiconsIcon } from "@hugeicons/react"
 import { cn } from "cn"
+import { type ComponentPropsWithoutRef, type ReactNode } from "react"
+
 import { Button } from "../base/index.ts"
 
 interface BentoGridProps extends ComponentPropsWithoutRef<"div"> {
@@ -20,13 +20,11 @@ interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
   cta: string
 }
 
-const BentoGrid = ({ children, className, ...props }: BentoGridProps) => {
-  return (
-    <div className={cn("grid w-full auto-rows-88 grid-cols-3 gap-4", className)} {...props}>
-      {children}
-    </div>
-  )
-}
+const BentoGrid = ({ children, className, ...props }: BentoGridProps) => (
+  <div className={cn("grid w-full auto-rows-88 grid-cols-3 gap-4", className)} {...props}>
+    {children}
+  </div>
+)
 
 const BentoCard = ({ name, className, background, Icon, description, href, cta, ...props }: BentoCardProps) => (
   <div
@@ -36,8 +34,8 @@ const BentoCard = ({ name, className, background, Icon, description, href, cta, 
       // light styles
       "bg-background [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
       // dark styles
-      "dark:bg-background transform-gpu dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset] dark:[border:1px_solid_rgba(255,255,255,.1)]",
-      className
+      "transform-gpu dark:bg-background dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset] dark:[border:1px_solid_rgba(255,255,255,.1)]",
+      className,
     )}
     {...props}
   >
@@ -51,7 +49,7 @@ const BentoCard = ({ name, className, background, Icon, description, href, cta, 
 
       <div
         className={cn(
-          "pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:hidden"
+          "pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:hidden",
         )}
       >
         <Button
@@ -69,7 +67,7 @@ const BentoCard = ({ name, className, background, Icon, description, href, cta, 
 
     <div
       className={cn(
-        "pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:flex"
+        "pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:flex",
       )}
     >
       <Button

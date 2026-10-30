@@ -1,7 +1,9 @@
 import postgres from "postgres"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
 import { createApp } from "../app"
-import { MemorySmsVerifier, PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
+import type { MemorySmsVerifier } from "../auth"
+import { PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
 import { readEnvironment } from "../environment"
 
 const TEST_ENV = {
@@ -123,8 +125,8 @@ describe("Agent 令牌 HTTP 接口", () => {
           method: "POST",
           headers: { cookie, "content-type": "application/json" },
           body: JSON.stringify(body),
-        })
-      )
+        }),
+      ),
     )
     for (const response of responses) expect(response.status).toBe(400)
   })
@@ -198,7 +200,7 @@ describe("Agent 令牌 HTTP 接口", () => {
     const after = (await (await fetch(`${origin}/api/agent-tokens`, { headers: { cookie } })).json()) as TokenSummary[]
     expect(after[0]?.revokedAt).not.toBeNull()
     expect((await fetch(`${origin}/api/agent-tokens/${id}`, { method: "DELETE", headers: { cookie } })).status).toBe(
-      404
+      404,
     )
   })
 
@@ -209,14 +211,14 @@ describe("Agent 令牌 HTTP 接口", () => {
 
     expect(
       (await fetch(`${origin}/api/agent-tokens/${id}`, { method: "DELETE", headers: { cookie: strangerCookie } }))
-        .status
+        .status,
     ).toBe(404)
     expect(
       (await fetch(`${origin}/api/agent-tokens/not-a-uuid`, { method: "DELETE", headers: { cookie: ownerCookie } }))
-        .status
+        .status,
     ).toBe(400)
     expect(
-      (await fetch(`${origin}/api/agent-tokens`, { headers: { authorization: "Bearer not-a-real-token" } })).status
+      (await fetch(`${origin}/api/agent-tokens`, { headers: { authorization: "Bearer not-a-real-token" } })).status,
     ).toBe(401)
   })
 })

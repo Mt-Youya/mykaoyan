@@ -1,5 +1,7 @@
 import { z } from "zod"
+
 import { LEGAL_VERSION } from "@mykaoyan/core"
+
 import type { Environment } from "../../environment"
 
 export const TERMS_VERSION = LEGAL_VERSION

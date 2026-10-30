@@ -1,8 +1,10 @@
+import type { FormEvent } from "react"
+import { useState } from "react"
+
 import { getRetestState, isRetestDue, publicTopics, recordRetest, toLocalDate } from "@mykaoyan/core"
 import type { LocalDate, Mistake, MistakeCause, RetestResult } from "@mykaoyan/core"
 import { Button, Input, Label } from "@mykaoyan/ui"
-import type { FormEvent } from "react"
-import { useState } from "react"
+
 import { useProgress } from "../progress"
 
 const causes: { value: MistakeCause; label: string }[] = [
@@ -133,7 +135,7 @@ export function MistakesPage() {
       data: {
         ...document.data,
         mistakes: document.data.mistakes.map((mistake) =>
-          mistake.id === id ? recordRetest(mistake, result, today) : mistake
+          mistake.id === id ? recordRetest(mistake, result, today) : mistake,
         ),
       },
     }

@@ -1,7 +1,9 @@
 import postgres from "postgres"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
 import { createApp } from "../app"
-import { MemorySmsVerifier, PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
+import type { MemorySmsVerifier } from "../auth"
+import { PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
 import { readEnvironment } from "../environment"
 
 const TEST_ENV = {
@@ -132,7 +134,7 @@ describe("个人进度文档 HTTP 接口", () => {
 
     const otherCookie = await login("13400134000")
     expect(
-      await (await fetch(`${origin}/api/v1/progress/revisions`, { headers: { cookie: otherCookie } })).json()
+      await (await fetch(`${origin}/api/v1/progress/revisions`, { headers: { cookie: otherCookie } })).json(),
     ).toEqual([])
   })
 
@@ -173,7 +175,7 @@ describe("个人进度文档 HTTP 接口", () => {
     ).json()) as ProgressDocument
     expect(readBack.data.mistakes).toEqual([mistake])
     expect(Object.keys(readBack.data.mistakes[0] as Record<string, unknown>).toSorted()).toEqual(
-      Object.keys(mistake).toSorted()
+      Object.keys(mistake).toSorted(),
     )
   })
 
@@ -192,8 +194,8 @@ describe("个人进度文档 HTTP 接口", () => {
           method: "PUT",
           headers: { ...headers, "if-match": etag },
           body: JSON.stringify(document),
-        })
-      )
+        }),
+      ),
     )
     expect(results.map((response) => response.status).toSorted()).toEqual([200, 412])
   })

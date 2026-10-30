@@ -1,4 +1,5 @@
 import { z } from "zod"
+
 import { addDays, localDateSchema } from "../dates/index"
 import type { LocalDate } from "../dates/index"
 
@@ -80,7 +81,7 @@ export type VocabQueueItem = { entry: VocabEntry; card: VocabCard | null }
 export function getVocabQueue(
   data: VocabData,
   today: LocalDate,
-  newCardLimit = DAILY_NEW_CARD_LIMIT
+  newCardLimit = DAILY_NEW_CARD_LIMIT,
 ): VocabQueueItem[] {
   const limit = z.number().int().min(0).parse(newCardLimit)
   const entries = new Map(data.entries.map((entry) => [entry.id, entry]))
@@ -111,7 +112,7 @@ export function reviewVocabCard(
   entryId: string,
   grade: VocabGrade,
   today: LocalDate,
-  newCardLimit = DAILY_NEW_CARD_LIMIT
+  newCardLimit = DAILY_NEW_CARD_LIMIT,
 ): VocabData {
   const current = getVocabQueue(data, today, newCardLimit)[0]
   if (!current || current.entry.id !== entryId) throw new Error("复习队列已更新，请查看当前卡片后重新评分")

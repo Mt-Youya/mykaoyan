@@ -1,5 +1,6 @@
 import { BadRequestException, Body, Controller, Get, Inject, Param, Put, UseGuards } from "@nestjs/common"
 import { z } from "zod"
+
 import { CurrentSession, SessionGuard } from "../auth"
 import type { AuthSession } from "../auth"
 import { ListingService } from "./listing.service"
@@ -34,7 +35,7 @@ export class ListingController {
     if (!parsed.success) throw new BadRequestException("listed 必须是布尔值")
     return this.listing.setListed(
       { id: session.user.id, role: session.user.role },
-      { targetType, slug, listed: parsed.data.listed }
+      { targetType, slug, listed: parsed.data.listed },
     )
   }
 }

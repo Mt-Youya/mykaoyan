@@ -1,5 +1,7 @@
 import { createHash, randomBytes } from "node:crypto"
+
 import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common"
+
 import { DatabaseService } from "../database"
 
 export type AgentTokenSummary = {

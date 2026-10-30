@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto"
+
 import {
   BadRequestException,
   ConflictException,
@@ -7,8 +8,10 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common"
+
 import { publishLessonSchema } from "@mykaoyan/core"
 import type { PublishLesson } from "@mykaoyan/core"
+
 import { DatabaseService } from "../database"
 import { PUBLISH_STORAGE } from "./storage"
 import type { PublishStorage } from "./storage"
@@ -34,7 +37,7 @@ type Lesson = {
 export class PublishingService {
   constructor(
     @Inject(DatabaseService) private database: DatabaseService,
-    @Inject(PUBLISH_STORAGE) private storage: PublishStorage
+    @Inject(PUBLISH_STORAGE) private storage: PublishStorage,
   ) {}
   private async authorize(actor: Actor) {
     const [account] = await this.database.client<{ role: string }[]>`select role from accounts where id=${actor.id}`
@@ -119,7 +122,7 @@ export class PublishingService {
         if (!saved) throw new Error("讲写入失败")
         // 只删除本发布流程生成的旧对象；遗留对象来源不明时保留，避免误删共享文件。
         const old = [current?.video_key, current?.subtitle_key].filter(
-          (key): key is string => !!key && key.startsWith(`lessons/${input.slug}/`)
+          (key): key is string => !!key && key.startsWith(`lessons/${input.slug}/`),
         )
         await sql`update lesson_publications set completed_at=now(),old_keys=${JSON.stringify(old)}::jsonb where id=${id}`
       })
@@ -136,7 +139,7 @@ export class PublishingService {
         const failed = deleted.some((result) => result.status === "rejected")
         if (!failed) await this.database.client`update lesson_publications set old_keys='[]'::jsonb where id=${job.id}`
         return failed
-      })
+      }),
     )
     return pending.some(Boolean)
   }

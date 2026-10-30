@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+
 import type { LoadState } from "./use-catalog"
 
 /** 面包屑：只表达当前位置，链接用普通锚点即可。 */

@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto"
+
 import {
   BadRequestException,
   ConflictException,
@@ -7,10 +8,12 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common"
+import { z } from "zod"
+
 import { membershipStatus, nextMembershipPeriod } from "@mykaoyan/core"
 import type { MembershipPeriod } from "@mykaoyan/core"
+
 import { DatabaseService } from "../database"
-import { z } from "zod"
 const grantSchema = z.strictObject({ accountId: z.uuid(), reason: z.string().trim().min(1).max(500) })
 const hash = (code: string) => createHash("sha256").update(code).digest("hex")
 type PeriodRow = { startsAt: Date | string; endsAt: Date | string }

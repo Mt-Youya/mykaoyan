@@ -1,8 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server"
-import { afterEach, describe, it, expect, vi } from "vitest"
-import { RatingStats } from "./stats"
+import { afterEach, describe, expect, it, vi } from "vitest"
+
 import { ratingRequest } from "./api"
 import { RatingControl } from "./control"
+import { RatingStats } from "./stats"
 afterEach(() => vi.unstubAllGlobals())
 describe("评分显示与请求", () => {
   it("显示人数和两位加权分，推荐只按服务端标志展示", () => {
@@ -11,7 +12,7 @@ describe("评分显示与请求", () => {
     expect(html).toContain("4.00")
     expect(html).toContain("推荐")
     const rounded = renderToStaticMarkup(
-      <RatingStats value={{ ratingCount: 5, weightedScore: 3.99999, recommended: false }} />
+      <RatingStats value={{ ratingCount: 5, weightedScore: 3.99999, recommended: false }} />,
     )
     expect(rounded).toContain("4.00")
     expect(rounded).not.toContain("推荐")
@@ -32,7 +33,7 @@ describe("评分显示与请求", () => {
     })
     expect(fetch).toHaveBeenCalledWith(
       "/api/submissions/fictional/rating",
-      expect.objectContaining({ method: "PUT", credentials: "same-origin", body: '{"stars":4}' })
+      expect.objectContaining({ method: "PUT", credentials: "same-origin", body: '{"stars":4}' }),
     )
   })
 })

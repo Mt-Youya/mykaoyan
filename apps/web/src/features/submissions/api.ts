@@ -1,6 +1,5 @@
 import { SUBMISSION_PART_SIZE, uploadPartSize } from "@mykaoyan/core"
-import type { SubmissionInput } from "@mykaoyan/core"
-import type { RatingSummary } from "@mykaoyan/core"
+import type { RatingSummary, SubmissionInput } from "@mykaoyan/core"
 export type Submission = {
   id: string
   title: string
@@ -27,7 +26,7 @@ export type SubmissionList<T = Submission> = { enabled: boolean; items: T[]; has
 export class SubmissionRequestError extends Error {
   constructor(
     public status: number,
-    message: string
+    message: string,
   ) {
     super(message)
   }
@@ -36,7 +35,7 @@ export async function submissionRequest<T>(
   path: string,
   method = "GET",
   body?: unknown,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<T> {
   let response: Response
   try {
@@ -55,7 +54,7 @@ export async function submissionRequest<T>(
     const problem = (await response.json().catch(() => null)) as { title?: string } | null
     throw new SubmissionRequestError(
       response.status,
-      typeof problem?.title === "string" ? problem.title : "投稿操作失败，请稍后重试"
+      typeof problem?.title === "string" ? problem.title : "投稿操作失败，请稍后重试",
     )
   }
   return response.json() as Promise<T>
@@ -89,7 +88,7 @@ export async function uploadSubmission(
   file: File,
   input: SubmissionInput,
   signal: AbortSignal,
-  onProgress: (percent: number) => void
+  onProgress: (percent: number) => void,
 ) {
   const started = await submissionRequest<OwnSubmission>("submissions/uploads", "POST", input, signal)
   if (started.status !== "uploading") return started
@@ -97,7 +96,7 @@ export async function uploadSubmission(
     `submissions/${input.id}/upload`,
     "GET",
     undefined,
-    signal
+    signal,
   )
   if (!saved.completed) {
     let uploaded = 0
@@ -108,13 +107,13 @@ export async function uploadSubmission(
           `submissions/${input.id}/parts/${part}`,
           "POST",
           {},
-          signal
+          signal,
         )
         await putPart(
           signed.url,
           file.slice((part - 1) * SUBMISSION_PART_SIZE, (part - 1) * SUBMISSION_PART_SIZE + size),
           signal,
-          (loaded) => onProgress(Math.min(99, Math.round(((uploaded + loaded) / file.size) * 100)))
+          (loaded) => onProgress(Math.min(99, Math.round(((uploaded + loaded) / file.size) * 100))),
         )
       }
       uploaded += size

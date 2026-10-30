@@ -1,5 +1,6 @@
 import { BadRequestException, Controller, Get, Inject, NotFoundException, Param, Query } from "@nestjs/common"
 import { z } from "zod"
+
 import { CATALOG_READER } from "./service"
 import type { CatalogReader } from "./service"
 

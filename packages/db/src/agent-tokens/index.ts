@@ -1,4 +1,5 @@
 import { index, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core"
+
 import { accounts } from "../accounts"
 
 /**
@@ -30,5 +31,5 @@ export const agentTokens = pgTable(
   (table) => [
     uniqueIndex("agent_tokens_token_hash_unique").on(table.tokenHash),
     index("agent_tokens_account_created_idx").on(table.accountId, table.createdAt),
-  ]
+  ],
 ).enableRLS()

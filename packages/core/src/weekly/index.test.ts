@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest"
+
 import { parseLocalDate } from "../dates/index"
+import { fullProgressFileFixture } from "../progress/fixtures/index"
 import { progressFileSchema } from "../progress/index"
 import type { WeeklyReview } from "../progress/index"
-import { fullProgressFileFixture } from "../progress/fixtures/index"
 import { publicTopics } from "../topics/index"
 import { getWeeklyReview, getWeeklySummary, startOfWeek, upsertWeeklyReview } from "./index"
 
@@ -69,7 +70,7 @@ describe("周复盘汇总", () => {
         topics: publicTopics,
         progress: file.data.progress,
         weekStart: parseLocalDate("2030-03-05"),
-      })
+      }),
     ).toThrow("周一开始")
   })
 })

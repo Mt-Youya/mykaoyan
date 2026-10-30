@@ -1,8 +1,9 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { unstable_readConfig } from "wrangler"
 import { z } from "zod"
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import worker from "./index"
+
 import { key, secret, token } from "./fixtures/token"
+import worker from "./index"
 
 const config = unstable_readConfig({ config: "wrangler.jsonc" })
 const origins = z.array(z.string()).min(1).parse(config.vars.ALLOWED_ORIGINS)
@@ -40,7 +41,7 @@ function fixture() {
   const bucket = {
     head: vi.fn<R2Bucket["head"]>(async () => object("0123456789")),
     get: vi.fn<R2Bucket["get"]>(async (_key, options) => {
-      const range = Object.assign({ offset: 0, length: 10 }, options?.range)
+      const range = { offset: 0, length: 10, ...options?.range }
       const result = object("0123456789".substring(range.offset, range.offset + range.length))
       // R2 的 range 键常驻；完整响应的各键实际为 undefined。
       Object.defineProperty(result, "range", {
@@ -55,7 +56,7 @@ function fixture() {
 }
 
 function request(signed = token(), headers: Record<string, string> = {}, method = "GET") {
-  const url = new URL("https://media.invalid/" + key)
+  const url = new URL(`https://media.invalid/${key}`)
   url.searchParams.set("token", signed)
   return new Request(url, { method, headers })
 }
@@ -76,7 +77,7 @@ describe("媒体请求边界", () => {
         const invalid = { ...environment }
         Reflect.set(invalid, "MEDIA_SIGNING_KEY", value)
         expect((await worker.fetch(request(), invalid)).status).toBe(503)
-      })
+      }),
     )
     expect((await worker.fetch(request(), { ...environment, ALLOWED_ORIGINS: ["invalid"] })).status).toBe(503)
     expect(bucket.head).not.toHaveBeenCalled()
@@ -98,13 +99,13 @@ describe("媒体请求边界", () => {
       expect((await worker.fetch(request(token(overrides)), environment)).status).toBe(401)
       expect(bucket.head).not.toHaveBeenCalled()
       expect(bucket.get).not.toHaveBeenCalled()
-    }
+    },
   )
 
   it("签名被修改后不能读 R2", async () => {
     const { bucket, environment } = fixture()
     const [payload, signature] = token().split(".") as [string, string]
-    const tampered = payload + "." + (signature[0] === "A" ? "B" : "A") + signature.substring(1)
+    const tampered = `${payload}.${signature[0] === "A" ? "B" : "A"}${signature.substring(1)}`
     expect((await worker.fetch(request(tampered), environment)).status).toBe(401)
     expect(bucket.head).not.toHaveBeenCalled()
   })
@@ -173,7 +174,7 @@ describe("媒体请求边界", () => {
   it("If-Range 不匹配时返回完整内容，HEAD 不读取正文", async () => {
     const { bucket, environment } = fixture()
     expect(
-      (await worker.fetch(request(token(), { Range: "bytes=0-3", "If-Range": '"other"' }), environment)).status
+      (await worker.fetch(request(token(), { Range: "bytes=0-3", "If-Range": '"other"' }), environment)).status,
     ).toBe(200)
     bucket.get.mockClear()
     const response = await worker.fetch(request(token(), {}, "HEAD"), environment)
@@ -199,10 +200,10 @@ describe("媒体请求边界", () => {
       origins.map(async (origin) => {
         const response = await worker.fetch(request(token(), { Origin: origin }), environment)
         expect(response.headers.get("access-control-allow-origin")).toBe(origin)
-      })
+      }),
     )
     bucket.head.mockClear()
-    const response = await worker.fetch(request(token(), { Origin: origins[0] + ".attacker.invalid" }), environment)
+    const response = await worker.fetch(request(token(), { Origin: `${origins[0]}.attacker.invalid` }), environment)
     expect(response.status).toBe(403)
     expect(bucket.head).not.toHaveBeenCalled()
   })

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm"
 import { check, foreignKey, index, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core"
+
 import { accounts } from "../accounts"
 import { lessons } from "../catalog"
 export const comments = pgTable(
@@ -25,7 +26,7 @@ export const comments = pgTable(
     check("comments_not_self_parent", sql`${t.parentId} is null or ${t.parentId} <> ${t.id}`),
     check("comments_body_length", sql`length(btrim(${t.body})) between 1 and 2000`),
     index("comments_lesson_created_idx").on(t.lessonId, t.createdAt, t.id),
-  ]
+  ],
 ).enableRLS()
 export const commentDeletions = pgTable(
   "comment_deletions",
@@ -39,6 +40,6 @@ export const commentDeletions = pgTable(
     reason: text().notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [check("comment_deletions_reason", sql`length(btrim(${t.reason})) between 1 and 500`)]
+  (t) => [check("comment_deletions_reason", sql`length(btrim(${t.reason})) between 1 and 500`)],
 ).enableRLS()
 export const commentKeywords = pgTable("comment_keywords", { word: text().primaryKey() }).enableRLS()

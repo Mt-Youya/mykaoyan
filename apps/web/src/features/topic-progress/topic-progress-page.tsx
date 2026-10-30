@@ -1,6 +1,7 @@
 import { getTopicProgressList, publicTopics, upsertTopicProgress } from "@mykaoyan/core"
 import type { ProgressFile, TopicManualState } from "@mykaoyan/core"
 import { Button } from "@mykaoyan/ui"
+
 import { useProgress } from "../progress"
 
 const buttonSize = "min-h-10 px-4 text-sm"
@@ -108,7 +109,7 @@ export function TopicProgressView({ status, document, message, onSetManual }: To
                     key={topic.id}
                     className="grid gap-3 py-4 reading:grid-cols-[9rem_minmax(0,1fr)_auto] reading:items-center"
                   >
-                    <span className="tabular-nums text-muted-foreground">
+                    <span className="text-muted-foreground tabular-nums">
                       {topic.id}
                       {topic.part ? ` · ${topic.part}` : ""}
                     </span>

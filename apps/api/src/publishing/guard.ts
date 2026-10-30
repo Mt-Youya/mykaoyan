@@ -1,5 +1,6 @@
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common"
 import type { CanActivate, ExecutionContext } from "@nestjs/common"
+
 import { AgentTokensService } from "../agent-tokens"
 import type { AuthenticatedRequest } from "../auth"
 @Injectable()

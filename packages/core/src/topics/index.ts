@@ -1,6 +1,6 @@
 import { upsertUniqueBy } from "../collections"
-import { getStableOn, isMistakeStable } from "../mistakes/index"
 import type { LocalDate } from "../dates/index"
+import { getStableOn, isMistakeStable } from "../mistakes/index"
 import type { Mistake, TopicManualState, TopicProgress } from "../progress/index"
 import type { Topic } from "./data"
 
@@ -45,7 +45,7 @@ export function getTopicStableOn(topicId: string, mistakes: readonly Mistake[]):
 export function getTopicProgressList(
   topics: readonly Topic[],
   progress: readonly TopicProgress[],
-  mistakes: readonly Mistake[]
+  mistakes: readonly Mistake[],
 ): TopicProgressItem[] {
   return topics.map((topic) => {
     const manual = progress.find((item) => item.topicId === topic.id)?.manual ?? "untested"

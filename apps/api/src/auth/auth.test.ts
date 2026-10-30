@@ -3,28 +3,29 @@ import { Controller, Get, Module, UseGuards } from "@nestjs/common"
 import { NestFactory } from "@nestjs/core"
 import postgres from "postgres"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
+import { CONFIG } from "../config"
+import { DatabaseService } from "../database"
+import { readEnvironment } from "../environment"
+import type { Environment } from "../environment"
 import {
   AUTH,
   AUTH_ENV,
   AUTH_STORES,
   AuthController,
   CLOCK,
-  MemorySmsVerifier,
-  PhoneAuthService,
-  PhoneController,
-  SMS_VERIFIER,
-  SessionGuard,
   createAuth,
   createDrizzleAuthDatabase,
   createDrizzleStores,
-  readAuthEnvironment,
+  MemorySmsVerifier,
+  PhoneAuthService,
+  PhoneController,
   PRIVACY_POLICY_VERSION,
+  readAuthEnvironment,
+  SessionGuard,
+  SMS_VERIFIER,
 } from "./index"
 import type { AuthEnvironment } from "./index"
-import { CONFIG } from "../config"
-import { DatabaseService } from "../database"
-import { readEnvironment } from "../environment"
-import type { Environment } from "../environment"
 
 /**
  * 真实 Postgres 路径：Drizzle store + Drizzle adapter + 迁移后的真实表。
@@ -125,7 +126,7 @@ describe.runIf(enabled)("手机号登录（真实 Postgres）", () => {
           SessionGuard,
         ],
       },
-      { logger: false }
+      { logger: false },
     )
     app.setGlobalPrefix("api")
     await app.listen(0, "127.0.0.1")

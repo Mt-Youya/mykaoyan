@@ -1,6 +1,8 @@
+import { useEffect, useRef, useState } from "react"
+
 import { vocabDataSchema } from "@mykaoyan/core"
 import type { VocabData } from "@mykaoyan/core"
-import { useEffect, useRef, useState } from "react"
+
 import { emptyVocabData } from "./model"
 
 export const VOCAB_STORAGE_KEY = "mykaoyan.vocabulary-v1"

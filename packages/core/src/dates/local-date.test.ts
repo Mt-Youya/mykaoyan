@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+
 import { addDays, parseLocalDate, toLocalDate, weekdayOf } from "../index"
 
 describe("LocalDate", () => {
@@ -13,7 +14,7 @@ describe("LocalDate", () => {
   })
 
   it.each(["2025-02-29", "2026-04-31", "2026-1-01", "2026-10-26T00:00:00Z", ""])("拒绝非法日期 %s", (value) =>
-    expect(() => parseLocalDate(value)).toThrow()
+    expect(() => parseLocalDate(value)).toThrow(),
   )
 
   it.each([

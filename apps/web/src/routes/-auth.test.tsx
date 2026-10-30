@@ -1,6 +1,6 @@
-import { loginSuccessPath } from "./-auth"
 import { describe, expect, it } from "vitest"
-import { apiOrigin, collectSetCookies, problemMessage } from "./-auth"
+
+import { apiOrigin, collectSetCookies, loginSuccessPath, problemMessage } from "./-auth"
 
 describe("SSR 会话 cookie 转发", () => {
   it("多条 Set-Cookie 一条不少，顺序不变", () => {

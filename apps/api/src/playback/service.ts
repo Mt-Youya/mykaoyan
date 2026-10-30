@@ -1,5 +1,7 @@
 import { createHmac } from "node:crypto"
+
 import { Inject, Injectable } from "@nestjs/common"
+
 import { CatalogService } from "../catalog"
 import { CONFIG } from "../config"
 import type { Environment } from "../environment"
@@ -33,7 +35,7 @@ export type PlaybackToken = {
 export class PlaybackService {
   constructor(
     @Inject(CONFIG) private readonly config: Environment,
-    @Inject(CatalogService) private readonly catalog: CatalogService
+    @Inject(CatalogService) private readonly catalog: CatalogService,
   ) {}
 
   async signForLesson(slug: string, subject: string, ttlSeconds: number): Promise<PlaybackToken | undefined> {

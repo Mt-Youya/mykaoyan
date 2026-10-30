@@ -1,5 +1,7 @@
-import type { ProgressFile } from "@mykaoyan/core"
 import { useCallback, useEffect, useState } from "react"
+
+import type { ProgressFile } from "@mykaoyan/core"
+
 import { fetchProgress, saveProgress } from "./api"
 
 export type ProgressState = {
@@ -46,7 +48,7 @@ export function useProgress() {
       })
       return true
     },
-    [etag]
+    [etag],
   )
 
   return { ...state, etag, reload, save }

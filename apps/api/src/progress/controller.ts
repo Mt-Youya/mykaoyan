@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Headers, HttpException, HttpStatus, Inject, Put, Res, UseGuards } from "@nestjs/common"
+
 import { AgentTokenGuard } from "../agent-tokens"
 import { CurrentSession } from "../auth"
 import type { AuthSession } from "../auth"
@@ -25,7 +26,7 @@ export class ProgressController {
     @CurrentSession() session: AuthSession,
     @Headers("if-match") ifMatch: string | undefined,
     @Body() body: unknown,
-    @Res({ passthrough: true }) response: HeaderResponse
+    @Res({ passthrough: true }) response: HeaderResponse,
   ) {
     if (!ifMatch) throw new HttpException("缺少 If-Match", HttpStatus.PRECONDITION_REQUIRED)
     const result = await this.progress.replace(session.user.id, ifMatch, body)

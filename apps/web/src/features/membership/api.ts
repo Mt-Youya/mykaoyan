@@ -18,7 +18,11 @@ export async function membershipRequest<T>(path: string, body?: unknown): Promis
   if (!response.ok) {
     const problem = (await response.json().catch(() => null)) as { title?: string } | null
     throw new Error(
-      response.status === 401 ? "请先登录" : typeof problem?.title === "string" ? problem.title : "操作失败，请稍后重试"
+      response.status === 401
+        ? "请先登录"
+        : typeof problem?.title === "string"
+          ? problem.title
+          : "操作失败，请稍后重试",
     )
   }
   return (await response.json()) as T

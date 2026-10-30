@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process"
+
 import { expect, it } from "vitest"
 
 it.each(["NODE_ENV", "HOST", "PORT"])("前端启动拒绝缺失或空串 %s，且不打印配置值", (key) => {

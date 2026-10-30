@@ -1,3 +1,6 @@
+import type { FormEvent } from "react"
+import { useEffect, useState } from "react"
+
 import {
   dayPlanSchema,
   getDayPlan,
@@ -11,8 +14,7 @@ import {
 } from "@mykaoyan/core"
 import type { DayPlan, ProgressFile, StudyProfile } from "@mykaoyan/core"
 import { Button, Input, Label } from "@mykaoyan/ui"
-import type { FormEvent } from "react"
-import { useEffect, useState } from "react"
+
 import { useProgress } from "../progress"
 
 const buttonSize = "min-h-11 px-5 text-base"
@@ -161,7 +163,7 @@ export function PlanView({ status, document, message, onSaveProfile, onSaveDayPl
 
   function updatePhaseMinutes(index: number, slot: "weekday" | "weekend", code: string, value: string) {
     setPhases((rows) =>
-      rows.map((row, position) => (position === index ? { ...row, [slot]: { ...row[slot], [code]: value } } : row))
+      rows.map((row, position) => (position === index ? { ...row, [slot]: { ...row[slot], [code]: value } } : row)),
     )
   }
 
@@ -353,7 +355,7 @@ export function PlanView({ status, document, message, onSaveProfile, onSaveDayPl
                               index,
                               slot === "weekday"
                                 ? { flexWeekday: event.target.value }
-                                : { flexWeekend: event.target.value }
+                                : { flexWeekend: event.target.value },
                             )
                           }
                         />

@@ -1,10 +1,12 @@
-import type { ProgressChangeSummary, ProgressFile } from "@mykaoyan/core"
 import { useCallback, useEffect, useRef, useState } from "react"
+
+import type { ProgressChangeSummary, ProgressFile } from "@mykaoyan/core"
+
 import { fetchRevisions } from "./api"
 import type { ProgressRevision } from "./api"
-import { useProgress } from "./use-progress"
 import { changeRows, countProgressRecords, parseProgressUpload, summarizeUpload } from "./upload"
 import type { ProgressCounts } from "./upload"
+import { useProgress } from "./use-progress"
 
 type PendingUpload = { fileName: string; document: ProgressFile; summary: ProgressChangeSummary }
 
@@ -86,7 +88,7 @@ function ReadyView(props: ProgressViewProps & { document: ProgressFile; etag: st
           <p className="mt-2 text-muted-foreground">
             第 {props.document.revision} 版 · {formatTime(props.document.updatedAt)}
           </p>
-          <p className="mt-1 break-all text-sm text-muted-foreground">ETag：{props.etag}</p>
+          <p className="mt-1 text-sm break-all text-muted-foreground">ETag：{props.etag}</p>
         </div>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
           {(Object.keys(countLabels) as (keyof ProgressCounts)[]).map((key) => (

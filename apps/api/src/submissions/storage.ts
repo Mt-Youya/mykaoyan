@@ -1,4 +1,3 @@
-import { Inject, Injectable, ServiceUnavailableException } from "@nestjs/common"
 import {
   CompleteMultipartUploadCommand,
   CreateMultipartUploadCommand,
@@ -9,6 +8,8 @@ import {
   UploadPartCommand,
 } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import { Inject, Injectable, ServiceUnavailableException } from "@nestjs/common"
+
 import { CONFIG } from "../config"
 import type { Environment } from "../environment"
 export const SUBMISSION_STORAGE = Symbol("submission-storage")
@@ -44,7 +45,7 @@ export class R2SubmissionStorage implements SubmissionStorage {
   }
   async start(key: string) {
     const result = await this.s3().send(
-      new CreateMultipartUploadCommand({ Bucket: this.config.R2_BUCKET, Key: key, ContentType: "video/mp4" })
+      new CreateMultipartUploadCommand({ Bucket: this.config.R2_BUCKET, Key: key, ContentType: "video/mp4" }),
     )
     if (!result.UploadId) throw new Error("分片上传未返回编号")
     return result.UploadId
@@ -59,12 +60,12 @@ export class R2SubmissionStorage implements SubmissionStorage {
         PartNumber: number,
         ContentLength: size,
       }),
-      { expiresIn: 900, signableHeaders: new Set(["content-length"]) }
+      { expiresIn: 900, signableHeaders: new Set(["content-length"]) },
     )
   }
   async parts(key: string, uploadId: string) {
     const result = await this.s3().send(
-      new ListPartsCommand({ Bucket: this.config.R2_BUCKET, Key: key, UploadId: uploadId, MaxParts: 100 })
+      new ListPartsCommand({ Bucket: this.config.R2_BUCKET, Key: key, UploadId: uploadId, MaxParts: 100 }),
     )
     if (result.IsTruncated) throw new Error("分片数量超出投稿限制")
     return (result.Parts ?? []).map((p) => {
@@ -79,7 +80,7 @@ export class R2SubmissionStorage implements SubmissionStorage {
         Key: key,
         UploadId: uploadId,
         MultipartUpload: { Parts: parts.map((p) => ({ PartNumber: p.number, ETag: p.etag })) },
-      })
+      }),
     )
   }
   async head(key: string) {

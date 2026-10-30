@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+
 import { WeeklyPage } from "../features/weekly"
 
 export const Route = createFileRoute("/weekly")({

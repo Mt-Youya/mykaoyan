@@ -1,4 +1,5 @@
 import { createHmac, randomUUID } from "node:crypto"
+
 import type { AliyunAuthEnvironment } from "../environment"
 import { OTP_CODE_LENGTH, OTP_SEND_COOLDOWN_SECONDS, OTP_TTL_SECONDS, toAliyunPhone } from "../policy"
 import { SmsProviderError } from "./sms"
@@ -20,7 +21,7 @@ const API_VERSION = "2017-05-25"
 export function percentEncode(value: string): string {
   return encodeURIComponent(value).replace(
     /[!'()*]/g,
-    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
   )
 }
 
@@ -35,7 +36,7 @@ export function canonicalQuery(parameters: Record<string, string>): string {
 export function signRpcRequest(
   parameters: Record<string, string>,
   method: "GET" | "POST",
-  accessKeySecret: string
+  accessKeySecret: string,
 ): string {
   const stringToSign = `${method}&${percentEncode("/")}&${percentEncode(canonicalQuery(parameters))}`
   return createHmac("sha1", `${accessKeySecret}&`).update(stringToSign).digest("base64")
@@ -50,7 +51,7 @@ type AliyunResponse = {
 
 export type FetchLike = (
   input: string,
-  init?: { method?: string; headers?: Record<string, string> }
+  init?: { method?: string; headers?: Record<string, string> },
 ) => Promise<{
   ok: boolean
   status: number
@@ -62,7 +63,7 @@ export class AliyunSmsVerifier implements SmsVerifier {
     private readonly config: AliyunAuthEnvironment,
     private readonly fetchImpl: FetchLike = fetch,
     private readonly now: () => Date = () => new Date(),
-    private readonly nonce: () => string = randomUUID
+    private readonly nonce: () => string = randomUUID,
   ) {}
 
   async sendCode(e164Phone: string): Promise<{ requestId: string }> {

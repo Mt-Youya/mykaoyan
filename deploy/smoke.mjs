@@ -13,7 +13,7 @@ try {
         if (data.status !== "ok" || data.database !== "connected") throw new Error("健康检查未确认数据库连通")
       }
       console.log(`${path} 检查通过`)
-    })
+    }),
   )
 } catch {
   console.error("冒烟检查失败，请检查站点、接口与数据库连接。")

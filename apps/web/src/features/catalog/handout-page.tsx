@@ -1,7 +1,7 @@
 import type { HandoutDetail } from "./api"
 import { Markdown } from "./markdown"
-import { useCatalog } from "./use-catalog"
 import { Breadcrumb, LoadGuard } from "./ui"
+import { useCatalog } from "./use-catalog"
 
 const eyebrow = "text-[0.8125rem] tracking-[0.08em] text-muted-foreground"
 

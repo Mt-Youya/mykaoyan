@@ -1,5 +1,7 @@
-import { PROGRESS_FILE_APP, PROGRESS_FILE_VERSION, progressFileSchema } from "@mykaoyan/core"
 import { afterEach, expect, it, vi } from "vitest"
+
+import { PROGRESS_FILE_APP, PROGRESS_FILE_VERSION, progressFileSchema } from "@mykaoyan/core"
+
 import { fetchProgress, fetchRevisions, saveProgress } from "./api"
 
 const document = progressFileSchema.parse({
@@ -74,7 +76,7 @@ it("历史版本列表：未登录、成功与格式错误分开处理", async (
   stub(
     new Response(JSON.stringify([{ revision: 2, updatedAt: "2026-10-29T00:00:00.000Z", etag: '"revision-2"' }]), {
       status: 200,
-    })
+    }),
   )
   expect(await fetchRevisions()).toEqual({
     status: "ok",

@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
+
 import { blockedComment, normalizeKeywords } from "./index"
 describe("评论关键词", () => {
   it("规范化去重，按字面匹配，不把关键词当正则", () => {

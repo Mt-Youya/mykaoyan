@@ -1,4 +1,5 @@
 import { z } from "zod"
+
 import { subjectCodeSchema } from "../progress/index"
 
 /** 考点元数据：只有编号、科目、名称与分组，不含真题原文、答案或课程内容。 */

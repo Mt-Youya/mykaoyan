@@ -1,4 +1,5 @@
 import { z } from "zod"
+
 import { publicTopics } from "../topics"
 export const SUBMISSION_MAX_SIZE = 500_000_000
 export const SUBMISSION_PART_SIZE = 8 * 1024 * 1024

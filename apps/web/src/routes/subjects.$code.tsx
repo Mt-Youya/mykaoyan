@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+
 import { SubjectPage } from "../features/catalog"
 
 export const Route = createFileRoute("/subjects/$code")({

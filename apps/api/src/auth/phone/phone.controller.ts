@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Header, Inject, Post, Req, Res } from "@nestjs/common"
+
 import { toFetchHeaders, writeJson, writeProblem } from "../http"
 import type { NodeRequestLike, NodeResponseLike } from "../http"
 import { PhoneAuthService } from "./phone.service"
@@ -30,7 +31,7 @@ export class PhoneController {
         result.problem.status,
         result.problem.title,
         result.problem.code,
-        result.problem.retryAfterSeconds
+        result.problem.retryAfterSeconds,
       )
       return
     }
@@ -41,7 +42,7 @@ export class PhoneController {
   async verify(
     @Body() body: unknown,
     @Req() request: NodeRequestLike,
-    @Res() response: NodeResponseLike
+    @Res() response: NodeResponseLike,
   ): Promise<void> {
     const result = await this.phone.verify(body, toFetchHeaders(request.headers))
     if (!result.ok) {

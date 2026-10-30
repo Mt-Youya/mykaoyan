@@ -1,7 +1,9 @@
 import { randomUUID } from "node:crypto"
+
 import { BadRequestException, Body, Controller, Inject, NotFoundException, Param, Post, Req, Res } from "@nestjs/common"
 import { fromNodeHeaders } from "better-auth/node"
 import { z } from "zod"
+
 import { AUTH } from "../auth"
 import type { Auth } from "../auth"
 import { DEFAULT_TOKEN_TTL_SECONDS, MAX_TOKEN_TTL_SECONDS, PlaybackService } from "./service"
@@ -23,7 +25,7 @@ function readVisitor(cookie: string | string[] | undefined): string | undefined 
 export class PlaybackController {
   constructor(
     @Inject(PlaybackService) private readonly playback: PlaybackService,
-    @Inject(AUTH) private readonly auth: Auth
+    @Inject(AUTH) private readonly auth: Auth,
   ) {}
 
   @Post(":slug/playback-token")
@@ -31,7 +33,7 @@ export class PlaybackController {
     @Param("slug") slug: string,
     @Body() body: unknown,
     @Req() request: { headers: Record<string, string | string[] | undefined> },
-    @Res({ passthrough: true }) response: { setHeader(name: string, value: string): void }
+    @Res({ passthrough: true }) response: { setHeader(name: string, value: string): void },
   ) {
     const parsed = bodySchema.safeParse(body ?? {})
     if (!parsed.success) {
@@ -45,7 +47,7 @@ export class PlaybackController {
       subject = randomUUID()
       response.setHeader(
         "Set-Cookie",
-        `${VISITOR_COOKIE}=${subject}; Path=/; Max-Age=${VISITOR_MAX_AGE_SECONDS}; HttpOnly; SameSite=Lax`
+        `${VISITOR_COOKIE}=${subject}; Path=/; Max-Age=${VISITOR_MAX_AGE_SECONDS}; HttpOnly; SameSite=Lax`,
       )
     }
 

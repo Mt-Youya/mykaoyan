@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
+
 import { membershipStatus, nextMembershipPeriod } from "./index"
 const now = Date.parse("2030-01-01T00:00:00Z")
 describe("会员期固定365天与叠加", () => {
@@ -18,7 +19,7 @@ describe("会员期固定365天与叠加", () => {
   })
   it("未开始的会员期不会提前生效，空档不会算成有效期", () => {
     expect(membershipStatus([{ startsAt: "2030-02-01T00:00:00Z", endsAt: "2031-02-01T00:00:00Z" }], now).active).toBe(
-      false
+      false,
     )
   })
 })

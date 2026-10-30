@@ -13,7 +13,7 @@ export function token(overrides = {}) {
       iat: now,
       exp: now + 300,
       ...overrides,
-    })
+    }),
   ).toString("base64url")
-  return payload + "." + createHmac("sha256", secret).update(payload).digest("base64url")
+  return `${payload}.${createHmac("sha256", secret).update(payload).digest("base64url")}`
 }

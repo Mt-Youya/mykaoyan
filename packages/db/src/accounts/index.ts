@@ -52,7 +52,7 @@ export const accounts = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("accounts_role_idx").on(table.role)]
+  (table) => [index("accounts_role_idx").on(table.role)],
 ).enableRLS()
 
 /** 会话：一个账号在一台设备上的一次登录。不同设备各自一条，「退出当前设备」只删自己这条。 */
@@ -70,7 +70,7 @@ export const sessions = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("sessions_account_idx").on(table.userId)]
+  (table) => [index("sessions_account_idx").on(table.userId)],
 ).enableRLS()
 
 /**
@@ -101,7 +101,7 @@ export const loginMethods = pgTable(
   (table) => [
     index("login_methods_account_idx").on(table.userId),
     uniqueIndex("login_methods_provider_account_unique").on(table.providerId, table.accountId),
-  ]
+  ],
 ).enableRLS()
 
 /**
@@ -121,7 +121,7 @@ export const verificationTokens = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("verification_tokens_identifier_idx").on(table.identifier)]
+  (table) => [index("verification_tokens_identifier_idx").on(table.identifier)],
 ).enableRLS()
 
 /**
@@ -138,7 +138,7 @@ export const phoneLoginAttempts = pgTable(
     kind: text().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("phone_login_attempts_phone_kind_time_idx").on(table.phoneHash, table.kind, table.createdAt)]
+  (table) => [index("phone_login_attempts_phone_kind_time_idx").on(table.phoneHash, table.kind, table.createdAt)],
 ).enableRLS()
 
 /**
@@ -163,5 +163,5 @@ export const personalInfoTransferConsents = pgTable(
   (table) => [
     uniqueIndex("personal_info_transfer_consents_account_policy_unique").on(table.accountId, table.policyVersion),
     index("personal_info_transfer_consents_account_idx").on(table.accountId),
-  ]
+  ],
 ).enableRLS()

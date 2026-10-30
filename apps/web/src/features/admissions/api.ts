@@ -57,7 +57,7 @@ export const listMajors = (year: number, unit: string, discipline?: string, sign
       year: String(year),
       ...(discipline ? { discipline } : {}),
     })}`,
-    signal
+    signal,
   )
 
 export const listRecords = (year: number, unit: string, major: string, signal?: AbortSignal) =>

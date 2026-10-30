@@ -1,7 +1,9 @@
-import { mistakeSchema, parseLocalDate } from "@mykaoyan/core"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
-import { z } from "zod"
+import type { z } from "zod"
+
+import { mistakeSchema, parseLocalDate } from "@mykaoyan/core"
+
 import { MistakeItem } from "./mistakes-page"
 
 const base = {

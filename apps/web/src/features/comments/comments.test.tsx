@@ -1,8 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server"
-import { afterEach, describe, it, expect, vi } from "vitest"
-import { CommentCard } from "./comments-panel"
+import { afterEach, describe, expect, it, vi } from "vitest"
+
 import { MembershipHelp } from "../membership"
 import { commentRequest } from "./api"
+import { CommentCard } from "./comments-panel"
 const item = {
   id: "fictional-comment",
   parentId: null,
@@ -36,7 +37,7 @@ describe("评论展示与开通说明", () => {
   it("拒绝请求不当作成功，401/403保留状态供入口切换", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response(JSON.stringify({ title: "评论需要有效会员" }), { status: 403 }))
+      vi.fn().mockResolvedValue(new Response(JSON.stringify({ title: "评论需要有效会员" }), { status: 403 })),
     )
     await expect(commentRequest("lessons/example/comments", "POST", { body: "虚构" })).rejects.toMatchObject({
       status: 403,

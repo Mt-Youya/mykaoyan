@@ -2,7 +2,7 @@ export type OwnRating = { stars: number | null; isOwn: boolean }
 export class RatingRequestError extends Error {
   constructor(
     public status: number,
-    message: string
+    message: string,
   ) {
     super(message)
   }
@@ -23,7 +23,7 @@ export async function ratingRequest(id: string, method = "GET", body?: { stars: 
     const problem = (await response.json().catch(() => null)) as { title?: string } | null
     throw new RatingRequestError(
       response.status,
-      typeof problem?.title === "string" ? problem.title : "评分暂不可用，请刷新后再试"
+      typeof problem?.title === "string" ? problem.title : "评分暂不可用，请刷新后再试",
     )
   }
   return response.json() as Promise<OwnRating>

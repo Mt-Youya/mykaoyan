@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+
 import { appendSetCookies, toFetchRequest, writeFetchResponse, writeProblem } from "./http"
 import type { NodeResponseLike } from "./http"
 
@@ -58,7 +59,7 @@ describe("把 Nest 请求重建为 Web Request", () => {
   it("GET 不带 body，路径取 originalUrl", () => {
     const request = toFetchRequest(
       { method: "GET", url: "/auth", originalUrl: "/api/auth/get-session?x=1", headers: { cookie: "a=b" } },
-      "https://mykaoyan.example"
+      "https://mykaoyan.example",
     )
     expect(request.method).toBe("GET")
     expect(request.url).toBe("https://mykaoyan.example/api/auth/get-session?x=1")
@@ -73,7 +74,7 @@ describe("把 Nest 请求重建为 Web Request", () => {
         headers: { "content-type": "application/json" },
         body: { a: 1 },
       },
-      "https://mykaoyan.example"
+      "https://mykaoyan.example",
     )
     expect(request.method).toBe("POST")
     expect(await request.json()).toEqual({ a: 1 })

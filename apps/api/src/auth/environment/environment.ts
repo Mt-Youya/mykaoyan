@@ -1,4 +1,5 @@
 import { z } from "zod"
+
 import { StartupConfigError } from "../../common"
 import type { Environment } from "../../environment"
 
@@ -56,7 +57,7 @@ function fail(keys: string[]): never {
 
 export function readAuthEnvironment(
   input: Record<string, string | undefined>,
-  nodeEnv: Environment["NODE_ENV"]
+  nodeEnv: Environment["NODE_ENV"],
 ): AuthEnvironment {
   const testing = nodeEnv === "test"
   const production = nodeEnv === "production"

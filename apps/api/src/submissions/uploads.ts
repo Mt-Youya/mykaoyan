@@ -1,7 +1,10 @@
 import { randomUUID } from "node:crypto"
+
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common"
-import { submissionInputSchema, SUBMISSION_PART_SIZE, uploadPartSize } from "@mykaoyan/core"
-import { SubmissionAccess, ownSubmissionView } from "./access"
+
+import { SUBMISSION_PART_SIZE, submissionInputSchema, uploadPartSize } from "@mykaoyan/core"
+
+import { ownSubmissionView, SubmissionAccess } from "./access"
 import type { SubmissionRow } from "./access"
 import { SUBMISSION_STORAGE } from "./storage"
 import type { SubmissionStorage } from "./storage"
@@ -9,14 +12,14 @@ import type { SubmissionStorage } from "./storage"
 export class SubmissionUploads {
   constructor(
     @Inject(SubmissionAccess) private access: SubmissionAccess,
-    @Inject(SUBMISSION_STORAGE) private storage: SubmissionStorage
+    @Inject(SUBMISSION_STORAGE) private storage: SubmissionStorage,
   ) {}
   async start(accountId: string, input: unknown) {
     await this.access.member(accountId)
     const parsed = submissionInputSchema.safeParse(input)
     if (!parsed.success)
       throw new BadRequestException(
-        "投稿需填写标题、考试科目，视频须为mp4/H.264、不超过500MB及30分钟，考点须属于所选科目"
+        "投稿需填写标题、考试科目，视频须为mp4/H.264、不超过500MB及30分钟，考点须属于所选科目",
       )
     const v = parsed.data,
       sql = this.access.database.client

@@ -30,7 +30,7 @@ export async function fetchAdminContent(): Promise<AdminResult<AdminContent>> {
 export async function setListing(
   target: "lesson" | "handout",
   slug: string,
-  listed: boolean
+  listed: boolean,
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   const response = await fetch(`/api/admin/${target}s/${encodeURIComponent(slug)}/listing`, {
     method: "PUT",

@@ -1,5 +1,7 @@
-import { Button, Field, FieldGroup, FieldLabel, Textarea } from "@mykaoyan/ui"
 import { useEffect, useState } from "react"
+
+import { Button, Field, FieldGroup, FieldLabel, Textarea } from "@mykaoyan/ui"
+
 import { MembershipAction, MembershipHelp } from "../membership"
 import type { MembershipAccess } from "../membership"
 import { commentRequest, CommentRequestError } from "./api"
@@ -20,7 +22,7 @@ export function CommentCard({ item, children }: { item: CommentItem; children?: 
           回复 {item.parent.author}：{item.parent.body}
         </blockquote>
       ) : null}
-      <p className="mbs-2 whitespace-pre-wrap break-words">{item.deleted ? "已删除" : item.body}</p>
+      <p className="mbs-2 break-words whitespace-pre-wrap">{item.deleted ? "已删除" : item.body}</p>
       {children}
     </li>
   )

@@ -11,6 +11,7 @@
     "dev": "pnpm --filter @mykaoyan/web dev",
     "serve": "pnpm --filter @mykaoyan/api dev",
     "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
     "fmt": "oxfmt --write .",
     "fmt:check": "oxfmt --check .",
     "typecheck": "pnpm -r typecheck",

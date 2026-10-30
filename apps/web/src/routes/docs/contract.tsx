@@ -20,7 +20,7 @@ export function ContractPage() {
               下载
             </a>
             <br />
-            <code className="wrap-anywhere font-mono text-sm text-muted-foreground">
+            <code className="font-mono text-sm wrap-anywhere text-muted-foreground">
               https://mykaoyan.cn/schemas/progress/v1/progress.schema.json
             </code>
           </li>
@@ -33,7 +33,7 @@ export function ContractPage() {
               下载
             </a>
             <br />
-            <code className="wrap-anywhere font-mono text-sm text-muted-foreground">
+            <code className="font-mono text-sm wrap-anywhere text-muted-foreground">
               https://mykaoyan.cn/openapi.json
             </code>
           </li>

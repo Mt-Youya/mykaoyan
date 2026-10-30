@@ -1,7 +1,9 @@
-import { describe, expect, it } from "vitest"
-import { mkdtempSync, mkdirSync, rmSync, symlinkSync } from "node:fs"
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
+
+import { describe, expect, it } from "vitest"
+
 import { checkLineLimit, generated, lines, linkedParent, sensitive } from "./line-limit.mjs"
 
 const root = resolve(import.meta.dirname, "../..")
@@ -84,7 +86,7 @@ describe("全仓库手写文件行数守卫", () => {
       symlinkSync(
         join(directory, "outside"),
         join(directory, "root/folder"),
-        process.platform === "win32" ? "junction" : "dir"
+        process.platform === "win32" ? "junction" : "dir",
       )
       expect(linkedParent(join(directory, "root"), "folder/fictional.md")).toBe(true)
       expect(linkedParent(join(directory, "root"), "missing/fictional.md")).toBe(false)

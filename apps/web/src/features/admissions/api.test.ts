@@ -1,4 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest"
+
 import { listMajors, listRecords } from "./api"
 
 afterEach(() => {
@@ -28,7 +29,7 @@ it("错误时带回服务端说明，服务端没有说明时给出可手动填�
   stub(
     new Response(JSON.stringify({ title: "研招网目前只提供 2027 年度的招生目录，无法查询 2026 年度", status: 409 }), {
       status: 409,
-    })
+    }),
   )
   expect(await listRecords(2026, "10001", "085404")).toEqual({
     status: "error",

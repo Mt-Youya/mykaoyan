@@ -2,8 +2,10 @@ import { execFileSync, spawnSync } from "node:child_process"
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
+
 import { beforeAll, describe, expect, it } from "vitest"
-import { validProgressFixtures, invalidProgressFixtures } from "../../packages/core/src/progress/fixtures/index.ts"
+
+import { invalidProgressFixtures, validProgressFixtures } from "../../packages/core/src/progress/fixtures/index.ts"
 const root = resolve(import.meta.dirname, "../..")
 const binary = join(root, "cli/target/debug", process.platform === "win32" ? "mykaoyan.exe" : "mykaoyan")
 beforeAll(() => {
@@ -35,7 +37,7 @@ describe("Rust CLI 的公开契约端到端校验", () => {
   }
   it("CLI 的 OpenAPI 与网站公开契约完全一致", () => {
     expect(JSON.parse(readFileSync(join(root, "cli/contracts/openapi.json")))).toEqual(
-      JSON.parse(readFileSync(join(root, "apps/web/public/openapi.json")))
+      JSON.parse(readFileSync(join(root, "apps/web/public/openapi.json"))),
     )
   })
 })

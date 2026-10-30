@@ -1,9 +1,9 @@
-import * as React from "react"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
-import { cn } from "cn"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowRight01Icon, MoreHorizontalCircle01Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { cn } from "cn"
+import * as React from "react"
 
 function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
   return <nav aria-label="breadcrumb" data-slot="breadcrumb" className={cn(className)} {...props} />
@@ -15,7 +15,7 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
       data-slot="breadcrumb-list"
       className={cn(
         "flex flex-wrap items-center gap-1.5 text-sm wrap-break-word text-muted-foreground sm:gap-2.5",
-        className
+        className,
       )}
       {...props}
     />
@@ -33,7 +33,7 @@ function BreadcrumbLink({ className, render, ...props }: useRender.ComponentProp
       {
         className: cn("transition-colors hover:text-foreground", className),
       },
-      props
+      props,
     ),
     render,
     state: {

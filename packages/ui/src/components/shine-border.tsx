@@ -1,8 +1,7 @@
 "use client"
 
-import * as React from "react"
-
 import { cn } from "cn"
+import * as React from "react"
 
 interface ShineBorderProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
@@ -55,7 +54,7 @@ export function ShineBorder({
       }
       className={cn(
         "motion-safe:animate-shine pointer-events-none absolute inset-0 size-full rounded-[inherit] will-change-[background-position]",
-        className
+        className,
       )}
       {...props}
     />

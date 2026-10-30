@@ -1,7 +1,8 @@
 import { Module } from "@nestjs/common"
+
 import { AuthModule } from "../auth"
 import { MembershipModule } from "../membership"
-import { CommentsController, AdminCommentsController } from "./controller"
+import { AdminCommentsController, CommentsController } from "./controller"
 import { CommentsService } from "./service"
 @Module({
   imports: [AuthModule, MembershipModule],

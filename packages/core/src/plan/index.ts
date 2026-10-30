@@ -24,7 +24,7 @@ export function getPlanTotal(plan: DailyPlan) {
 export function getDayPlan(
   profile: StudyProfile | null,
   dayPlans: readonly DayPlan[],
-  date: LocalDate
+  date: LocalDate,
 ): DailyPlan | null {
   const override = dayPlans.find((plan) => plan.date === date)
   if (override) return { minutes: { ...override.minutes }, flexMin: override.flexMin }

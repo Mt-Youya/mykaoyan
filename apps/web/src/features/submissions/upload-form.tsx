@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react"
-import { Button, Field, FieldGroup, FieldLabel, Input, Textarea } from "@mykaoyan/ui"
+
 import { publicTopics, submissionInputSchema } from "@mykaoyan/core"
+import { Button, Field, FieldGroup, FieldLabel, Input, Textarea } from "@mykaoyan/ui"
+
 import { SubmissionRequestError, uploadSubmission } from "./api"
 import type { OwnSubmission } from "./api"
 import { fingerprint, inspectVideo } from "./video"

@@ -1,7 +1,7 @@
-import * as React from "react"
-import { cn } from "cn"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { UnfoldMoreIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { cn } from "cn"
+import * as React from "react"
 
 type NativeSelectProps = Omit<React.ComponentProps<"select">, "size"> & {
   size?: "sm" | "default"

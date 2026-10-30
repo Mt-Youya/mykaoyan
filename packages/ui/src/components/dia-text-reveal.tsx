@@ -1,17 +1,16 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { cn } from "cn"
 import {
   animate,
+  type HTMLMotionProps,
   motion,
   useInView,
   useMotionValue,
   useReducedMotion,
   useTransform,
-  type HTMLMotionProps,
 } from "motion/react"
-
-import { cn } from "cn"
+import { useEffect, useRef, useState } from "react"
 
 const DEFAULT_COLORS = ["#c679c4", "#fa3d1d", "#ffb005", "#e1e1fe", "#0358f7"]
 const BAND_HALF = 17
@@ -171,7 +170,7 @@ export function DiaTextReveal({
   const sweepPos = useMotionValue(SWEEP_START)
 
   const backgroundImage = useTransform(sweepPos, (pos) =>
-    buildGradient(pos, optsRef.current.colors, optsRef.current.textColor)
+    buildGradient(pos, optsRef.current.colors, optsRef.current.textColor),
   )
 
   const isInView = useInView(spanRef, { once, amount: 0.1 })

@@ -41,7 +41,7 @@ export function repositoryPaths(root) {
         encoding: "utf8",
       })
         .split("\0")
-        .filter(Boolean)
+        .filter(Boolean),
     ),
   ].toSorted()
 }

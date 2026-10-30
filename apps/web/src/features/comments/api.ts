@@ -17,7 +17,7 @@ export type AdminComment = CommentItem & {
 export class CommentRequestError extends Error {
   constructor(
     public status: number,
-    message: string
+    message: string,
   ) {
     super(message)
   }
@@ -38,7 +38,7 @@ export async function commentRequest<T>(path: string, method = "GET", body?: unk
     const problem = (await response.json().catch(() => null)) as { title?: string } | null
     throw new CommentRequestError(
       response.status,
-      typeof problem?.title === "string" ? problem.title : "评论操作失败，请稍后重试"
+      typeof problem?.title === "string" ? problem.title : "评论操作失败，请稍后重试",
     )
   }
   return (await response.json()) as T

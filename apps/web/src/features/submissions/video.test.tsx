@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
+
 import { inspectVideo } from "./video"
 function box(type: string, ...children: Uint8Array[]) {
   const bytes = new Uint8Array(8 + children.reduce((n, c) => n + c.length, 0)),
@@ -26,12 +27,12 @@ function video(codec = "avc1", seconds = 10) {
       box(
         "moov",
         box("mvhd", mvhd),
-        box("trak", box("mdia", box("hdlr", hdlr), box("minf", box("stbl", box("stsd", entries, box(codec))))))
+        box("trak", box("mdia", box("hdlr", hdlr), box("minf", box("stbl", box("stsd", entries, box(codec)))))),
       ),
       box("mdat", new Uint8Array([0])),
     ],
     "fictional.mp4",
-    { type: "video/mp4" }
+    { type: "video/mp4" },
   )
 }
 describe("上传前读取MP4实际视频轨道", () => {

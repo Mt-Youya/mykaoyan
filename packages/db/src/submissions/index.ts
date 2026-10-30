@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm"
 import { boolean, check, doublePrecision, index, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
+
 import { accounts } from "../accounts"
 export const submissions = pgTable(
   "submissions",
@@ -32,12 +33,12 @@ export const submissions = pgTable(
     check("submissions_state", sql`${t.status} in ('uploading','pending','approved','rejected')`),
     check(
       "submissions_visibility",
-      sql`not ${t.listed} or (${t.status}='approved' and ${t.deletedAt} is null and ${t.deleteMarkedAt} is null)`
+      sql`not ${t.listed} or (${t.status}='approved' and ${t.deletedAt} is null and ${t.deleteMarkedAt} is null)`,
     ),
     check("submissions_limits", sql`${t.size}>0 and ${t.size}<=500000000 and ${t.duration}>0 and ${t.duration}<=1800`),
     check(
       "submissions_review",
-      sql`(${t.status} in ('uploading','pending') and ${t.reviewedAt} is null) or (${t.status} in ('approved','rejected') and ${t.reviewedAt} is not null and (${t.status}<>'rejected' or length(trim(${t.reason})) between 1 and 500))`
+      sql`(${t.status} in ('uploading','pending') and ${t.reviewedAt} is null) or (${t.status} in ('approved','rejected') and ${t.reviewedAt} is not null and (${t.status}<>'rejected' or length(trim(${t.reason})) between 1 and 500))`,
     ),
-  ]
+  ],
 ).enableRLS()

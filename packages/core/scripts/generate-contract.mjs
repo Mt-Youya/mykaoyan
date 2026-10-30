@@ -10,9 +10,11 @@
 import { mkdirSync, writeFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+
 import { z } from "zod"
-import { progressChangeSummarySchema } from "../src/progress/change-summary"
+
 import { publishLessonSchema, publishPreparedSchema, publishResultSchema } from "../src/catalog/index"
+import { progressChangeSummarySchema } from "../src/progress/change-summary"
 import { progressFileSchema } from "../src/progress/schema"
 
 const SCHEMA_URL = "https://mykaoyan.cn/schemas/progress/v1/progress.schema.json"

@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs"
 import { createRequire } from "node:module"
+
 import { describe, expect, it } from "vitest"
+
 import { invalidProgressFixtures, validProgressFixtures } from "../../packages/core/src/progress/fixtures/index.ts"
 import { progressFileSchema } from "../../packages/core/src/progress/schema.ts"
 
@@ -52,7 +54,7 @@ describe("公开契约 fixture", () => {
     expect(path.get.responses["200"].headers.ETag).toBeTruthy()
     expect(path.get.responses["200"].content["application/json"].schema.$ref).toBe("#/components/schemas/ProgressFile")
     expect(path.put.parameters).toContainEqual(
-      expect.objectContaining({ name: "If-Match", in: "header", required: true })
+      expect.objectContaining({ name: "If-Match", in: "header", required: true }),
     )
     expect(path.put.requestBody.content["application/json"].schema.$ref).toBe("#/components/schemas/ProgressFile")
     expect(path.put.responses["412"]).toBeTruthy()
@@ -67,7 +69,7 @@ describe("公开契约 fixture", () => {
 
     expect(path.put.responses["200"].headers.ETag).toBeTruthy()
     expect(path.put.responses["200"].content["application/json"].schema.$ref).toBe(
-      "#/components/schemas/ProgressChangeSummary"
+      "#/components/schemas/ProgressChangeSummary",
     )
     expect(path.get.security).toEqual(expectedSecurity)
     expect(path.put.security).toEqual(expectedSecurity)

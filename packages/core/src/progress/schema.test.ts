@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
+
 import { localDateSchema } from "../dates/index"
 import { fullProgressFileFixture, invalidProgressFixtures, validProgressFixtures } from "./fixtures/index"
 import { PROGRESS_FILE_APP, PROGRESS_FILE_VERSION, progressFileSchema } from "./index"
@@ -24,14 +25,14 @@ describe("进度文件 v1 fixture", () => {
     (_name, value) => {
       const result = progressFileSchema.safeParse(value)
       expect(result.success, result.error?.message).toBe(true)
-    }
+    },
   )
 
   it.each(invalidProgressFixtures.map((fixture) => [fixture.name, fixture.value] as const))(
     "拒绝无效 fixture %s",
     (_name, value) => {
       expect(progressFileSchema.safeParse(value).success).toBe(false)
-    }
+    },
   )
 })
 
@@ -78,7 +79,7 @@ describe("进度文件 v1 日期与时间字段", () => {
         const expected = localDateSchema.safeParse(value).success
         expect(actual, `${path.join(".")}=${JSON.stringify(value)}`).toBe(expected)
       }
-    }
+    },
   )
 
   // 阶段开始/结束还受「结束不早于开始、阶段不重叠」约束，合法日期也可能整体被拒绝；
@@ -114,10 +115,10 @@ describe("进度文件 v1 日期与时间字段", () => {
     (_label, path) => {
       for (const [value, expected] of dateTimeCandidates) {
         expect(progressFileSchema.safeParse(fixtureAt(path, value)).success, `${path.join(".")}=${value}`).toBe(
-          expected
+          expected,
         )
       }
-    }
+    },
   )
 })
 
@@ -136,7 +137,7 @@ describe("进度文件 v1 文本字段", () => {
   it("自由文本允许空串", () => {
     expect(progressFileSchema.safeParse(fixtureAt(["data", "daily", "0", "retro"], "")).success).toBe(true)
     expect(progressFileSchema.safeParse(fixtureAt(["data", "weekly", "0", "nextWeekAdjustment"], "")).success).toBe(
-      true
+      true,
     )
   })
 })

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+
 import { StartupConfigError } from "../../common"
 import { readAuthEnvironment } from "./environment"
 
@@ -14,11 +15,11 @@ const aliyun = {
 describe("认证启动配置", () => {
   it("生产环境必须显式给足密钥与阿里云凭据，缺失即启动失败", () => {
     expect(() => readAuthEnvironment({ ...base, BETTER_AUTH_SECRET: undefined }, "production")).toThrow(
-      "BETTER_AUTH_SECRET"
+      "BETTER_AUTH_SECRET",
     )
     expect(() => readAuthEnvironment({ ...base, BETTER_AUTH_SECRET: "" }, "production")).toThrow("BETTER_AUTH_SECRET")
     expect(() => readAuthEnvironment({ ...base, BETTER_AUTH_SECRET: "short" }, "production")).toThrow(
-      "BETTER_AUTH_SECRET"
+      "BETTER_AUTH_SECRET",
     )
     expect(() => readAuthEnvironment({ ...base, SMS_PROVIDER: undefined }, "production")).toThrow("SMS_PROVIDER")
     expect(() => readAuthEnvironment({ ...base, SMS_PROVIDER: "memory" }, "production")).toThrow("SMS_PROVIDER")
@@ -60,7 +61,7 @@ describe("认证启动配置", () => {
   it("允许用逗号分隔多个可信 origin", () => {
     const env = readAuthEnvironment(
       { ...base, AUTH_TRUSTED_ORIGINS: "https://a.example, https://b.example" },
-      "development"
+      "development",
     )
     expect(env.trustedOrigins).toEqual(["https://a.example", "https://b.example"])
   })
@@ -68,19 +69,19 @@ describe("认证启动配置", () => {
   it("可选 AUTH_COOKIE_DOMAIN 用于页面与 API 跨子域共享 cookie", () => {
     expect(readAuthEnvironment(base, "development").cookieDomain).toBeUndefined()
     expect(readAuthEnvironment({ ...base, AUTH_COOKIE_DOMAIN: "mykaoyan.cn" }, "development").cookieDomain).toBe(
-      "mykaoyan.cn"
+      "mykaoyan.cn",
     )
     expect(readAuthEnvironment({ ...base, AUTH_COOKIE_DOMAIN: ".mykaoyan.cn" }, "development").cookieDomain).toBe(
-      ".mykaoyan.cn"
+      ".mykaoyan.cn",
     )
   })
 
   it("AUTH_COOKIE_DOMAIN 只接受域名，拒绝协议与路径", () => {
     expect(() => readAuthEnvironment({ ...base, AUTH_COOKIE_DOMAIN: "https://mykaoyan.cn" }, "development")).toThrow(
-      "AUTH_COOKIE_DOMAIN"
+      "AUTH_COOKIE_DOMAIN",
     )
     expect(() => readAuthEnvironment({ ...base, AUTH_COOKIE_DOMAIN: "mykaoyan.cn/path" }, "development")).toThrow(
-      "AUTH_COOKIE_DOMAIN"
+      "AUTH_COOKIE_DOMAIN",
     )
   })
 })

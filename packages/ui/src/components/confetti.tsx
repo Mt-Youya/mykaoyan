@@ -1,13 +1,13 @@
 "use client"
 
-import type { ReactNode } from "react"
-import React, { createContext, forwardRef, useEffect, useImperativeHandle, useRef } from "react"
 import type {
   GlobalOptions as ConfettiGlobalOptions,
   CreateTypes as ConfettiInstance,
   Options as ConfettiOptions,
 } from "canvas-confetti"
 import confetti from "canvas-confetti"
+import type { ReactNode } from "react"
+import React, { createContext, forwardRef, useEffect, useImperativeHandle, useRef } from "react"
 
 import { Button } from "../base/index.ts"
 
@@ -128,7 +128,7 @@ export const ConfettiButton = forwardRef<HTMLButtonElement, ConfettiButtonProps>
         {children}
       </Button>
     )
-  }
+  },
 )
 
 ConfettiButton.displayName = "ConfettiButton"

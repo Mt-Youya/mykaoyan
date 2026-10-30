@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+
 import { StartupConfigError } from "../common"
 import { readEnvironment } from "./environment"
 

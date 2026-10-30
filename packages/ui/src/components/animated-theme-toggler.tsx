@@ -1,11 +1,10 @@
 "use client"
 
+import { MoonIcon, SunIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { cn } from "cn"
 import { useEffect, useRef, useState } from "react"
 import { flushSync } from "react-dom"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { MoonIcon, SunIcon } from "@hugeicons/core-free-icons"
-
-import { cn } from "cn"
 
 export type TransitionVariant = "circle" | "square" | "triangle" | "diamond" | "hexagon" | "rectangle" | "star"
 
@@ -38,7 +37,7 @@ function getThemeTransitionClipPaths(
   cy: number,
   maxRadius: number,
   viewportWidth: number,
-  viewportHeight: number
+  viewportHeight: number,
 ): [string, string] {
   const toX = (x: number) => `${(x / viewportWidth) * 100}%`
   const toY = (y: number) => `${(y / viewportHeight) * 100}%`
@@ -65,7 +64,7 @@ function getThemeTransitionClipPaths(
       const scale = maxRadius * 2.2
       const dx = (Math.sqrt(3) / 2) * scale
       const verts = [point(cx, cy - scale), point(cx + dx, cy + 0.5 * scale), point(cx - dx, cy + 0.5 * scale)].join(
-        ", "
+        ", ",
       )
       return [polygonCollapsed(point(cx, cy), 3), `polygon(${verts})`]
     }
@@ -139,16 +138,17 @@ export const AnimatedThemeToggler = ({
     activeAnimRef.current = null
   }
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       cancelAnim()
       const root = document.documentElement
       if (root.dataset.magicuiThemeVt !== "active") return
       delete root.dataset.magicuiThemeVt
       root.style.removeProperty("--magicui-theme-toggle-vt-duration")
       root.style.removeProperty("--magicui-theme-vt-clip-from")
-    }
-  }, [cancelAnim])
+    },
+    [cancelAnim],
+  )
 
   useEffect(() => {
     if (isControlled) return
@@ -248,7 +248,7 @@ export const AnimatedThemeToggler = ({
               easing: shape === "star" ? "linear" : "ease-in-out",
               fill: "forwards",
               pseudoElement: "::view-transition-new(root)",
-            }
+            },
           )
           activeAnimRef.current = anim
         })

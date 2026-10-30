@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common"
+
 import { AuthController } from "./auth.controller"
-import { PhoneController } from "./phone"
+import { PhoneAuthService, PhoneController } from "./phone"
 import { authProviders } from "./providers"
-import { PhoneAuthService } from "./phone"
 import { SessionGuard } from "./session"
 import { AUTH } from "./tokens"
 

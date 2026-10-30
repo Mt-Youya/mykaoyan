@@ -1,4 +1,5 @@
 import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
+
 import { accounts } from "../accounts"
 /** 服务端持有发布计划；客户端不能自行指定对象 key 或变更上架状态。 */
 export const lessonPublications = pgTable("lesson_publications", {

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
+
+import { emptyProgressFileFixture, fullProgressFileFixture } from "./fixtures/index"
 import {
   PROGRESS_FILE_APP,
   PROGRESS_FILE_VERSION,
@@ -7,7 +9,6 @@ import {
   progressDataSchema,
   summarizeProgressChanges,
 } from "./index"
-import { emptyProgressFileFixture, fullProgressFileFixture } from "./fixtures/index"
 
 const validSummary = {
   app: PROGRESS_FILE_APP,

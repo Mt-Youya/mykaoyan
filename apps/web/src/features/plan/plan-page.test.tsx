@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
+
 import { emptyStudyDocument, studyDocument } from "../study-fixture"
 import { PlanView } from "./plan-page"
 
@@ -8,7 +9,7 @@ const noop = async () => true
 describe("备考档案与计划页", () => {
   it("没有档案时提示先建立，并给出创建表单", () => {
     const html = renderToStaticMarkup(
-      <PlanView status="ready" document={emptyStudyDocument} message="" onSaveProfile={noop} onSaveDayPlan={noop} />
+      <PlanView status="ready" document={emptyStudyDocument} message="" onSaveProfile={noop} onSaveDayPlan={noop} />,
     )
     expect(html).toContain("还没有备考档案")
     expect(html).toContain("备考档案")
@@ -18,7 +19,7 @@ describe("备考档案与计划页", () => {
 
   it("已有档案时回填科目、阶段与按天覆盖", () => {
     const html = renderToStaticMarkup(
-      <PlanView status="ready" document={studyDocument} message="" onSaveProfile={noop} onSaveDayPlan={noop} />
+      <PlanView status="ready" document={studyDocument} message="" onSaveProfile={noop} onSaveDayPlan={noop} />,
     )
     expect(html).toContain("数学（二）")
     expect(html).toContain("基础阶段")
@@ -28,7 +29,7 @@ describe("备考档案与计划页", () => {
 
   it("未登录时只给登录入口", () => {
     const html = renderToStaticMarkup(
-      <PlanView status="unauthorized" document={null} message="" onSaveProfile={noop} onSaveDayPlan={noop} />
+      <PlanView status="unauthorized" document={null} message="" onSaveProfile={noop} onSaveDayPlan={noop} />,
     )
     expect(html).toContain("登录账号")
     expect(html).toContain('href="/login"')

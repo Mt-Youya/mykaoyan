@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Post, Put, Query, Res, UseGuards } from "@nestjs/common"
+
 import { CurrentSession, SessionGuard } from "../auth"
 import type { AuthSession } from "../auth"
 import { CommentsService } from "./service"
@@ -8,7 +9,7 @@ export class CommentsController {
   @Get() list(
     @Param("slug") slug: string,
     @Query("page") page = "0",
-    @Res({ passthrough: true }) response: { setHeader(name: string, value: string): void }
+    @Res({ passthrough: true }) response: { setHeader(name: string, value: string): void },
   ) {
     response.setHeader("Cache-Control", "no-store")
     return this.comments.list(slug, Number(page))
@@ -16,7 +17,7 @@ export class CommentsController {
   @Post() @UseGuards(SessionGuard) create(
     @CurrentSession() session: AuthSession,
     @Param("slug") slug: string,
-    @Body() body: unknown
+    @Body() body: unknown,
   ) {
     return this.comments.create(session.user.id, slug, body)
   }

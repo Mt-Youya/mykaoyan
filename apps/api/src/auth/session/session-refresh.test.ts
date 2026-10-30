@@ -1,6 +1,7 @@
 import { memoryAdapter } from "better-auth/adapters/memory"
 import type { MemoryDB } from "better-auth/adapters/memory"
 import { describe, expect, it } from "vitest"
+
 import { createAuth } from "../auth"
 import type { AuthEnvironment } from "../environment"
 import { MemorySmsVerifier } from "../sms"

@@ -1,7 +1,9 @@
 import { BadRequestException, Inject, Injectable, PreconditionFailedException } from "@nestjs/common"
+
 import { PROGRESS_FILE_APP, PROGRESS_FILE_VERSION, progressFileSchema, summarizeProgressChanges } from "@mykaoyan/core"
-import { DatabaseService } from "../database"
 import type { ProgressFile } from "@mykaoyan/core"
+
+import { DatabaseService } from "../database"
 
 export type ProgressRevision = { revision: number; updatedAt: string; etag: string }
 

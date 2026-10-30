@@ -1,6 +1,6 @@
+import type { LocalDate } from "../dates/index"
 import { getDueRetests } from "../mistakes/index"
 import type { DueRetest } from "../mistakes/index"
-import type { LocalDate } from "../dates/index"
 import type { Mistake } from "../progress/index"
 
 /** 单词卡数量；浏览器本地没有词表时按 0 处理。 */

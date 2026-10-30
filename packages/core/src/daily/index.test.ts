@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
+
 import { parseLocalDate } from "../dates/index"
-import { progressFileSchema } from "../progress/index"
 import { fullProgressFileFixture } from "../progress/fixtures/index"
+import { progressFileSchema } from "../progress/index"
 import { getDailyLog, getRecordedMinutes, upsertDailyLog } from "./index"
 
 const file = progressFileSchema.parse(fullProgressFileFixture.value)

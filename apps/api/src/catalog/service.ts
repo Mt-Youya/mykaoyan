@@ -1,6 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common"
 import { and, asc, eq, inArray } from "drizzle-orm"
+
 import { chapters, courses, handouts, lessons } from "@mykaoyan/db"
+
 import { DatabaseService } from "../database"
 import type { Database } from "../database"
 

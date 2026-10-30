@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { ratingSummary, ratingInputSchema } from "./index"
+
+import { ratingInputSchema, ratingSummary } from "./index"
 describe("评分与推荐", () => {
   it("按固定先验权重计算贝叶斯平均，不把少数高分当推荐", () => {
     expect(ratingSummary(1, 5, 3)).toEqual({ ratingCount: 1, weightedScore: 35 / 11, recommended: false })

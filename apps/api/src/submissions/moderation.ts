@@ -1,7 +1,8 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common"
-import type { OnModuleInit, OnModuleDestroy } from "@nestjs/common"
+import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common"
 import { z } from "zod"
-import { SubmissionAccess, ownSubmissionView } from "./access"
+
+import { ownSubmissionView, SubmissionAccess } from "./access"
 import type { Actor, SubmissionRow } from "./access"
 import { SUBMISSION_STORAGE } from "./storage"
 import type { SubmissionStorage } from "./storage"
@@ -11,7 +12,7 @@ export class SubmissionModeration implements OnModuleInit, OnModuleDestroy {
   private running = false
   constructor(
     @Inject(SubmissionAccess) private access: SubmissionAccess,
-    @Inject(SUBMISSION_STORAGE) private storage: SubmissionStorage
+    @Inject(SUBMISSION_STORAGE) private storage: SubmissionStorage,
   ) {}
   onModuleInit() {
     if (this.access.config.NODE_ENV !== "production") return

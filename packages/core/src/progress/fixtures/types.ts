@@ -1,4 +1,5 @@
 import type { z } from "zod"
+
 import type { progressFileSchema } from "../schema"
 
 /** 进度文件 fixture 的输入形状：日期与时间保持字符串，与公开契约一致。 */

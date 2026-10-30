@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm"
 import { check, index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
+
 import { accounts } from "../accounts"
 export const redemptionCodes = pgTable(
   "redemption_codes",
@@ -12,7 +13,7 @@ export const redemptionCodes = pgTable(
     redeemedBy: uuid("redeemed_by").references(() => accounts.id, { onDelete: "set null" }),
     redeemedAt: timestamp("redeemed_at", { withTimezone: true }),
   },
-  (t) => [index("redemption_codes_created_idx").on(t.createdAt, t.id)]
+  (t) => [index("redemption_codes_created_idx").on(t.createdAt, t.id)],
 ).enableRLS()
 export const membershipPeriods = pgTable(
   "membership_periods",
@@ -37,7 +38,7 @@ export const membershipPeriods = pgTable(
     check("membership_periods_source", sql`${t.source} in ('manual','code')`),
     check(
       "membership_periods_manual_reason",
-      sql`${t.source} <> 'manual' or length(btrim(${t.reason})) > 0 and ${t.reason} is not null`
+      sql`${t.source} <> 'manual' or length(btrim(${t.reason})) > 0 and ${t.reason} is not null`,
     ),
-  ]
+  ],
 ).enableRLS()

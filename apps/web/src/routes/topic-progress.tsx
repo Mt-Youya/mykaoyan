@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+
 import { TopicProgressPage } from "../features/topic-progress"
 
 export const Route = createFileRoute("/topic-progress")({

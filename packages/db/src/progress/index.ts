@@ -1,4 +1,5 @@
 import { index, integer, jsonb, pgTable, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core"
+
 import { accounts } from "../accounts"
 
 /** 每个账号当前的一份学习进度文档；内容只由 API 服务层访问。 */
@@ -13,7 +14,7 @@ export const progressDocuments = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("progress_documents_updated_idx").on(table.updatedAt)]
+  (table) => [index("progress_documents_updated_idx").on(table.updatedAt)],
 ).enableRLS()
 
 /** 每次成功替换后的不可变快照；当前文档不在这里重复初始化。 */
@@ -31,5 +32,5 @@ export const progressRevisions = pgTable(
   (table) => [
     uniqueIndex("progress_revisions_account_revision_unique").on(table.accountId, table.revision),
     index("progress_revisions_account_created_idx").on(table.accountId, table.createdAt),
-  ]
+  ],
 ).enableRLS()

@@ -1,5 +1,7 @@
-import { Button, Field, FieldGroup, FieldLabel, Input, Textarea } from "@mykaoyan/ui"
 import { useEffect, useState } from "react"
+
+import { Button, Field, FieldGroup, FieldLabel, Input, Textarea } from "@mykaoyan/ui"
+
 import { commentRequest } from "./api"
 import type { AdminComment } from "./api"
 import { CommentCard } from "./comments-panel"
@@ -110,7 +112,7 @@ export function AdminCommentsPanel() {
                   </a>
                 </p>
                 {item.deleted ? (
-                  <p className="break-words text-sm text-muted-foreground">
+                  <p className="text-sm break-words text-muted-foreground">
                     删除原因：{item.deleteReason} · 管理员：{item.deletedBy ?? "账号已删除"} · {item.deletedAt}
                   </p>
                 ) : (

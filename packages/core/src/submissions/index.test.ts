@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { submissionInputSchema, uploadPartSize, SUBMISSION_PART_SIZE } from "./index"
+
+import { SUBMISSION_PART_SIZE, submissionInputSchema, uploadPartSize } from "./index"
 const valid = {
   id: "10000000-0000-4000-8000-000000000001",
   title: "虚构讲解",

@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest"
+
 import { parseLocalDate } from "../dates/index"
 import {
-  DAILY_NEW_CARD_LIMIT,
   createVocabCard,
+  DAILY_NEW_CARD_LIMIT,
   getVocabCounts,
   getVocabQueue,
   reviewVocabCard,
@@ -20,7 +21,7 @@ describe("单词复习调度", () => {
     const first = scheduleVocabCard(
       createVocabCard("one", parseLocalDate("2026-10-22")),
       "good",
-      parseLocalDate("2026-10-22")
+      parseLocalDate("2026-10-22"),
     )
     const second = scheduleVocabCard(first, "good", parseLocalDate("2026-10-23"))
     const third = scheduleVocabCard(second, "good", parseLocalDate("2026-10-26"))

@@ -1,21 +1,22 @@
 import { Module } from "@nestjs/common"
 import type { DynamicModule } from "@nestjs/common"
+
 import { AdminModule } from "../admin"
 import { AdmissionsModule } from "../admissions"
 import { AgentTokensModule } from "../agent-tokens"
-import { AppController } from "./app.controller"
-import { AppService } from "./app.service"
 import { AuthModule } from "../auth"
 import { CatalogEmptyModule, CatalogModule } from "../catalog"
+import { CommentsModule } from "../comments"
 import { ConfigModule } from "../config"
 import { DatabaseModule } from "../database"
 import type { Environment } from "../environment"
-import { PlaybackModule } from "../playback"
-import { PublishingModule } from "../publishing"
 import { MembershipModule } from "../membership"
-import { CommentsModule } from "../comments"
-import { SubmissionsEmptyModule, SubmissionsModule } from "../submissions"
+import { PlaybackModule } from "../playback"
 import { ProgressModule } from "../progress"
+import { PublishingModule } from "../publishing"
+import { SubmissionsEmptyModule, SubmissionsModule } from "../submissions"
+import { AppController } from "./app.controller"
+import { AppService } from "./app.service"
 
 /**
  * 应用根模块：按领域装配子模块，启动配置经 `forRoot` 注入。

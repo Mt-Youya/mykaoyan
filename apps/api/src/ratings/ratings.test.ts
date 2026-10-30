@@ -1,9 +1,12 @@
 import { randomUUID } from "node:crypto"
+
 import postgres from "postgres"
-import { beforeAll, afterAll, describe, it, expect } from "vitest"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
 import { createApp } from "../app"
+import type { MemorySmsVerifier } from "../auth"
+import { PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
 import { readEnvironment } from "../environment"
-import { MemorySmsVerifier, SMS_VERIFIER, PRIVACY_POLICY_VERSION } from "../auth"
 type Body = {
   stars: number | null
   isOwn: boolean
@@ -24,7 +27,7 @@ describe("评分权限、修改与推荐 HTTP", () => {
     cookie?: string,
     body?: unknown,
     method = body === undefined ? "GET" : "PUT",
-    base = origin
+    base = origin,
   ) =>
     fetch(`${base}/api/${path}`, {
       method,
@@ -44,7 +47,7 @@ describe("评分权限、修改与推荐 HTTP", () => {
         acceptedPolicyVersion: PRIVACY_POLICY_VERSION,
         acceptedTermsVersion: "2026-10-30",
       },
-      "POST"
+      "POST",
     )
     expect(r.status).toBe(200)
     const cookie = r.headers
@@ -60,13 +63,13 @@ describe("评分权限、修改与推荐 HTTP", () => {
     subject = "302",
     topic: string | null = "M01",
     listed = true,
-    status = "approved"
+    status = "approved",
   ) {
     await sql`insert into submissions(id,account_id,title,summary,subject_code,topic_id,size,duration,fingerprint,object_key,status,listed,reviewed_at,reviewer_id) values(${id},${owner},'虚构评分投稿','',${subject},${topic},100,10,${"a".repeat(64)},${`submissions/fictional-rating-${id}/video.mp4`},${status},${listed},${status === "approved" ? new Date().toISOString() : null},${admin.id})`
   }
   async function grant(id: string) {
     expect(
-      (await call("admin/membership/grants", admin.cookie, { accountId: id, reason: "虚构评分开通" }, "POST")).status
+      (await call("admin/membership/grants", admin.cookie, { accountId: id, reason: "虚构评分开通" }, "POST")).status,
     ).toBe(201)
   }
   beforeAll(async () => {
@@ -199,7 +202,7 @@ describe("评分权限、修改与推荐 HTTP", () => {
       recommended: false,
     })
     expect(recommended.items.findIndex((r) => r.id === good)).toBeLessThan(
-      recommended.items.findIndex((r) => r.id === few)
+      recommended.items.findIndex((r) => r.id === few),
     )
   })
   it("会员到期后不能修改评分，历史评分及人数保留", async () => {
@@ -208,7 +211,7 @@ describe("评分权限、修改与推荐 HTTP", () => {
     expect((await vote(ids.normal, a.cookie, 5)).status).toBe(403)
     expect(await (await call(`submissions/${ids.normal}/rating`, a.cookie)).json()).toMatchObject({ stars: 4 })
     expect((await (await call("submissions?subject=302")).json()).items.find((r) => r.id === ids.normal)).toMatchObject(
-      { ratingCount: 1 }
+      { ratingCount: 1 },
     )
   })
 })

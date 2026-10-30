@@ -1,5 +1,7 @@
 import { z } from "zod"
-import { PROGRESS_FILE_APP, PROGRESS_FILE_VERSION, progressDataSchema } from "./schema"
+
+import type { progressDataSchema } from "./schema"
+import { PROGRESS_FILE_APP, PROGRESS_FILE_VERSION } from "./schema"
 
 const nonNegativeInteger = z.number().int().nonnegative()
 

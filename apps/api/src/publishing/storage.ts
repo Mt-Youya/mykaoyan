@@ -1,9 +1,11 @@
-import { Inject, Injectable, ServiceUnavailableException } from "@nestjs/common"
 import { DeleteObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import { Inject, Injectable, ServiceUnavailableException } from "@nestjs/common"
+
+import type { PublishLesson } from "@mykaoyan/core"
+
 import { CONFIG } from "../config"
 import type { Environment } from "../environment"
-import type { PublishLesson } from "@mykaoyan/core"
 export type Asset = PublishLesson["video"]
 export const PUBLISH_STORAGE = Symbol("publish-storage")
 export interface PublishStorage {
@@ -38,7 +40,7 @@ export class R2PublishStorage implements PublishStorage {
         ContentMD5: asset.md5,
         IfNoneMatch: "*",
       }),
-      { expiresIn: 900, signableHeaders: new Set(["content-type", "content-md5", "if-none-match"]) }
+      { expiresIn: 900, signableHeaders: new Set(["content-type", "content-md5", "if-none-match"]) },
     )
     return { url, headers }
   }

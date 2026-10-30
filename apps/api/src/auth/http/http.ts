@@ -61,7 +61,7 @@ export function writeProblem(
   status: number,
   title: string,
   code: string,
-  retryAfterSeconds?: number
+  retryAfterSeconds?: number,
 ): void {
   response.statusCode = status
   response.setHeader("content-type", "application/problem+json")

@@ -1,7 +1,6 @@
+import { cn } from "cn"
 import * as React from "react"
 import { createMap } from "svg-dotted-map"
-
-import { cn } from "cn"
 
 export interface Marker {
   lat: number

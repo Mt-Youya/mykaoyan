@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common"
+
 import { AuthModule } from "../auth"
-import { MembershipController, AdminMembershipController } from "./controller"
+import { AdminMembershipController, MembershipController } from "./controller"
 import { MembershipService } from "./service"
 @Module({
   imports: [AuthModule],

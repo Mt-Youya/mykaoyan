@@ -7,7 +7,7 @@ const YEAR_MS = 365 * 24 * 60 * 60 * 1000
 /** 左闭右开，连续的未来会员期合并展示到期时刻。 */
 export function membershipStatus(
   periods: readonly MembershipPeriod[],
-  now: number
+  now: number,
 ): { active: boolean; expiresAt: string | null } {
   z.number().finite().parse(now)
   const ordered = periods

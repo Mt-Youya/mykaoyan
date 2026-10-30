@@ -1,9 +1,12 @@
 import { createHmac } from "node:crypto"
+
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { APIError } from "better-auth/api"
 import { phoneNumber } from "better-auth/plugins"
+
 import { accounts, loginMethods, sessions, verificationTokens } from "@mykaoyan/db"
+
 import type { Database } from "../database"
 import type { AuthEnvironment } from "./environment"
 import { OTP_CODE_LENGTH, OTP_TTL_SECONDS } from "./policy"

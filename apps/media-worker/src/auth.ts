@@ -37,7 +37,7 @@ export async function verifyToken(token: string | null, secret: string, key: str
       new TextEncoder().encode(secret),
       { name: "HMAC", hash: "SHA-256" },
       false,
-      ["verify"]
+      ["verify"],
     )
     return await crypto.subtle.verify("HMAC", hmac, decode(signature), new TextEncoder().encode(payload))
   } catch {

@@ -2,6 +2,7 @@ import "reflect-metadata"
 import type { INestApplication } from "@nestjs/common"
 import { Test } from "@nestjs/testing"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
+
 import { ProblemFilter } from "../common"
 import { AdmissionsModule } from "./admissions.module"
 import { ChsiClient } from "./client"
@@ -88,12 +89,12 @@ const routes: Record<string, Handler> = {
             { dwdm: "99999", dwmc: "示例大学" },
             { dwdm: "", dwmc: "缺代码" },
           ]
-        : []
+        : [],
     ),
   "POST /zsml/rs/dwzys.do": () =>
     page(
       Array.from({ length: 10 }, (_, index) => majorRow(`0854${String(index).padStart(2, "0")}`)),
-      37
+      37,
     ),
   "POST /zsml/rs/yjfxs.do": (_, body) =>
     body.get("zydm") === "085404" ? page([recordRow]) : body.get("zydm") === "125100" ? page([jointExamRow]) : page([]),
@@ -286,7 +287,7 @@ describe("研招网客户端", () => {
             fetch: async () => (fail ? new Response("down", { status: 503 }) : new Response('{ curYear: "2027" }')),
             minIntervalMs: 0,
             sleep: async () => {},
-          })
+          }),
         )
         .compile()
       const service = moduleRef.get(AdmissionsService)

@@ -1,4 +1,5 @@
-import { afterEach, describe, it, expect, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
+
 import { membershipRequest } from "./api"
 afterEach(() => vi.unstubAllGlobals())
 describe("会员请求错误与会话", () => {
@@ -12,7 +13,7 @@ describe("会员请求错误与会话", () => {
         credentials: "same-origin",
         method: "POST",
         body: JSON.stringify({ code: "fictional" }),
-      })
+      }),
     )
   })
   it("网络失败与401给出可见错误，兑换冲突不当作成功", async () => {
@@ -22,7 +23,7 @@ describe("会员请求错误与会话", () => {
     await expect(membershipRequest("membership")).rejects.toThrow("请先登录")
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response(JSON.stringify({ title: "兑换码不存在或已兑换" }), { status: 409 }))
+      vi.fn().mockResolvedValue(new Response(JSON.stringify({ title: "兑换码不存在或已兑换" }), { status: 409 })),
     )
     await expect(membershipRequest("membership/redeem", { code: "fictional" })).rejects.toThrow("已兑换")
   })

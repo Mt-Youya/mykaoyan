@@ -70,7 +70,7 @@ export function getDueRetests(mistakes: readonly Mistake[], today: LocalDate): D
     .filter((item): item is DueRetest => isRetestDue(item.state, today))
     .toSorted(
       (left, right) =>
-        right.state.overdueDays - left.state.overdueDays || left.state.nextOn.localeCompare(right.state.nextOn)
+        right.state.overdueDays - left.state.overdueDays || left.state.nextOn.localeCompare(right.state.nextOn),
     )
 }
 

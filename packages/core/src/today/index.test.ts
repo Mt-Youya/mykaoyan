@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest"
+
 import { parseLocalDate } from "../dates/index"
+import { fullProgressFileFixture } from "../progress/fixtures/index"
 import { mistakeSchema, progressFileSchema } from "../progress/index"
 import type { Mistake, RetestAttempt } from "../progress/index"
-import { fullProgressFileFixture } from "../progress/fixtures/index"
 import { getTodayTasks } from "./index"
 
 const base = progressFileSchema.parse(fullProgressFileFixture.value).data.mistakes[0]!
@@ -24,7 +25,7 @@ describe("今日页排序", () => {
         { ...base, id: "stable" },
       ],
       { due: 3, newAvailable: 4 },
-      today
+      today,
     )
     expect(tasks.map((task) => task.kind)).toEqual([
       "overdue-retest",

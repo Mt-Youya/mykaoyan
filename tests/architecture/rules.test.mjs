@@ -1,9 +1,10 @@
-import { builtinModules } from "node:module"
 import { execFileSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
+import { builtinModules } from "node:module"
 import { basename, dirname, join, relative, resolve } from "node:path"
-import { API } from "typescript/unstable/sync"
+
 import * as ts from "typescript/unstable/ast"
+import { API } from "typescript/unstable/sync"
 import { afterAll, describe, expect, it } from "vitest"
 
 const root = resolve(import.meta.dirname, "../..")
@@ -32,7 +33,7 @@ const codeFiles = packages
     (file) =>
       /\.(?:[cm]?[jt]sx?)$/.test(file) &&
       !file.endsWith("routeTree.gen.ts") &&
-      !file.endsWith("worker-configuration.d.ts")
+      !file.endsWith("worker-configuration.d.ts"),
   )
 const api = new API({ cwd: root })
 const snapshot = api.updateSnapshot({ openFiles: codeFiles })
@@ -57,7 +58,7 @@ describe("仓库架构", () => {
     ]
     const ignored = execFileSync("git", ["check-ignore", "--no-index", "--stdin"], {
       cwd: root,
-      input: paths.join("\n") + "\n",
+      input: `${paths.join("\n")}\n`,
       encoding: "utf8",
     })
       .trim()
@@ -106,7 +107,7 @@ describe("仓库架构", () => {
   })
 
   for (const { path, manifest } of packages) {
-    for (const file of codeFiles.filter((item) => item.startsWith(path + "/"))) {
+    for (const file of codeFiles.filter((item) => item.startsWith(`${path}/`))) {
       it(relative(root, file), () => {
         const ast = snapshot.getDefaultProjectForFile(file)?.program.getSourceFile(file)
         expect(ast, "TypeScript 必须解析每个受检文件").toBeTruthy()
@@ -115,7 +116,7 @@ describe("仓库架构", () => {
         const inspect = (node) => {
           if (isCore && ts.isIdentifier(node)) {
             expect(["fetch", "window", "document", "localStorage", "indexedDB"], "core 不依赖 IO").not.toContain(
-              node.text
+              node.text,
             )
           }
           const specifier =

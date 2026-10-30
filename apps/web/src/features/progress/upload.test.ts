@@ -1,6 +1,8 @@
+import { describe, expect, it } from "vitest"
+
 import { PROGRESS_FILE_APP, PROGRESS_FILE_VERSION, progressFileSchema } from "@mykaoyan/core"
 import type { ProgressFile } from "@mykaoyan/core"
-import { describe, expect, it } from "vitest"
+
 import { changeRows, countProgressRecords, parseProgressUpload, summarizeUpload } from "./upload"
 
 export function emptyProgressFile(revision = 0): ProgressFile {

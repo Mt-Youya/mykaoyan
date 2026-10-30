@@ -1,9 +1,12 @@
 import { randomUUID } from "node:crypto"
+
 import postgres from "postgres"
-import { beforeAll, afterAll, describe, it, expect } from "vitest"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
 import { createApp } from "../app"
+import type { MemorySmsVerifier } from "../auth"
+import { PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
 import { readEnvironment } from "../environment"
-import { MemorySmsVerifier, PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
 import { MembershipService } from "../membership"
 describe("评论权限、回复与删除 HTTP", () => {
   let app: Awaited<ReturnType<typeof createApp>>,
@@ -30,7 +33,7 @@ describe("评论权限、回复与删除 HTTP", () => {
     cookie?: string,
     body?: unknown,
     method = body === undefined ? "GET" : "POST",
-    base = origin
+    base = origin,
   ) =>
     fetch(`${base}/api/${path}`, {
       method,
@@ -79,7 +82,7 @@ describe("评论权限、回复与删除 HTTP", () => {
         PORT: "3001",
         COMMUNITY_ENABLED: "false",
         MEDIA_SIGNING_KEY: "fictional-comments-test-key-32-characters",
-      })
+      }),
     )
     await off.listen(0, "127.0.0.1")
     offOrigin = await off.getUrl()
@@ -95,16 +98,16 @@ describe("评论权限、回复与删除 HTTP", () => {
         NODE_ENV: "test",
         PORT: "3001",
         MEDIA_SIGNING_KEY: "fictional-comments-test-key-32-characters",
-      }).COMMUNITY_ENABLED
+      }).COMMUNITY_ENABLED,
     ).toBe(false)
     expect(await (await call(`lessons/${slug}/comments`, undefined, undefined, "GET", offOrigin)).json()).toMatchObject(
-      { enabled: false, items: [] }
+      { enabled: false, items: [] },
     )
     expect((await call(`lessons/${slug}/comments`, undefined, { body: "虚构讨论" })).status).toBe(401)
     expect((await call(`lessons/${slug}/comments`, a.cookie, { body: "虚构讨论" })).status).toBe(403)
     await app.get(MembershipService).grant({ id: admin.id, role: "admin" }, { accountId: a.id, reason: "虚构会员开通" })
     expect(
-      (await call(`lessons/${slug}/comments`, a.cookie, { body: "未开放", parentId: null }, "POST", offOrigin)).status
+      (await call(`lessons/${slug}/comments`, a.cookie, { body: "未开放", parentId: null }, "POST", offOrigin)).status,
     ).toBe(403)
     const created = await call(`lessons/${slug}/comments`, a.cookie, { body: "虚构讨论", parentId: null })
     expect(created.status).toBe(201)
@@ -116,7 +119,7 @@ describe("评论权限、回复与删除 HTTP", () => {
     const replyId = ((await reply.json()) as { id: string }).id
     expect((await call(`lessons/${slug}/comments`, a.cookie, { body: "再回复", parentId: replyId })).status).toBe(400)
     expect((await call(`lessons/${otherSlug}/comments`, a.cookie, { body: "跨讲回复", parentId: rootId })).status).toBe(
-      400
+      400,
     )
     expect((await call(`lessons/${slug}/comments`, a.cookie, { body: "冒用", accountId: b.id })).status).toBe(400)
     const list = (await (await call(`lessons/${slug}/comments`)).json()) as { items: { id: string; body: string }[] }
@@ -137,7 +140,7 @@ describe("评论权限、回复与删除 HTTP", () => {
   it("管理员维护关键词，命中拒绝；普通账号不能改关键词", async () => {
     expect((await call("admin/comments/keywords", b.cookie, { keywords: ["虚构禁词"] }, "PUT")).status).toBe(403)
     expect(
-      (await call("admin/comments/keywords", admin.cookie, { keywords: ["虚构禁词", "TeSt"] }, "PUT")).status
+      (await call("admin/comments/keywords", admin.cookie, { keywords: ["虚构禁词", "TeSt"] }, "PUT")).status,
     ).toBe(200)
     expect((await call(`lessons/${slug}/comments`, a.cookie, { body: "包含虚构禁词" })).status).toBe(400)
     expect((await call(`lessons/${slug}/comments`, a.cookie, { body: "ＴＥＳＴ" })).status).toBe(400)
@@ -149,7 +152,7 @@ describe("评论权限、回复与删除 HTTP", () => {
     expect((await call(`admin/comments/${rootId}`, b.cookie, { reason: "虚构原因" }, "DELETE")).status).toBe(403)
     expect((await call(`admin/comments/${rootId}`, admin.cookie, { reason: " " }, "DELETE")).status).toBe(400)
     expect((await call(`admin/comments/${rootId}`, admin.cookie, { reason: "虚构删除原因" }, "DELETE")).status).toBe(
-      200
+      200,
     )
     const list = await (await call(`lessons/${slug}/comments`)).text()
     expect(list).toContain("已删除")

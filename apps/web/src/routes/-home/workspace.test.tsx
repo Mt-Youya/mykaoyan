@@ -1,9 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { expect, it } from "vitest"
+
 import { createDraft, presets } from "../../features/profile"
-import { StudyWorkspace } from "./workspace"
 import { ProfileForm } from "./profile-form"
 import { toSubjects } from "./target-lookup"
+import { StudyWorkspace } from "./workspace"
 
 it("默认只展示当前学习科目的目录，隐藏英语时不展示背单词工具", () => {
   const draft = { ...createDraft(2027), subjects: presets["22408"], active: ["302", "408"] }
@@ -16,7 +17,7 @@ it("默认只展示当前学习科目的目录，隐藏英语时不展示背单�
   expect(html).not.toContain('href="/vocabulary"')
   expect(html).toContain("尚未同步到账号")
   const english = renderToStaticMarkup(
-    <StudyWorkspace draft={{ ...draft, active: ["204"] }} onEdit={() => {}} onBrowse={() => {}} />
+    <StudyWorkspace draft={{ ...draft, active: ["204"] }} onEdit={() => {}} onBrowse={() => {}} />,
   )
   expect(english).toContain("背单词")
   expect(english).toContain('href="/vocabulary"')
@@ -48,7 +49,7 @@ it("目录科目组按代码换成站内统考名称，其他科目保留正式�
         { code: "302", name: "数学（二）" },
         { code: "830", name: "示例专业基础" },
       ],
-    })
+    }),
   ).toEqual([
     { code: "101", name: "思想政治理论" },
     { code: "203", name: "日语" },

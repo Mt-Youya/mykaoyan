@@ -1,6 +1,8 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
+
 import { LegalLinks } from "./-legal/documents"
+
 import "../globals.css"
 
 export const Route = createRootRoute({

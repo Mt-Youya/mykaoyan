@@ -1,21 +1,24 @@
-import { createHash, randomUUID } from "node:crypto"
 import { execFile } from "node:child_process"
-import { promisify } from "node:util"
-import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises"
+import { createHash, randomUUID } from "node:crypto"
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises"
+import { createServer } from "node:http"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { createServer } from "node:http"
+import { promisify } from "node:util"
+
 import { Test } from "@nestjs/testing"
-import { beforeAll, afterAll, describe, it, expect } from "vitest"
 import postgres from "postgres"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
 import { publishPreparedSchema, publishResultSchema } from "@mykaoyan/core"
+
+import { AgentTokensService } from "../agent-tokens"
 import { AppModule } from "../app"
-import { readEnvironment } from "../environment"
 import { ProblemFilter } from "../common"
+import { readEnvironment } from "../environment"
 import { PUBLISH_STORAGE, PublishingService } from "./index"
 import type { PublishStorage } from "./storage"
-import { AgentTokensService } from "../agent-tokens"
 
 class FakeStorage implements PublishStorage {
   objects = new Map<string, { size: number; md5: string; type: string }>()
@@ -113,7 +116,7 @@ describe("管理员发布 HTTP 与对象生命周期", () => {
     await app.get(AgentTokensService).revoke(adminId, revoked.id)
     expect((await call("prepare", input, revoked.token)).status).toBe(401)
     expect(
-      (await fetch(`${origin}/api/v1/progress`, { headers: { authorization: `Bearer ${adminToken}` } })).status
+      (await fetch(`${origin}/api/v1/progress`, { headers: { authorization: `Bearer ${adminToken}` } })).status,
     ).toBe(401)
   })
   it("上传前不写讲，首次发布后逐个校验 key，重复发布不新增版本或签名，下架状态保留", async () => {
@@ -121,7 +124,7 @@ describe("管理员发布 HTTP 与对象生命周期", () => {
     expect(prepared.status).toBe(201)
     const plan = publishPreparedSchema.parse(await prepared.json())
     expect((await call(`${plan.id}/complete`, {})).status).toBe(409)
-    expect((await call("lessons/" + input.slug)).status).toBe(404)
+    expect((await call(`lessons/${input.slug}`)).status).toBe(404)
     storage.accept(plan)
     const completed = await call(`${plan.id}/complete`, {})
     expect(completed.status).toBe(201)
@@ -131,7 +134,7 @@ describe("管理员发布 HTTP 与对象生命周期", () => {
     const signatures = storage.signed.length
     expect(await (await call("prepare", input)).json()).toMatchObject({ unchanged: true, uploads: [] })
     expect(storage.signed).toHaveLength(signatures)
-    expect(await (await call("lessons/" + input.slug)).json()).toMatchObject({ version: 1 })
+    expect(await (await call(`lessons/${input.slug}`)).json()).toMatchObject({ version: 1 })
     await sql`update lessons set listed=true where slug=${input.slug}`
     await sql`update lessons set listed=false where slug=${input.slug}`
     const changed = { ...input, title: "虚构新标题" }
@@ -141,10 +144,10 @@ describe("管理员发布 HTTP 与对象生命周期", () => {
     const saved = publishResultSchema.parse(await (await call(`${next.id}/complete`, {})).json())
     expect(saved).toMatchObject({ listed: false, version: 2, cleanupPending: true })
     // 删除失败不能回滚已经登记的新内容；重试完成可清理旧对象，不新增版本。
-    expect(await (await call("lessons/" + input.slug)).json()).toMatchObject({ cleanupPending: true })
+    expect(await (await call(`lessons/${input.slug}`)).json()).toMatchObject({ cleanupPending: true })
     // 同内容重发也会重试清理；若仍失败，读回继续准确报告。
     expect(await (await call("prepare", changed)).json()).toMatchObject({ unchanged: true })
-    expect(await (await call("lessons/" + input.slug)).json()).toMatchObject({ cleanupPending: true })
+    expect(await (await call(`lessons/${input.slug}`)).json()).toMatchObject({ cleanupPending: true })
     storage.failDelete = false
     const retried = await (await call(`${next.id}/complete`, {})).json()
     expect(retried).toMatchObject({ listed: false, version: 2, cleanupPending: false })
@@ -167,7 +170,7 @@ describe("管理员发布 HTTP 与对象生命周期", () => {
     const [a, b] = await Promise.all([prepare(), prepare()])
     const results = await Promise.all([call(`${a.id}/complete`, {}), call(`${b.id}/complete`, {})])
     expect(results.map((r) => r.status).toSorted()).toEqual([201, 409])
-    expect(await (await call("lessons/" + slug)).json()).toMatchObject({ version: 1 })
+    expect(await (await call(`lessons/${slug}`)).json()).toMatchObject({ version: 1 })
   })
   it("拒绝客户端指定上架状态和未知计划", async () => {
     expect((await call("prepare", { ...input, listed: true })).status).toBe(400)
@@ -178,7 +181,7 @@ describe("管理员发布 HTTP 与对象生命周期", () => {
     const manifest = fileURLToPath(new URL("../../../../cli/Cargo.toml", import.meta.url))
     await execute("cargo", ["build", "--manifest-path", manifest, "--locked"])
     const binary = fileURLToPath(
-      new URL(`../../../../cli/target/debug/mykaoyan${process.platform === "win32" ? ".exe" : ""}`, import.meta.url)
+      new URL(`../../../../cli/target/debug/mykaoyan${process.platform === "win32" ? ".exe" : ""}`, import.meta.url),
     )
     let puts = 0
     const server = createServer(async (req, res) => {
@@ -212,7 +215,7 @@ describe("管理员发布 HTTP 与对象生命周期", () => {
           await execute(binary, ["--json", "--origin", origin, "publish", chapter], {
             env: { ...process.env, MYKAOYAN_TOKEN: adminToken },
           })
-        ).stdout
+        ).stdout,
       )
     try {
       for (const kind of ["视频", "字幕", "讲稿"]) await mkdir(join(chapter, kind), { recursive: true })

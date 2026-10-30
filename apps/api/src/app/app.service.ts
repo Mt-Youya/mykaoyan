@@ -1,4 +1,5 @@
 import { Inject, Injectable, ServiceUnavailableException } from "@nestjs/common"
+
 import { DatabaseService } from "../database"
 
 /** 健康检查：真的执行一次数据库查询，而不是只看进程活着。 */

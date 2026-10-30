@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
+
 import { parseLocalDate } from "../dates/index"
-import { mistakeSchema, progressFileSchema } from "../progress/index"
 import { fullProgressFileFixture } from "../progress/fixtures/index"
+import { mistakeSchema, progressFileSchema } from "../progress/index"
 import type { RetestAttempt } from "../progress/index"
 import { getDueRetests, getRetestState, getStableOn, isMistakeStable, isRetestDue, recordRetest } from "./index"
 
@@ -86,7 +87,7 @@ describe("错题复测推算（PLAN §5.6）", () => {
   for (const scenario of scenarios) {
     it(scenario.name, () => {
       expect(
-        getRetestState(mistake(scenario.correctedOn, attempts(scenario.retests)), parseLocalDate(scenario.today))
+        getRetestState(mistake(scenario.correctedOn, attempts(scenario.retests)), parseLocalDate(scenario.today)),
       ).toEqual(scenario.expected)
     })
   }
@@ -97,7 +98,7 @@ describe("错题复测推算（PLAN §5.6）", () => {
       attempts([
         { on: "2030-03-03", result: "independent" },
         { on: "2030-03-08", result: "independent" },
-      ])
+      ]),
     )
     expect(getRetestState(stable, parseLocalDate("2030-03-10"))).toEqual({ stable: true })
   })
@@ -110,7 +111,7 @@ describe("乱序复测记录", () => {
       attempts([
         { on: "2030-03-08", result: "independent" },
         { on: "2030-03-03", result: "independent" },
-      ])
+      ]),
     )
     expect(getRetestState(reversed, parseLocalDate("2030-03-10"))).toEqual({ stable: true })
     expect(reversed.retests.map((retest) => retest.on)).toEqual(["2030-03-08", "2030-03-03"])
@@ -122,7 +123,7 @@ describe("乱序复测记录", () => {
       attempts([
         { on: "2030-03-08", result: "failed" },
         { on: "2030-03-03", result: "independent" },
-      ])
+      ]),
     )
     expect(getRetestState(reversed, parseLocalDate("2030-03-11"))).toEqual({
       stable: false,
@@ -140,7 +141,7 @@ describe("稳定状态与稳定日期", () => {
       attempts([
         { on: "2030-03-03", result: "independent" },
         { on: "2030-03-08", result: "independent" },
-      ])
+      ]),
     )
     expect(isMistakeStable(stable)).toBe(true)
     expect(getStableOn(stable)).toBe("2030-03-08")
@@ -160,7 +161,7 @@ describe("稳定状态与稳定日期", () => {
       attempts([
         { on: "2030-03-08", result: "independent" },
         { on: "2030-03-03", result: "independent" },
-      ])
+      ]),
     )
     expect(getStableOn(reversed)).toBe("2030-03-08")
   })
@@ -208,7 +209,7 @@ describe("追加复测记录", () => {
       attempts([
         { on: "2030-03-10", result: "failed" },
         { on: "2030-03-03", result: "independent" },
-      ])
+      ]),
     )
     expect(() => recordRetest(backfilled, "failed", parseLocalDate("2030-03-05"))).toThrow("必须晚于")
   })
@@ -228,7 +229,7 @@ describe("追加复测记录", () => {
       attempts([
         { on: "2030-03-03", result: "independent" },
         { on: "2030-03-08", result: "independent" },
-      ])
+      ]),
     )
     expect(() => recordRetest(stable, "failed", parseLocalDate("2030-03-09"))).toThrow("已稳定")
   })

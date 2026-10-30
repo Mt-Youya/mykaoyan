@@ -1,6 +1,7 @@
-import { describe, it, expect } from "vitest"
-import { R2SubmissionStorage } from "./storage"
+import { describe, expect, it } from "vitest"
+
 import { readEnvironment } from "../environment"
+import { R2SubmissionStorage } from "./storage"
 describe("R2分片预签名边界", () => {
   it("签名绑定上传编号、分片编号、大小且不暴露密钥", async () => {
     const config = readEnvironment({
@@ -17,7 +18,7 @@ describe("R2分片预签名边界", () => {
       "submissions/fictional/video.mp4",
       "fictional-upload",
       2,
-      123
+      123,
     )
     const parsed = new URL(url)
     expect(parsed.searchParams.get("uploadId")).toBe("fictional-upload")

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+
 import { publishLessonSchema } from "./index"
 const request = {
   course: { slug: "fictional", title: "虚构课程", subjectCode: "302" },
@@ -19,7 +20,7 @@ describe("发布讲的公开输入", () => {
   it("拒绝答案类标识、非法摘要和非整数大小", () => {
     expect(publishLessonSchema.safeParse({ ...request, slug: "lesson-answer" }).success).toBe(false)
     expect(
-      publishLessonSchema.safeParse({ ...request, video: { ...request.video, sha256: "x", size: 0.5 } }).success
+      publishLessonSchema.safeParse({ ...request, video: { ...request.video, sha256: "x", size: 0.5 } }).success,
     ).toBe(false)
   })
 })

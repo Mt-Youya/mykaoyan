@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router"
+
 import type { CourseDetail } from "./api"
-import { useCatalog } from "./use-catalog"
 import { Breadcrumb, LoadGuard } from "./ui"
+import { useCatalog } from "./use-catalog"
 
 const eyebrow = "text-[0.8125rem] tracking-[0.08em] text-muted-foreground"
 const lede = "max-w-[42rem] text-muted-foreground"
@@ -38,7 +39,7 @@ export function CoursePage({ slug }: { slug: string }) {
                       <li key={`${chapterIndex}-${chapter.title}`} className="min-w-0">
                         <h3 className="mb-[0.6rem] flex items-baseline gap-[0.6rem] text-[1.05rem] leading-[1.4]">
                           <span
-                            className="shrink-0 rounded-full border border-border px-[0.45rem] py-[0.05rem] text-xs font-normal tabular-nums text-muted-foreground"
+                            className="shrink-0 rounded-full border border-border px-[0.45rem] py-[0.05rem] text-xs font-normal text-muted-foreground tabular-nums"
                             aria-hidden="true"
                           >
                             {String(chapterIndex + 1).padStart(2, "0")}
@@ -50,7 +51,7 @@ export function CoursePage({ slug }: { slug: string }) {
                             {chapter.lessons.map((lesson, lessonIndex) => (
                               <li key={lesson.slug} className="flex min-w-0 items-baseline gap-[0.55rem]">
                                 <span
-                                  className="min-w-[1.4rem] shrink-0 text-right text-sm tabular-nums text-muted-foreground"
+                                  className="min-w-[1.4rem] shrink-0 text-right text-sm text-muted-foreground tabular-nums"
                                   aria-hidden="true"
                                 >
                                   {firstLessonNumber + lessonIndex + 1}

@@ -1,9 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState, type ComponentType, type RefAttributes, type RefObject } from "react"
-import { motion, useInView, type DOMMotionComponents, type HTMLMotionProps, type MotionProps } from "motion/react"
-
 import { cn } from "cn"
+import { type DOMMotionComponents, type HTMLMotionProps, motion, type MotionProps, useInView } from "motion/react"
+import { type ComponentType, type RefAttributes, type RefObject, useEffect, useRef, useState } from "react"
 
 const motionElements = {
   article: motion.article,

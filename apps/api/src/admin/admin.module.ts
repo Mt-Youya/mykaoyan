@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common"
+
 import { AuthModule } from "../auth"
 import { ListingController } from "./controller"
 import { ListingService } from "./listing.service"

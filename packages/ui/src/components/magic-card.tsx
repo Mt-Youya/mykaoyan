@@ -1,10 +1,9 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react"
+import { cn } from "cn"
 import { motion, useMotionTemplate, useMotionValue, useSpring } from "motion/react"
 import { useTheme } from "next-themes"
-
-import { cn } from "cn"
+import React, { useEffect, useRef, useState } from "react"
 
 interface MagicCardBaseProps {
   children?: React.ReactNode
@@ -164,7 +163,7 @@ export function MagicCard(props: MagicCardProps) {
         `,
       }}
     >
-      <div className="bg-background absolute inset-px z-20 rounded-[inherit]" />
+      <div className="absolute inset-px z-20 rounded-[inherit] bg-background" />
 
       {mode === "gradient" && (
         <motion.div

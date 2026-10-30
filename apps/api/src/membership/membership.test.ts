@@ -1,7 +1,9 @@
 import postgres from "postgres"
-import { beforeAll, afterAll, describe, it, expect } from "vitest"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
 import { createApp } from "../app"
-import { MemorySmsVerifier, PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
+import type { MemorySmsVerifier } from "../auth"
+import { PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
 import { readEnvironment } from "../environment"
 import { MembershipService } from "./service"
 describe("会员期与兑换码 HTTP", () => {
@@ -73,7 +75,7 @@ describe("会员期与兑换码 HTTP", () => {
     })
     await expect(app.get(MembershipService).generate({ id: a.id, role: "admin" }, { count: 1 })).rejects.toThrow()
     expect((await request("admin/membership/grants", a.cookie, { accountId: a.id, reason: "虚构原因" })).status).toBe(
-      403
+      403,
     )
     expect((await request("admin/membership/grants", admin.cookie, { accountId: a.id, reason: " " })).status).toBe(400)
     const first = await request("admin/membership/grants", admin.cookie, { accountId: a.id, reason: "虚构首次开通" })
@@ -128,7 +130,7 @@ describe("会员期与兑换码 HTTP", () => {
     ])
     expect(results.map((r) => r.status)).toEqual([201, 201])
     const periods = await Promise.all(
-      results.map(async (r) => (await r.json()) as { startsAt: string; endsAt: string })
+      results.map(async (r) => (await r.json()) as { startsAt: string; endsAt: string }),
     )
     periods.sort((x, y) => x.startsAt.localeCompare(y.startsAt))
     expect(periods[1]!.startsAt).toBe(periods[0]!.endsAt)

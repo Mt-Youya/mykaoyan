@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest"
-import { OTP_CODE_LENGTH, OTP_SEND_COOLDOWN_SECONDS, OTP_TTL_SECONDS } from "../policy"
-import { AliyunSmsVerifier, canonicalQuery, percentEncode, signRpcRequest } from "./sms-aliyun"
+
 import type { AliyunAuthEnvironment } from "../environment"
+import { OTP_CODE_LENGTH, OTP_SEND_COOLDOWN_SECONDS, OTP_TTL_SECONDS } from "../policy"
 import { SmsProviderError } from "./sms"
+import { AliyunSmsVerifier, canonicalQuery, percentEncode, signRpcRequest } from "./sms-aliyun"
 
 const config: AliyunAuthEnvironment = {
   provider: "aliyun",
@@ -51,7 +52,7 @@ describe("阿里云发送与校验", () => {
       config,
       fetchImpl,
       () => fixedNow,
-      () => fixedNonce
+      () => fixedNonce,
     )
     await expect(verifier.sendCode("+8613800138000")).resolves.toEqual({ requestId: "req-1" })
 
@@ -79,16 +80,16 @@ describe("阿里云发送与校验", () => {
         config,
         passed.fetchImpl,
         () => fixedNow,
-        () => fixedNonce
-      ).checkCode("+8613800138000", "123456")
+        () => fixedNonce,
+      ).checkCode("+8613800138000", "123456"),
     ).toBe("valid")
     expect(
       await new AliyunSmsVerifier(
         config,
         failed.fetchImpl,
         () => fixedNow,
-        () => fixedNonce
-      ).checkCode("+8613800138000", "000000")
+        () => fixedNonce,
+      ).checkCode("+8613800138000", "000000"),
     ).toBe("invalid")
     expect(new URL(failed.urls[0]!).searchParams.get("VerifyCode")).toBe("000000")
   })
@@ -99,7 +100,7 @@ describe("阿里云发送与校验", () => {
       config,
       fetchImpl,
       () => fixedNow,
-      () => fixedNonce
+      () => fixedNonce,
     )
     const error = await verifier.sendCode("+8613800138000").catch((caught: unknown) => caught)
     expect(error).toBeInstanceOf(SmsProviderError)

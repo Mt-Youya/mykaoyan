@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
+
 import { LegalLinks, PolicyChecks, PrivacyDocument, SupportDocument, TermsDocument } from "./documents"
 
 describe("政策与投诉申诉公开入口", () => {
@@ -33,7 +34,7 @@ describe("政策与投诉申诉公开入口", () => {
         consented={false}
         onAgreement={() => {}}
         onConsent={() => {}}
-      />
+      />,
     )
     expect(html.match(/type="checkbox"/g)).toHaveLength(2)
     expect(html).not.toContain("checked=")

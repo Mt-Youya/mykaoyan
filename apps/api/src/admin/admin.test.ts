@@ -3,31 +3,32 @@ import { Module } from "@nestjs/common"
 import { NestFactory } from "@nestjs/core"
 import postgres from "postgres"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { ListingController, ListingService } from "./index"
-import { ProblemFilter } from "../common"
+
 import {
   AUTH,
   AUTH_ENV,
   AUTH_STORES,
   AuthController,
   CLOCK,
-  MemorySmsVerifier,
-  PRIVACY_POLICY_VERSION,
-  PhoneAuthService,
-  PhoneController,
-  SMS_VERIFIER,
-  SessionGuard,
   createAuth,
   createDrizzleAuthDatabase,
   createDrizzleStores,
+  MemorySmsVerifier,
+  PhoneAuthService,
+  PhoneController,
+  PRIVACY_POLICY_VERSION,
   readAuthEnvironment,
+  SessionGuard,
+  SMS_VERIFIER,
 } from "../auth"
 import type { AuthEnvironment } from "../auth"
-import { CatalogController, CatalogService, CATALOG_READER } from "../catalog"
+import { CATALOG_READER, CatalogController, CatalogService } from "../catalog"
+import { ProblemFilter } from "../common"
 import { CONFIG } from "../config"
 import { DatabaseService } from "../database"
 import { readEnvironment } from "../environment"
 import type { Environment } from "../environment"
+import { ListingController, ListingService } from "./index"
 
 /**
  * 上下架权限矩阵与审计记录（真实 Postgres + Drizzle 会话）。
@@ -159,7 +160,7 @@ describe.runIf(enabled)("管理员上下架", () => {
           ListingService,
         ],
       },
-      { logger: false }
+      { logger: false },
     )
     app.setGlobalPrefix("api")
     app.useGlobalFilters(new ProblemFilter(app.getHttpAdapter()))

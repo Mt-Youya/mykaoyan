@@ -1,4 +1,5 @@
 import { expect, it } from "vitest"
+
 import { createDraft, parseDraft, presets, readDraft, writeDraft } from "./draft"
 
 it("22408保留完整初试要求，只学习数学二和408，并能保存恢复", () => {
@@ -39,8 +40,8 @@ it("11408与专业目标独立保存，拒绝重复科目、空学习范围和�
         target: { ...draft.target, school: "" },
         subjects: [{ code: "901", name: "专业基础" }],
         active: ["901"],
-      })
-    )
+      }),
+    ),
   ).toBeNull()
 })
 
@@ -54,8 +55,8 @@ it("旧版草稿补齐目标与词汇偏好，存储异常不会被伪装成成�
           throw new Error("quota")
         },
       },
-      { ...createDraft(2027), subjects: presets["22408"], active: ["302"] }
-    )
+      { ...createDraft(2027), subjects: presets["22408"], active: ["302"] },
+    ),
   ).toThrow("quota")
 })
 
@@ -92,8 +93,8 @@ it("保存研招网条目来源，拒绝其他站点的链接", () => {
       JSON.stringify({
         ...draft,
         source: { ...draft.source, url: "https://example.com/zsml/yjfxdetail?id=0123456789abcdef0123456789abcdef" },
-      })
-    )
+      }),
+    ),
   ).toBeNull()
   expect(parseDraft(JSON.stringify({ ...draft, source: undefined }))?.source).toBeNull()
 })

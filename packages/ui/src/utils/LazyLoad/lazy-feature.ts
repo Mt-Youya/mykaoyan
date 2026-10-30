@@ -1,4 +1,4 @@
-import { lazy, type ComponentType, type LazyExoticComponent } from "react"
+import { type ComponentType, lazy, type LazyExoticComponent } from "react"
 
 /**
  * 通用懒加载工厂：把「模块路径 + 导出名」变成 React.lazy 组件，自动保留 Props 类型。
@@ -15,7 +15,7 @@ type ComponentOf<M, K extends keyof M> = M[K] extends ComponentType<infer P> ? C
 
 export function lazyFeature<M extends Record<string, unknown>, K extends keyof M>(
   loader: () => Promise<M>,
-  exportName: K
+  exportName: K,
 ): LazyExoticComponent<ComponentOf<M, K>> {
   const factory = lazy(async () => {
     const mod = await loader()

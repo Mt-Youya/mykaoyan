@@ -1,14 +1,17 @@
 import { randomUUID } from "node:crypto"
-import postgres from "postgres"
+
+import type { INestApplication } from "@nestjs/common"
 import { Test } from "@nestjs/testing"
-import { beforeAll, afterAll, describe, it, expect } from "vitest"
+import postgres from "postgres"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
 import { AppModule } from "../app"
-import { readEnvironment } from "../environment"
-import { MemorySmsVerifier, SMS_VERIFIER, PRIVACY_POLICY_VERSION } from "../auth"
+import type { MemorySmsVerifier } from "../auth"
+import { PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
 import { ProblemFilter } from "../common"
+import { readEnvironment } from "../environment"
 import { SUBMISSION_STORAGE } from "./index"
 import type { SubmissionStorage, UploadedPart } from "./index"
-import type { INestApplication } from "@nestjs/common"
 type TestResponse = Omit<Response, "json"> & {
   json(): Promise<{
     url: string
@@ -68,7 +71,7 @@ describe("投稿上传、审核和清理 HTTP", () => {
     cookie?: string,
     body?: unknown,
     method = body === undefined ? "GET" : "POST",
-    base = origin
+    base = origin,
   ) =>
     fetch(`${base}/api/${path}`, {
       method,
@@ -143,7 +146,7 @@ describe("投稿上传、审核和清理 HTTP", () => {
   })
   async function grant() {
     expect((await call("admin/membership/grants", admin.cookie, { accountId: a.id, reason: "虚构开通" })).status).toBe(
-      201
+      201,
     )
   }
   async function pending(change = {}) {
@@ -207,7 +210,8 @@ describe("投稿上传、审核和清理 HTTP", () => {
     storage.data.get(key)!.object = { size: 100, type: "application/octet-stream" }
     expect((await call(`submissions/${v.id}/complete`, a.cookie, {})).status).toBe(400)
     expect(
-      (await (await call("submissions/mine", a.cookie)).json()).items.find((r: { id: string }) => r.id === v.id)?.status
+      (await (await call("submissions/mine", a.cookie)).json()).items.find((r: { id: string }) => r.id === v.id)
+        ?.status,
     ).toBe("uploading")
   })
   it("先审核后公开，管理员可下架，投稿播放复用HMAC令牌且关闭时不向访客签发", async () => {
@@ -218,15 +222,15 @@ describe("投稿上传、审核和清理 HTTP", () => {
     for (const cookie of [undefined, b.cookie]) {
       expect((await call("admin/submissions", cookie)).status).toBe(cookie ? 403 : 401)
       expect((await call(`admin/submissions/${v.id}/review`, cookie, { decision: "approve" })).status).toBe(
-        cookie ? 403 : 401
+        cookie ? 403 : 401,
       )
       expect((await call(`admin/submissions/${v.id}/listing`, cookie, { listed: true }, "PUT")).status).toBe(
-        cookie ? 403 : 401
+        cookie ? 403 : 401,
       )
       expect((await call("admin/submissions/cleanup", cookie, {})).status).toBe(cookie ? 403 : 401)
     }
     expect(
-      await (await call(`admin/submissions/${v.id}/review`, admin.cookie, { decision: "approve" })).json()
+      await (await call(`admin/submissions/${v.id}/review`, admin.cookie, { decision: "approve" })).json(),
     ).toMatchObject({ status: "approved", listed: true })
     const token = await (await call(`submissions/${v.id}/playback-token`, undefined, {})).json()
     expect(JSON.parse(Buffer.from(token.token.split(".")[0]!, "base64url").toString())).toMatchObject({
@@ -239,17 +243,17 @@ describe("投稿上传、审核和清理 HTTP", () => {
     expect((await call(`submissions/${v.id}/playback-token`, undefined, {}, "POST", offOrigin)).status).toBe(404)
     expect((await call(`admin/submissions/${v.id}/listing`, admin.cookie, { listed: false }, "PUT")).status).toBe(200)
     expect(
-      (await (await call("admin/submissions", admin.cookie)).json()).items.find((r) => r.id === v.id)
+      (await (await call("admin/submissions", admin.cookie)).json()).items.find((r) => r.id === v.id),
     ).toMatchObject({ listingChange: { listed: false, actorId: admin.id } })
     expect((await call(`submissions/${v.id}/playback-token`, undefined, {})).status).toBe(404)
     expect(
-      (await call(`admin/submissions/${v.id}/review`, admin.cookie, { decision: "reject", reason: "重审" })).status
+      (await call(`admin/submissions/${v.id}/review`, admin.cookie, { decision: "reject", reason: "重审" })).status,
     ).toBe(409)
   })
   it("驳回必须原因，30天前不删除，先持久标记再删对象，失败重试且保留审核记录", async () => {
     const v = await pending()
     expect(
-      (await call(`admin/submissions/${v.id}/review`, admin.cookie, { decision: "reject", reason: " " })).status
+      (await call(`admin/submissions/${v.id}/review`, admin.cookie, { decision: "reject", reason: " " })).status,
     ).toBe(400)
     await call(`admin/submissions/${v.id}/review`, admin.cookie, { decision: "reject", reason: "虚构驳回原因" })
     expect(await (await call("admin/submissions/cleanup", admin.cookie, {})).json()).toMatchObject({ removed: 0 })
@@ -274,7 +278,7 @@ describe("投稿上传、审核和清理 HTTP", () => {
       pending: 0,
     })
     expect(
-      (await (await call("submissions/mine", a.cookie)).json()).items.find((r: { id: string }) => r.id === v.id)
+      (await (await call("submissions/mine", a.cookie)).json()).items.find((r: { id: string }) => r.id === v.id),
     ).toMatchObject({ deleted: true, status: "rejected", reason: "虚构驳回原因" })
     storage.beforeRemove = null
   })
@@ -291,7 +295,7 @@ describe("投稿上传、审核和清理 HTTP", () => {
       expect((await call(path, a.cookie, body)).status).toBe(403)
     expect((await call("submissions/mine", a.cookie)).status).toBe(200)
     expect(
-      (await (await call("submissions/mine", a.cookie)).json()).items.some((r: { id: string }) => r.id === v.id)
+      (await (await call("submissions/mine", a.cookie)).json()).items.some((r: { id: string }) => r.id === v.id),
     ).toBe(true)
   })
   it("失败的清理批次不阻塞后续到期文件", async () => {

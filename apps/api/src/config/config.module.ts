@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common"
 import type { DynamicModule } from "@nestjs/common"
+
 import type { Environment } from "../environment"
 import { CONFIG, ConfigService } from "./config.service"
 

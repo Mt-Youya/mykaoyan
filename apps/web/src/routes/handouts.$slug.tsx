@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+
 import { HandoutPage } from "../features/catalog"
 
 export const Route = createFileRoute("/handouts/$slug")({

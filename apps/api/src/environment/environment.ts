@@ -1,4 +1,5 @@
 import { z } from "zod"
+
 import { StartupConfigError } from "../common"
 
 const environmentSchema = z

@@ -1,23 +1,24 @@
 import "reflect-metadata"
 import { Controller, Get, Module, UseGuards } from "@nestjs/common"
 import { NestFactory } from "@nestjs/core"
-import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { CONFIG } from "../config"
-import type { Environment } from "../environment"
 import { memoryAdapter } from "better-auth/adapters/memory"
 import type { MemoryDB } from "better-auth/adapters/memory"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
+
+import { CONFIG } from "../config"
+import type { Environment } from "../environment"
 import {
   AUTH,
   AUTH_ENV,
   AUTH_STORES,
+  authControllers,
   CLOCK,
+  createAuth,
   MemorySmsVerifier,
   PhoneAuthService,
+  readAuthEnvironment,
   SessionGuard,
   SMS_VERIFIER,
-  authControllers,
-  createAuth,
-  readAuthEnvironment,
 } from "./index"
 import type { AuthEnvironment } from "./index"
 import { PRIVACY_POLICY_VERSION } from "./policy"
@@ -116,7 +117,7 @@ describe("手机号验证码登录 HTTP 链路（内存短信 + 内存 store）"
           SessionGuard,
         ],
       },
-      { logger: false }
+      { logger: false },
     )
     app.setGlobalPrefix("api")
     await app.listen(0, "127.0.0.1")

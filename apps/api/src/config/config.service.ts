@@ -1,4 +1,5 @@
-import { Injectable, Inject } from "@nestjs/common"
+import { Inject, Injectable } from "@nestjs/common"
+
 import type { Environment } from "../environment"
 
 /** 启动配置的注入标记；由 `ConfigModule.forRoot` 提供。 */

@@ -4,6 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { pathToFileURL } from "node:url"
+
 import postgres from "postgres"
 import { z } from "zod"
 
@@ -89,7 +90,7 @@ export async function backupDatabase(input) {
           "--file",
           dump,
         ],
-        { env, stdio: ["ignore", "pipe", "pipe"] }
+        { env, stdio: ["ignore", "pipe", "pipe"] },
       )
       return { tables: result, roles: roles.map((role) => role.rolname), schemas }
     })
@@ -109,7 +110,7 @@ export async function backupDatabase(input) {
         "--body",
         file,
         "--metadata",
-        `sha256=${sha256}`
+        `sha256=${sha256}`,
       )
       const stored = JSON.parse(aws("head-object", "--bucket", config.BACKUP_BUCKET, "--key", key + suffix))
       if (stored.ContentLength !== statSync(file).size || stored.Metadata?.sha256 !== sha256) {
@@ -159,7 +160,7 @@ export async function restoreBackup(input) {
             z.object({
               name: z.enum(["public", "supabase_migrations"]),
               publicPrivileges: z.array(z.enum(["USAGE", "CREATE"])).max(2),
-            })
+            }),
           )
           .max(2)
           .refine((schemas) => new Set(schemas.map((schema) => schema.name)).size === schemas.length),
@@ -172,12 +173,12 @@ export async function restoreBackup(input) {
         if (!existing.present) {
           await sql`create role ${sql(role)} nologin nosuperuser nocreatedb nocreaterole noreplication nobypassrls`
         }
-      })
+      }),
     )
     execFileSync(
       "pg_restore",
       ["--dbname", target.href, "--exit-on-error", "--clean", "--if-exists", "--no-owner", dump],
-      { stdio: ["ignore", "pipe", "pipe"] }
+      { stdio: ["ignore", "pipe", "pipe"] },
     )
     // 重建 public schema 后，pg_restore 不一定重放其默认 PUBLIC 权限。
     await Promise.all(
@@ -186,7 +187,7 @@ export async function restoreBackup(input) {
         if (publicPrivileges.length) {
           await sql`grant ${sql.unsafe(publicPrivileges.join(", "))} on schema ${sql(name)} to public`
         }
-      })
+      }),
     )
     const restored = await counts(sql)
     if (JSON.stringify(restored) !== JSON.stringify(manifest.tables)) throw new Error("恢复后的逐表行数不匹配")

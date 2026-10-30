@@ -1,8 +1,7 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
-
 import { cn } from "cn"
+import React, { useEffect, useState } from "react"
 
 interface MeteorsProps {
   number?: number
@@ -27,11 +26,11 @@ export const Meteors = ({
 
   useEffect(() => {
     const styles = Array.from({ length: number }, () => ({
-      "--angle": -angle + "deg",
+      "--angle": `${-angle}deg`,
       top: "-5%",
       left: `calc(0% + ${Math.floor(Math.random() * window.innerWidth)}px)`,
-      animationDelay: Math.random() * (maxDelay - minDelay) + minDelay + "s",
-      animationDuration: Math.floor(Math.random() * (maxDuration - minDuration) + minDuration) + "s",
+      animationDelay: `${Math.random() * (maxDelay - minDelay) + minDelay}s`,
+      animationDuration: `${Math.floor(Math.random() * (maxDuration - minDuration) + minDuration)}s`,
     }))
     setMeteorStyles(styles)
   }, [number, minDelay, maxDelay, minDuration, maxDuration, angle])
@@ -45,7 +44,7 @@ export const Meteors = ({
           style={{ ...style }}
           className={cn(
             "animate-meteor pointer-events-none absolute size-0.5 rotate-(--angle) rounded-full bg-zinc-500 shadow-[0_0_0_1px_#ffffff10]",
-            className
+            className,
           )}
         >
           {/* Meteor Tail */}

@@ -1,5 +1,6 @@
-import { Button } from "@mykaoyan/ui"
 import { useCallback, useEffect, useRef, useState } from "react"
+
+import { Button } from "@mykaoyan/ui"
 
 /** 后端签发的播放令牌；字幕是独立令牌，因为媒体 Worker 要求令牌的 key 与路径一致。 */
 type PlaybackToken = {

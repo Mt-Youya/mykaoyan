@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
 import { getRequest, setResponseHeader } from "@tanstack/react-start/server"
-import { Button, Input, Label } from "@mykaoyan/ui"
 import { useEffect, useState } from "react"
-import { loadLoginState, postJson, loginSuccessPath } from "./-auth"
+
+import { Button, Input, Label } from "@mykaoyan/ui"
+
 import { MemberPanel } from "../features/membership"
-import { PolicyChecks } from "./-legal/documents"
+import { loadLoginState, loginSuccessPath, postJson } from "./-auth"
 import type { LoginState } from "./-auth"
+import { PolicyChecks } from "./-legal/documents"
 
 /**
  * 服务端读取会话与登录策略。

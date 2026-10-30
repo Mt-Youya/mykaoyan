@@ -6,12 +6,14 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common"
-import { blockedComment, normalizeKeywords } from "@mykaoyan/core"
 import { z } from "zod"
-import { DatabaseService } from "../database"
-import { MembershipService } from "../membership"
+
+import { blockedComment, normalizeKeywords } from "@mykaoyan/core"
+
 import { CONFIG } from "../config"
+import { DatabaseService } from "../database"
 import type { Environment } from "../environment"
+import { MembershipService } from "../membership"
 type Actor = { id: string; role: string }
 type Row = {
   id: string
@@ -46,7 +48,7 @@ export class CommentsService {
   constructor(
     @Inject(DatabaseService) private database: DatabaseService,
     @Inject(MembershipService) private membership: MembershipService,
-    @Inject(CONFIG) private config: Environment
+    @Inject(CONFIG) private config: Environment,
   ) {}
   private async admin(actor: Actor) {
     const [row] = await this.database.client<{ role: string }[]>`select role from accounts where id=${actor.id}`
@@ -90,7 +92,7 @@ export class CommentsService {
       if (
         blockedComment(
           body,
-          keywords.map((row) => row.word)
+          keywords.map((row) => row.word),
         )
       )
         throw new BadRequestException("评论含有禁止的关键词，请修改后再发送")
@@ -127,7 +129,7 @@ export class CommentsService {
     await this.admin(actor)
     return {
       keywords: (await this.database.client<{ word: string }[]>`select word from comment_keywords order by word`).map(
-        (row) => row.word
+        (row) => row.word,
       ),
     }
   }

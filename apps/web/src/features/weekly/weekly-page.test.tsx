@@ -1,6 +1,8 @@
-import { parseLocalDate } from "@mykaoyan/core"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
+
+import { parseLocalDate } from "@mykaoyan/core"
+
 import { emptyStudyDocument, studyDocument } from "../study-fixture"
 import { WeeklyView } from "./weekly-page"
 
@@ -16,7 +18,7 @@ describe("周复盘页", () => {
         weekStart={parseLocalDate("2030-03-04")}
         onChangeWeek={noop}
         onSave={noop}
-      />
+      />,
     )
     expect(html).toContain("2030-03-04 至 2030-03-10")
     expect(html).toContain("700")
@@ -36,7 +38,7 @@ describe("周复盘页", () => {
         weekStart={parseLocalDate("2030-03-04")}
         onChangeWeek={noop}
         onSave={noop}
-      />
+      />,
     )
     expect(html).toContain("虚构调整")
     expect(html).toContain("保存下周调整")
@@ -51,7 +53,7 @@ describe("周复盘页", () => {
         weekStart={parseLocalDate("2030-03-04")}
         onChangeWeek={noop}
         onSave={noop}
-      />
+      />,
     )
     expect(html).toContain("还没有备考档案")
     expect(html).toContain("/plan")

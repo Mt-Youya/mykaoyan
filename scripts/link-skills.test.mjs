@@ -4,6 +4,7 @@ import fs from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve, toNamespacedPath } from "node:path"
 import { test } from "node:test"
+
 import { linkSkills } from "./link-skills.mjs"
 
 const entries = [".agents/skills/mykaoyan", ".claude/skills/mykaoyan"]
@@ -28,7 +29,7 @@ function verify(root) {
     if (process.platform === "win32") {
       assert.equal(
         toNamespacedPath(resolve(dirname(link), fs.readlinkSync(link))),
-        toNamespacedPath(resolve(dirname(link), target))
+        toNamespacedPath(resolve(dirname(link), target)),
       )
     } else assert.equal(fs.readlinkSync(link), target)
   }

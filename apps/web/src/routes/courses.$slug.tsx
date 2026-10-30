@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+
 import { CoursePage } from "../features/catalog"
 
 export const Route = createFileRoute("/courses/$slug")({

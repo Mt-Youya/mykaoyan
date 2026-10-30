@@ -18,7 +18,7 @@ export const courses = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("courses_subject_position_idx").on(table.subjectCode, table.position)]
+  (table) => [index("courses_subject_position_idx").on(table.subjectCode, table.position)],
 ).enableRLS()
 
 /** 章：课程中的一个单元。 */
@@ -36,7 +36,7 @@ export const chapters = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("chapters_course_position_idx").on(table.courseId, table.position)]
+  (table) => [index("chapters_course_position_idx").on(table.courseId, table.position)],
 ).enableRLS()
 
 /** 讲：内容发布的最小单位，一个视频加上字幕和讲稿。 */
@@ -59,7 +59,7 @@ export const lessons = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("lessons_chapter_position_idx").on(table.chapterId, table.position)]
+  (table) => [index("lessons_chapter_position_idx").on(table.chapterId, table.position)],
 ).enableRLS()
 
 /** 讲义：不带视频、单独发布的 Markdown 文章。 */
@@ -76,5 +76,5 @@ export const handouts = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("handouts_subject_position_idx").on(table.subjectCode, table.position)]
+  (table) => [index("handouts_subject_position_idx").on(table.subjectCode, table.position)],
 ).enableRLS()

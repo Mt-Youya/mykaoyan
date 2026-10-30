@@ -25,7 +25,7 @@ export const publishPreparedSchema = z.strictObject({
   unchanged: z.boolean(),
   contentHash: z.string(),
   uploads: z.array(
-    z.strictObject({ kind: z.enum(["video", "subtitle"]), url: z.string(), headers: z.record(z.string(), z.string()) })
+    z.strictObject({ kind: z.enum(["video", "subtitle"]), url: z.string(), headers: z.record(z.string(), z.string()) }),
   ),
 })
 export const publishResultSchema = z.strictObject({
