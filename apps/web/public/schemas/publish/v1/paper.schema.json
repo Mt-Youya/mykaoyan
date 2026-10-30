@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mykaoyan.cn/schemas/publish/v1/paper.schema.json",
+  "type": "object",
+  "properties": {
+    "subjectCode": {
+      "type": "string",
+      "pattern": "^\\d{3}$",
+      "description": "三位考试科目代码，例如 302、408。"
+    },
+    "year": {
+      "type": "integer",
+      "minimum": 2000,
+      "maximum": 2100
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "sourceNote": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 500
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "来源说明，不得包含题目原文或答案。"
+    },
+    "position": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "questions": {
+      "minItems": 1,
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 999
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "单选",
+              "多选",
+              "填空",
+              "判断",
+              "简答",
+              "计算",
+              "算法",
+              "综合"
+            ]
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "topics": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            }
+          },
+          "stemMarkdown": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50000
+          },
+          "options": {
+            "anyOf": [
+              {
+                "minItems": 2,
+                "maxItems": 8,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "pattern": "^[A-H]$"
+                    },
+                    "markdown": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 10000
+                    }
+                  },
+                  "required": [
+                    "label",
+                    "markdown"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "answerMarkdown": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50000
+          },
+          "analysisMarkdown": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "number",
+          "type",
+          "score",
+          "topics",
+          "stemMarkdown",
+          "options",
+          "answerMarkdown",
+          "analysisMarkdown"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "subjectCode",
+    "year",
+    "slug",
+    "title",
+    "sourceNote",
+    "position",
+    "questions"
+  ],
+  "additionalProperties": false
+}

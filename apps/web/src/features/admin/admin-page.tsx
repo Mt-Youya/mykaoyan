@@ -35,7 +35,7 @@ export function AdminPage() {
     void load()
   }, [load])
 
-  async function toggle(target: "lesson" | "handout", slug: string, listed: boolean) {
+  async function toggle(target: "lesson" | "handout" | "paper", slug: string, listed: boolean) {
     const key = `${target}:${slug}`
     setPending(key)
     setMessage(null)
@@ -63,7 +63,7 @@ export function AdminPage() {
   if (state.status === "forbidden") return <p className={statePage}>当前账号不是管理员，无法进入内容管理。</p>
   if (state.status === "error") return <p className={statePage}>加载失败，请刷新页面重试。</p>
 
-  const { lessons, handouts } = state.data
+  const { lessons, handouts, papers } = state.data
 
   return (
     <main className="page-container py-10">
@@ -113,6 +113,23 @@ export function AdminPage() {
               listed={handout.listed}
               pending={pending === `handout:${handout.slug}`}
               onToggle={() => void toggle("handout", handout.slug, handout.listed)}
+            />
+          ))}
+        </ul>
+      </section>
+      <section className="mt-9 reading:mt-12" aria-labelledby="admin-papers">
+        <h2 id="admin-papers" className="mb-3 text-[1.15rem]">
+          试卷（{papers.length}）
+        </h2>
+        <ul className="flex flex-col gap-2">
+          {papers.map((paper) => (
+            <AdminRow
+              key={paper.slug}
+              title={paper.title}
+              meta={`考试科目 ${paper.subjectCode} · ${paper.year} 年`}
+              listed={paper.listed}
+              pending={pending === `paper:${paper.slug}`}
+              onToggle={() => void toggle("paper", paper.slug, paper.listed)}
             />
           ))}
         </ul>

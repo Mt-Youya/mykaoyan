@@ -30,6 +30,11 @@ export class ListingController {
     return this.set(slug, "handout", body, session)
   }
 
+  @Put("papers/:slug/listing")
+  async setPaperListed(@Param("slug") slug: string, @Body() body: unknown, @CurrentSession() session: AuthSession) {
+    return this.set(slug, "paper", body, session)
+  }
+
   private async set(slug: string, targetType: ListingTarget, body: unknown, session: AuthSession) {
     const parsed = bodySchema.safeParse(body ?? {})
     if (!parsed.success) throw new BadRequestException("listed 必须是布尔值")

@@ -26,4 +26,11 @@ export class PublishingController {
   ) {
     return this.service.publishHandout(session.user, slug, body)
   }
+  @Put("papers/:slug") publishPaper(
+    @CurrentSession() session: AuthSession,
+    @Param("slug") slug: string,
+    @Body() body: unknown,
+  ) {
+    return this.service.publishPaper(session.user, slug, body)
+  }
 }

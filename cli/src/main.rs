@@ -44,6 +44,15 @@ fn run(args: &Args) -> Result<Value> {
             *position,
             *dry_run,
         ),
+        Commands::PublishPaper { file, dry_run } => publish::run_paper(
+            if *dry_run {
+                None
+            } else {
+                Some(auth::load(origin)?)
+            },
+            file,
+            *dry_run,
+        ),
         Commands::Login { token_stdin } => auth::login(origin, *token_stdin),
         Commands::Progress { command } => match command {
             Progress::Validate { file } => progress::validate(file),

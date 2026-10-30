@@ -64,6 +64,13 @@ export function HomePage() {
             </a>
             <a
               className="inline-flex min-h-11 items-center hover:underline"
+              href="/exams"
+              onClick={() => setEditing(false)}
+            >
+              真题
+            </a>
+            <a
+              className="inline-flex min-h-11 items-center hover:underline"
               href="#tracking"
               onClick={() => setEditing(false)}
             >
@@ -143,6 +150,9 @@ export function HomePage() {
             onClick={() => setEditing(false)}
           >
             讲义
+          </a>
+          <a className="inline-flex min-h-11 items-center hover:underline" href="/exams">
+            真题
           </a>
           <a className="inline-flex min-h-11 items-center hover:underline" href="/docs/contract">
             公开契约

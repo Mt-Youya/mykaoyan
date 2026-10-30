@@ -92,6 +92,21 @@ impl Api {
         )
     }
 
+    pub(super) fn publish_paper(&self, input: &Value) -> Result<Value> {
+        let slug = input["slug"].as_str().context("缺少试卷标识")?;
+        checked(
+            self.client
+                .put(format!(
+                    "{}/api/v1/publish/papers/{slug}",
+                    self.config.origin
+                ))
+                .bearer_auth(&self.config.token)
+                .json(input)
+                .send()
+                .map_err(|_| anyhow::anyhow!("试卷发布请求失败；未自动重试"))?,
+        )
+    }
+
     pub(super) fn local_uploads(&self) -> bool {
         self.config.origin.starts_with("http://127.0.0.1:")
     }

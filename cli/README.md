@@ -33,12 +33,13 @@ mykaoyan publish-handout handout.md --subject 408 --slug my-handout --title "题
 | progress validate | `{"valid":true}` |
 | progress push | 透传公开契约的变更摘要 `{app,version,etag,changes}` |
 | publish-handout | 透传发布结果 `{slug,unchanged,listed,contentHash,updatedAt}` |
+| publish-paper | 透传发布结果 `{slug,unchanged,version,listed,contentHash,questionCount}` |
 
 离线校验仅检查格式，不证明复测独立完成、记录真实或日期之间的业务关系。题目、答案、词表等私有内容不应放入上传文件。详细字段见 `skills/mykaoyan/references/progress-v1.md`。
 
 ## 契约与验证
 
-`contracts/openapi.json` 由公开契约生成脚本同步；`build.rs` 用 typify 从其 `ProgressFile`、`ProgressChangeSummary` 与发布相关的 `PublishLesson`、`PublishPrepared`、`PublishResult`、`PublishHandout`、`PublishHandoutResult` 组件生成 Rust 类型到 Cargo OUT_DIR。代码不导入网站内部模块。纯字符串 anyOf 在类型生成时宽化为 String，以绕过 typify 的结构体映射；运行时仍用原始 schema 完整校验，HTTP 请求保留原始 JSON，避免类型序列化改变数据。
+`contracts/openapi.json` 由公开契约生成脚本同步；`build.rs` 用 typify 从其 `ProgressFile`、`ProgressChangeSummary` 与发布相关的 `PublishLesson`、`PublishPrepared`、`PublishResult`、`PublishHandout`、`PublishHandoutResult`、`PublishPaper`、`PublishPaperResult` 组件生成 Rust 类型到 Cargo OUT_DIR。代码不导入网站内部模块。纯字符串 anyOf 在类型生成时宽化为 String，以绕过 typify 的结构体映射；运行时仍用原始 schema 完整校验，HTTP 请求保留原始 JSON，避免类型序列化改变数据。
 
 ```sh
 cargo fmt --manifest-path cli/Cargo.toml --check
@@ -66,9 +67,20 @@ mykaoyan publish-handout handout.md --subject 408 --slug 408-ds-tree --title "�
 mykaoyan publish-handout handout.md --subject 408 --slug 408-ds-tree --title "数据结构 · 树与二叉树（题面）" --position 1
 ```
 
-一份 Markdown 单请求发布为讲义，不经过对象存储，也不改变上架状态：新讲义默认下架，已有上架状态在更新后保留。服务端按内容判断是否变化，重复发布同内容返回 `unchanged:true`，不写库。文件名或路径含 `答案`、`解析`、`answer`、`solution` 会被直接拒绝且不读取内容；只发布题面与自学材料，答案、解析、真题原文和模拟卷整题不上站。需要 `scope=publish` 的管理员令牌，规则与发布课程相同。
+一份 Markdown 单请求发布为讲义，不经过对象存储，也不改变上架状态：新讲义默认下架，已有上架状态在更新后保留。服务端按内容判断是否变化，重复发布同内容返回 `unchanged:true`，不写库。文件名或路径含 `答案`、`解析`、`answer`、`solution` 会被直接拒绝且不读取内容；只发布题面与自学材料，未取得授权的真题原文与答案不上站（授权与红线见 `docs/adr/0016-past-paper-publishing.md`）。需要 `scope=publish` 的管理员令牌，规则与发布课程相同。
 
 `--dry-run` 离线校验参数、Markdown 大小（≤ 1 MiB）与公开契约，输出 `{"dryRun":true,"slug":"…","bytes":N,"contentHash":"…"}`；成功 JSON 为 `{"slug":"…","unchanged":false,"listed":false,"contentHash":"…","updatedAt":"…"}`。讲义 JSON Schema：`https://mykaoyan.cn/schemas/publish/v1/handout.schema.json`。
+
+## 发布真题试卷
+
+```sh
+mykaoyan publish-paper paper.json --dry-run
+mykaoyan publish-paper paper.json
+```
+
+`paper.json` 是单文件结构化 JSON：试卷元数据（科目、年份、slug、标题、来源说明、顺序）加 `questions` 数组；每题包含题号、题型、分值、考点、题面、选项（选择题）、答案与解析。发布为单请求事务写入，题目整体替换；新试卷默认下架、版本 1，内容变化时版本 +1，重复发布同内容返回 `unchanged:true` 且不写库。`--dry-run` 离线校验契约、题号唯一且严格升序、选择题必须有选项、非选择题不得带选项，输出 `{"dryRun":true,"slug":"…","questions":N,"bytes":N,"contentHash":"…"}`。成功 JSON 为 `{"slug":"…","unchanged":false,"version":1,"listed":false,"contentHash":"…","questionCount":N}`。
+
+只发布站主确认取得授权的真题；题面公开，答案与解析只在登录后的单独答案页可见（`https://mykaoyan.cn/exams/{slug}/answers`）。试卷 JSON Schema：`https://mykaoyan.cn/schemas/publish/v1/paper.schema.json`。
 
 ## 代码结构
 
@@ -91,6 +103,7 @@ src/
     api.rs             发布接口
     upload.rs          预签名直传
     handout.rs         讲义（Markdown）单请求发布
+    paper.rs           试卷（结构化 JSON）单请求发布
     contract.rs        发布契约校验
   support/
     mod.rs             横切能力的模块声明

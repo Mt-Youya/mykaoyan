@@ -11,6 +11,7 @@ import { ConfigModule } from "../config"
 import { DatabaseModule } from "../database"
 import type { Environment } from "../environment"
 import { MembershipModule } from "../membership"
+import { PapersModule } from "../papers"
 import { PlaybackModule } from "../playback"
 import { ProgressModule } from "../progress"
 import { PublishingModule } from "../publishing"
@@ -37,6 +38,7 @@ export class AppModule {
               DatabaseModule,
               AuthModule,
               CatalogModule,
+              PapersModule,
               PlaybackModule,
               AdminModule,
               AgentTokensModule,

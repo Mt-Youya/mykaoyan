@@ -11,7 +11,15 @@ export type AdminLesson = {
 
 export type AdminHandout = { slug: string; title: string; listed: boolean; subjectCode: string }
 
-export type AdminContent = { lessons: AdminLesson[]; handouts: AdminHandout[] }
+export type AdminPaper = {
+  slug: string
+  title: string
+  listed: boolean
+  subjectCode: string
+  year: number
+}
+
+export type AdminContent = { lessons: AdminLesson[]; handouts: AdminHandout[]; papers: AdminPaper[] }
 
 export type AdminResult<T> =
   | { status: "ok"; data: T }
@@ -28,7 +36,7 @@ export async function fetchAdminContent(): Promise<AdminResult<AdminContent>> {
 }
 
 export async function setListing(
-  target: "lesson" | "handout",
+  target: "lesson" | "handout" | "paper",
   slug: string,
   listed: boolean,
 ): Promise<{ ok: true } | { ok: false; message: string }> {

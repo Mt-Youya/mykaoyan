@@ -20,11 +20,13 @@ import {
   publishPreparedSchema,
   publishResultSchema,
 } from "../src/catalog/index"
+import { publishPaperResultSchema, publishPaperSchema } from "../src/papers/index"
 import { progressChangeSummarySchema } from "../src/progress/change-summary"
 import { progressFileSchema } from "../src/progress/schema"
 
 const SCHEMA_URL = "https://mykaoyan.cn/schemas/progress/v1/progress.schema.json"
 const HANDOUT_SCHEMA_URL = "https://mykaoyan.cn/schemas/publish/v1/handout.schema.json"
+const PAPER_SCHEMA_URL = "https://mykaoyan.cn/schemas/publish/v1/paper.schema.json"
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..")
 
 function writeJson(path, value) {
@@ -36,6 +38,8 @@ const { $schema, ...progressSchemaBody } = z.toJSONSchema(progressFileSchema, { 
 const progressSchema = { $schema, $id: SCHEMA_URL, ...progressSchemaBody }
 const { $schema: _handoutDialect, ...handoutSchemaBody } = z.toJSONSchema(publishHandoutSchema, { io: "input" })
 const handoutSchema = { $schema: _handoutDialect, $id: HANDOUT_SCHEMA_URL, ...handoutSchemaBody }
+const { $schema: _paperDialect, ...paperSchemaBody } = z.toJSONSchema(publishPaperSchema, { io: "input" })
+const paperSchema = { $schema: _paperDialect, $id: PAPER_SCHEMA_URL, ...paperSchemaBody }
 const { $schema: _changeSummaryDialect, ...changeSummarySchemaBody } = z.toJSONSchema(progressChangeSummarySchema, {
   io: "input",
 })
@@ -61,6 +65,7 @@ const openapi = {
       "进度文件格式与公开接口说明。契约只有一个来源：packages/core 的 zod 定义，由脚本生成 JSON Schema 与 OpenAPI。",
       `进度文件 JSON Schema：${SCHEMA_URL}`,
       `讲义发布 JSON Schema：${HANDOUT_SCHEMA_URL}`,
+      `试卷发布 JSON Schema：${PAPER_SCHEMA_URL}`,
       "文档页：https://mykaoyan.cn/docs/contract",
       "版本规则：兼容变更留在 v1，破坏性变更走 /v2/，v1 至少保留一个大版本周期。",
     ].join("\n\n"),
@@ -144,6 +149,8 @@ for (const [name, definition] of Object.entries({
   PublishResult: publishResultSchema,
   PublishHandout: publishHandoutSchema,
   PublishHandoutResult: publishHandoutResultSchema,
+  PublishPaper: publishPaperSchema,
+  PublishPaperResult: publishPaperResultSchema,
 })) {
   const { $schema: _dialect, ...body } = z.toJSONSchema(definition, { io: "input" })
   openapi.components.schemas[name] = body
@@ -219,9 +226,33 @@ openapi.paths["/api/v1/publish/handouts/{slug}"] = {
   },
 }
 
+openapi.paths["/api/v1/publish/papers/{slug}"] = {
+  put: {
+    operationId: "putPaper",
+    summary: "管理员发布或更新一套真题试卷（结构化题面与答案）",
+    description: [
+      "一次请求写入试卷元数据与全部题目；题目整体替换。",
+      "内容与路径 slug 必须一致；内容相同返回 unchanged=true 且不写库。",
+      "新试卷默认下架、version=1；内容变化时 version 递增；更新不改变上架状态。",
+      "题号必须唯一且严格升序；选择题必须有选项，非选择题不得带选项。",
+      "只发布站主确认取得授权的真题；答案与解析只经登录后的答案接口读取。",
+    ].join("\n\n"),
+    security: publishSecurity,
+    parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }],
+    requestBody: { required: true, content: content("PublishPaper") },
+    responses: {
+      200: { description: "发布结果；unchanged=true 表示内容未变化。", content: content("PublishPaperResult") },
+      400: { description: "内容无效，或请求体 slug 与路径不一致。" },
+      401: { description: "缺少管理员发布令牌" },
+      403: { description: "令牌用途或账号角色没有发布权限" },
+    },
+  },
+}
+
 writeJson(resolve(root, "apps/web/public/schemas/progress/v1/progress.schema.json"), progressSchema)
 writeJson(resolve(root, "apps/web/public/schemas/publish/v1/handout.schema.json"), handoutSchema)
+writeJson(resolve(root, "apps/web/public/schemas/publish/v1/paper.schema.json"), paperSchema)
 writeJson(resolve(root, "skills/mykaoyan/references/progress.schema.json"), progressSchema)
 writeJson(resolve(root, "apps/web/public/openapi.json"), openapi)
 writeJson(resolve(root, "cli/contracts/openapi.json"), openapi)
-console.log("已生成公开契约产物：进度与讲义 JSON Schema、OpenAPI")
+console.log("已生成公开契约产物：进度、讲义与试卷 JSON Schema、OpenAPI")

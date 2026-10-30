@@ -1,6 +1,6 @@
 # 投稿上传与审核（ticket 22）
 
-现有考试科目页提供“投稿视频”和“我的投稿”，内容管理页增加“投稿审核”。访客、非会员点击投稿入口可看到手动开通与兑换码说明，并进入实际的会员期面板。续传入口使用相同会员判断；当前会员期失效时已有投稿记录保留。
+现有考试科目页提供“投稿视频”和“我的投稿”，内容管理页增加“投稿审核”。登录用户可以直接投稿；未登录点击投稿入口先登录。续传只要求本人登录，会员到期不影响已有投稿和继续上传。评论、评分与查看真题答案仍要求有效会员。
 
 ticket23已在公开投稿列表接入评分、推荐及科目/考点筛选；公开列表改为按加权分排序，见[评分说明](ratings.md)。本人历史与管理员审核列表仍按创建时间排列。
 
@@ -29,7 +29,7 @@ R2复用既有的 `R2_ACCOUNT_ID`、`R2_ENDPOINT`、`R2_BUCKET`、`R2_ACCESS_KEY
 | 接口 | 行为 |
 | --- | --- |
 | GET /api/submissions?subject=302&page=0 | 访客读取已通过且上架的投稿；返回enabled |
-| GET /api/submissions/mine?page=0 | 本人记录，会员到期仍可读；含指纹、审核结果与清理状态 |
+| GET /api/submissions/mine?page=0 | 本人记录，任何时候都可读；含指纹、审核结果与清理状态 |
 | POST /api/submissions/uploads | 初始化或按原id恢复；需id、title、summary、subjectCode、topicId（可null）、size、duration、codec=h264、contentType=video/mp4、fingerprint |
 | GET /api/submissions/:id/upload | 本人上传的服务器进度，返回partSize、已存分片和对象是否已完成 |
 | POST /api/submissions/:id/parts/:number | 为当前片签发15分钟直传URL；长度由服务端计算 |

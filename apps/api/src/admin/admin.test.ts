@@ -4,6 +4,7 @@ import { NestFactory } from "@nestjs/core"
 import postgres from "postgres"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 
+import { ListingController, ListingService } from "."
 import {
   AUTH,
   AUTH_ENV,
@@ -28,7 +29,6 @@ import { CONFIG } from "../config"
 import { DatabaseService } from "../database"
 import { readEnvironment } from "../environment"
 import type { Environment } from "../environment"
-import { ListingController, ListingService } from "./index"
 
 /**
  * 上下架权限矩阵与审计记录（真实 Postgres + Drizzle 会话）。
@@ -106,6 +106,7 @@ describe.runIf(enabled)("管理员上下架", () => {
       await client`delete from accounts`
       await client`delete from lessons where slug = 'admin-lesson'`
       await client`delete from handouts where slug = 'admin-handout'`
+      await client`delete from papers where slug = 'admin-paper'`
       await client`delete from chapters where title = '上下架示例章'`
       await client`delete from courses where slug = 'admin-course'`
     } finally {
@@ -134,6 +135,9 @@ describe.runIf(enabled)("管理员上下架", () => {
     await sql`
       insert into handouts (subject_code, slug, title, markdown, position, listed)
       values ('408', 'admin-handout', '上下架示例讲义', '# 讲义', 1, true)`
+    await sql`
+      insert into papers (subject_code, year, slug, title, position, listed)
+      values ('408', 2024, 'admin-paper', '上下架示例试卷', 1, true)`
 
     database = new DatabaseService(config)
     const stores = createDrizzleStores(database.db)
@@ -230,6 +234,22 @@ describe.runIf(enabled)("管理员上下架", () => {
     })
     expect(response.status).toBe(200)
     expect((await fetch(`${origin}/api/handouts/admin-handout`)).status).toBe(404)
+  })
+
+  it("试卷同样可以上下架并留下记录", async () => {
+    const [paper] = await sql<{ id: string }[]>`select id from papers where slug = 'admin-paper'`
+    const response = await fetch(`${origin}/api/admin/papers/admin-paper/listing`, {
+      method: "PUT",
+      headers: { "content-type": "application/json", cookie: accountCookie },
+      body: JSON.stringify({ listed: false }),
+    })
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ targetType: "paper", slug: "admin-paper", listed: false })
+    const [row] = await sql<{ listed: boolean }[]>`select listed from papers where slug = 'admin-paper'`
+    expect(row!.listed).toBe(false)
+    const [change] = await sql<{ listed: boolean; target_type: string }[]>`
+      select listed, target_type from listing_changes where target_id = ${paper!.id}`
+    expect(change).toMatchObject({ listed: false, target_type: "paper" })
   })
 
   it("非法请求体与不存在的 slug 分别返回 400 与 404", async () => {

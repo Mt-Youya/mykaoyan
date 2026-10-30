@@ -10,8 +10,8 @@ import type { MemorySmsVerifier } from "../auth"
 import { PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
 import { ProblemFilter } from "../common"
 import { readEnvironment } from "../environment"
-import { SUBMISSION_STORAGE } from "./index"
-import type { SubmissionStorage, UploadedPart } from "./index"
+import { SUBMISSION_STORAGE } from "."
+import type { SubmissionStorage, UploadedPart } from "."
 type TestResponse = Omit<Response, "json"> & {
   json(): Promise<{
     url: string
@@ -144,11 +144,6 @@ describe("投稿上传、审核和清理 HTTP", () => {
     await app?.close()
     await sql?.end({ timeout: 1 })
   })
-  async function grant() {
-    expect((await call("admin/membership/grants", admin.cookie, { accountId: a.id, reason: "虚构开通" })).status).toBe(
-      201,
-    )
-  }
   async function pending(change = {}) {
     const v = input(change)
     expect((await call("submissions/uploads", a.cookie, v)).status).toBe(201)
@@ -157,14 +152,13 @@ describe("投稿上传、审核和清理 HTTP", () => {
     expect((await call(`submissions/${v.id}/complete`, a.cookie, {})).status).toBe(201)
     return v
   }
-  it("默认开关同时关闭公开读取与上传；非会员403且登录会话必须存在", async () => {
+  it("默认开关同时关闭公开读取与上传；上传只要求登录，不再要求会员", async () => {
     expect(await (await call("submissions?subject=302", undefined, undefined, "GET", offOrigin)).json()).toMatchObject({
       enabled: false,
       items: [],
     })
     expect((await call("submissions/uploads", undefined, input())).status).toBe(401)
-    expect((await call("submissions/uploads", a.cookie, input())).status).toBe(403)
-    await grant()
+    expect((await call("submissions/uploads", a.cookie, input())).status).toBe(201)
     expect((await call("submissions/uploads", a.cookie, input(), "POST", offOrigin)).status).toBe(403)
     expect((await call("submissions/uploads", a.cookie, input({ size: 500000001 }))).status).toBe(400)
     expect((await call("submissions/uploads", a.cookie, input({ subjectCode: "408" }))).status).toBe(400)
@@ -172,7 +166,6 @@ describe("投稿上传、审核和清理 HTTP", () => {
   it("断点续传绑定本人和原文件，不能读取、签名、完成别人的上传", async () => {
     const v = input({ size: 8388618 })
     expect((await call("submissions/uploads", a.cookie, v)).status).toBe(201)
-    await sql`insert into membership_periods(account_id,starts_at,ends_at,source,reason,actor_id) values(${b.id},now(),now()+interval '365 days','manual','虚构开通',${admin.id})`
     for (const [path, body] of [
       [`submissions/${v.id}/upload`, undefined],
       [`submissions/${v.id}/parts/1`, {}],
@@ -282,17 +275,10 @@ describe("投稿上传、审核和清理 HTTP", () => {
     ).toMatchObject({ deleted: true, status: "rejected", reason: "虚构驳回原因" })
     storage.beforeRemove = null
   })
-  it("会员到期后所有上传步骤403，历史投稿仍可查看", async () => {
+  it("会员到期不影响上传，历史投稿仍可查看", async () => {
     const v = input()
-    await call("submissions/uploads", a.cookie, v)
-    await sql`update membership_periods set starts_at='2020-01-01',ends_at='2020-12-31' where account_id=${a.id}`
-    for (const [path, body] of [
-      ["submissions/uploads", input()],
-      [`submissions/${v.id}/upload`, undefined],
-      [`submissions/${v.id}/parts/1`, {}],
-      [`submissions/${v.id}/complete`, {}],
-    ] as const)
-      expect((await call(path, a.cookie, body)).status).toBe(403)
+    expect((await call("submissions/uploads", a.cookie, v)).status).toBe(201)
+    expect((await call("submissions/uploads", a.cookie, input())).status).toBe(201)
     expect((await call("submissions/mine", a.cookie)).status).toBe(200)
     expect(
       (await (await call("submissions/mine", a.cookie)).json()).items.some((r: { id: string }) => r.id === v.id),

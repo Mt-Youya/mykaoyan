@@ -101,6 +101,18 @@ describe("空库迁移与权限", () => {
       ).toBe("f")
   })
 
+  it("试卷与试卷题目启用RLS，公开角色无权限", () => {
+    for (const table of ["papers", "paper_questions"]) {
+      expect(sql(`select relrowsecurity from pg_class where oid='public.${table}'::regclass`)).toBe("t")
+      for (const role of ["anon", "authenticated"])
+        expect(
+          sql(
+            `select has_table_privilege('${role}','public.${table}','SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')`,
+          ),
+        ).toBe("f")
+    }
+  })
+
   it("public schema 的函数没有向 PUBLIC、anon、authenticated 开放执行", () => {
     expect(sql(functionViolations)).toBe("")
   })

@@ -15,7 +15,7 @@ export class SubmissionUploads {
     @Inject(SUBMISSION_STORAGE) private storage: SubmissionStorage,
   ) {}
   async start(accountId: string, input: unknown) {
-    await this.access.member(accountId)
+    this.access.open()
     const parsed = submissionInputSchema.safeParse(input)
     if (!parsed.success)
       throw new BadRequestException(
@@ -49,7 +49,7 @@ export class SubmissionUploads {
     })
   }
   async resume(accountId: string, id: string) {
-    await this.access.member(accountId)
+    this.access.open()
     const r = await this.access.owned(accountId, id)
     if (r.status !== "uploading" || !r.upload_id) throw new ConflictException("此投稿不在可续传状态")
     // 上次完成分片后响应丢失时，对象已存在；让浏览器重试完成登记。
@@ -63,7 +63,7 @@ export class SubmissionUploads {
     }
   }
   async sign(accountId: string, id: string, number: number) {
-    await this.access.member(accountId)
+    this.access.open()
     const r = await this.access.owned(accountId, id)
     if (r.status !== "uploading" || !r.upload_id) throw new ConflictException("投稿已结束上传")
     let size: number
@@ -75,7 +75,7 @@ export class SubmissionUploads {
     return { url: await this.storage.sign(r.object_key, r.upload_id, number, size), size }
   }
   async finish(accountId: string, id: string) {
-    await this.access.member(accountId)
+    this.access.open()
     this.access.id(id)
     return this.access.database.client.begin(async (sql) => {
       const [r] = await sql<

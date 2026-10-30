@@ -41,6 +41,12 @@ pub(crate) enum Commands {
         #[arg(long)]
         dry_run: bool,
     },
+    /// 从结构化 JSON 发布一套真题试卷（题面与答案）；不会改变上架状态
+    PublishPaper {
+        file: PathBuf,
+        #[arg(long)]
+        dry_run: bool,
+    },
     /// 下载、离线校验、整份替换进度文件
     Progress {
         #[command(subcommand)]

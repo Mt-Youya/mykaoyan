@@ -4,7 +4,6 @@ import { z } from "zod"
 import { CONFIG } from "../config"
 import { DatabaseService } from "../database"
 import type { Environment } from "../environment"
-import { MembershipService } from "../membership"
 export type Actor = { id: string; role: string }
 export type SubmissionRow = {
   id: string
@@ -71,15 +70,9 @@ export class SubmissionAccess {
   constructor(
     @Inject(CONFIG) public config: Environment,
     @Inject(DatabaseService) public database: DatabaseService,
-    @Inject(MembershipService) private membership: MembershipService,
   ) {}
   open() {
     if (!this.config.COMMUNITY_ENABLED) throw new ForbiddenException("投稿尚未开放")
-  }
-  async member(id: string) {
-    this.open()
-    if (!(await this.membership.status(id)).active)
-      throw new ForbiddenException("投稿需要有效会员，请先手动开通或兑换会员期")
   }
   async admin(actor: Actor) {
     const [row] = await this.database.client<{ role: string }[]>`select role from accounts where id=${actor.id}`

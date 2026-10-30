@@ -1,9 +1,10 @@
-export * from "./agent-tokens/index"
-export * from "./admin/index"
-export * from "./accounts/index"
-export * from "./catalog/index"
-export * from "./progress/index"
+export * from "./agent-tokens"
+export * from "./admin"
+export * from "./accounts"
+export * from "./catalog"
+export * from "./progress"
 
+export * from "./papers"
 export * from "./publishing"
 
 export * from "./membership"

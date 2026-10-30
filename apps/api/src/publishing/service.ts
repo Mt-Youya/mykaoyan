@@ -9,8 +9,8 @@ import {
   NotFoundException,
 } from "@nestjs/common"
 
-import { publishHandoutSchema, publishLessonSchema } from "@mykaoyan/core"
-import type { PublishHandout, PublishLesson } from "@mykaoyan/core"
+import { publishHandoutSchema, publishLessonSchema, publishPaperSchema } from "@mykaoyan/core"
+import type { PublishHandout, PublishLesson, PublishPaper } from "@mykaoyan/core"
 
 import { DatabaseService } from "../database"
 import { PUBLISH_STORAGE } from "./storage"
@@ -42,11 +42,46 @@ type Lesson = {
   video_key: string
   subtitle_key: string | null
 }
+type PaperRow = {
+  id: string
+  slug: string
+  content_hash: string | null
+  content_version: number
+  listed: boolean
+}
 /** 讲义内容指纹：拼接顺序固定，客户端与服务端都可复算；不作为版本号。 */
 function handoutHash(input: PublishHandout) {
   return createHash("sha256")
     .update([input.subjectCode, input.slug, input.title, String(input.position), input.markdown].join("\0"))
     .digest("hex")
+}
+/** 深排序对象键后的规范化 JSON：服务端与 CLI 用同一规则计算试卷指纹。 */
+function canonical(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonical)
+  if (value && typeof value === "object")
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, canonical((value as Record<string, unknown>)[key])]),
+    )
+  return value
+}
+/** 试卷内容指纹：题目按发布顺序整体参与，答案与解析同样计入。 */
+function paperHash(input: PublishPaper) {
+  return createHash("sha256")
+    .update(JSON.stringify(canonical(input)))
+    .digest("hex")
+}
+/** 试卷题号必须严格升序；选择题必须有选项，非选择题不得带选项。 */
+function validatePaperQuestions(input: PublishPaper) {
+  let previous = 0
+  for (const question of input.questions) {
+    if (question.number <= previous) throw new BadRequestException("题号必须唯一且严格升序")
+    previous = question.number
+    const choice = question.type === "单选" || question.type === "多选"
+    if (choice && !question.options) throw new BadRequestException("选择题必须有选项")
+    if (!choice && question.options) throw new BadRequestException("非选择题不得带选项")
+  }
 }
 @Injectable()
 export class PublishingService {
@@ -214,6 +249,52 @@ export class PublishingService {
       listed: saved.listed,
       contentHash: hash,
       updatedAt: new Date(saved.updated_at).toISOString(),
+    }
+  }
+
+  /** 试卷发布：事务内 upsert 试卷并整体替换题目；内容相同不写库；更新不改上架状态。 */
+  async publishPaper(actor: Actor, slug: string, body: unknown) {
+    await this.authorize(actor)
+    const parsed = publishPaperSchema.safeParse(body)
+    if (!parsed.success) throw new BadRequestException("试卷内容格式无效")
+    const input = parsed.data
+    if (input.slug !== slug) throw new BadRequestException("路径与内容的标识不一致")
+    validatePaperQuestions(input)
+    const hash = paperHash(input)
+    const [current] = await this.database.client<
+      PaperRow[]
+    >`select id,slug,content_hash,content_version,listed from papers where slug=${slug}`
+    if (current?.content_hash === hash)
+      return {
+        slug,
+        unchanged: true,
+        version: current.content_version,
+        listed: current.listed,
+        contentHash: hash,
+        questionCount: input.questions.length,
+      }
+    const saved = await this.database.client.begin(async (tx) => {
+      const [paper] = current
+        ? await tx<
+            PaperRow[]
+          >`update papers set subject_code=${input.subjectCode},year=${input.year},title=${input.title},source_note=${input.sourceNote},position=${input.position},content_hash=${hash},content_version=content_version+1,updated_at=now() where slug=${slug} returning id,slug,content_hash,content_version,listed`
+        : await tx<
+            PaperRow[]
+          >`insert into papers(subject_code,year,slug,title,source_note,position,owner_account_id,content_hash,content_version) values(${input.subjectCode},${input.year},${slug},${input.title},${input.sourceNote},${input.position},${actor.id},${hash},1) returning id,slug,content_hash,content_version,listed`
+      if (!paper) throw new Error("试卷写入未返回记录")
+      await tx`delete from paper_questions where paper_id=${paper.id}`
+      for (const question of input.questions)
+        await tx`insert into paper_questions(paper_id,number,type,score,topics,stem_markdown,options,answer_markdown,analysis_markdown) values(${paper.id},${question.number},${question.type},${question.score},${question.topics},${question.stemMarkdown},${question.options === null ? null : JSON.stringify(question.options)}::jsonb,${question.answerMarkdown},${question.analysisMarkdown})`
+      return paper
+    })
+    if (!saved) throw new Error("试卷写入未返回记录")
+    return {
+      slug: saved.slug,
+      unchanged: false,
+      version: saved.content_version,
+      listed: saved.listed,
+      contentHash: hash,
+      questionCount: input.questions.length,
     }
   }
 }

@@ -1,13 +1,15 @@
 //! 发布 feature：扫描一章的本地课程目录，上传视频与字幕，登记并读回内容；
-//! 另提供讲义（Markdown）的单请求发布。
+//! 另提供讲义（Markdown）与试卷（结构化 JSON）的单请求发布。
 
 mod api;
 mod contract;
 mod handout;
+mod paper;
 mod scan;
 mod upload;
 
 pub(crate) use handout::run as run_handout;
+pub(crate) use paper::run as run_paper;
 
 use crate::auth::Config;
 use anyhow::{Context, Result, bail};

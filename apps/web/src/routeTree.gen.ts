@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as accountLoginRouteImport } from './routes/(account)/login'
+import { Route as catalogExamsRouteImport } from './routes/(catalog)/exams'
 import { Route as legalPrivacyRouteImport } from './routes/(legal)/privacy'
 import { Route as legalSupportRouteImport } from './routes/(legal)/support'
 import { Route as legalTermsRouteImport } from './routes/(legal)/terms'
@@ -28,13 +29,20 @@ import { Route as studyWeeklyRouteImport } from './routes/(study)/weekly'
 import { Route as DocsContractRouteImport } from './routes/docs/contract'
 import { Route as adminAdminContentRouteImport } from './routes/(admin)/admin.content'
 import { Route as catalogCoursesSlugRouteImport } from './routes/(catalog)/courses.$slug'
+import { Route as catalogExamsSlugRouteImport } from './routes/(catalog)/exams.$slug'
 import { Route as catalogHandoutsSlugRouteImport } from './routes/(catalog)/handouts.$slug'
 import { Route as catalogLessonsSlugRouteImport } from './routes/(catalog)/lessons.$slug'
 import { Route as catalogSubjectsCodeRouteImport } from './routes/(catalog)/subjects.$code'
+import { Route as catalogExamsSlugAnswersRouteImport } from './routes/(catalog)/exams.$slug.answers'
 
 const accountLoginRoute = accountLoginRouteImport.update({
   id: '/(account)/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const catalogExamsRoute = catalogExamsRouteImport.update({
+  id: '/(catalog)/exams',
+  path: '/exams',
   getParentRoute: () => rootRouteImport,
 } as any)
 const legalPrivacyRoute = legalPrivacyRouteImport.update({
@@ -127,6 +135,11 @@ const catalogCoursesSlugRoute = catalogCoursesSlugRouteImport.update({
   path: '/courses/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const catalogExamsSlugRoute = catalogExamsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => catalogExamsRoute,
+} as any)
 const catalogHandoutsSlugRoute = catalogHandoutsSlugRouteImport.update({
   id: '/(catalog)/handouts/$slug',
   path: '/handouts/$slug',
@@ -142,9 +155,15 @@ const catalogSubjectsCodeRoute = catalogSubjectsCodeRouteImport.update({
   path: '/subjects/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const catalogExamsSlugAnswersRoute = catalogExamsSlugAnswersRouteImport.update({
+  id: '/answers',
+  path: '/answers',
+  getParentRoute: () => catalogExamsSlugRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof accountLoginRoute
+  '/exams': typeof catalogExamsRouteWithChildren
   '/privacy': typeof legalPrivacyRoute
   '/support': typeof legalSupportRoute
   '/terms': typeof legalTermsRoute
@@ -163,12 +182,15 @@ export interface FileRoutesByFullPath {
   '/': typeof siteIndexRoute
   '/admin/content': typeof adminAdminContentRoute
   '/courses/$slug': typeof catalogCoursesSlugRoute
+  '/exams/$slug': typeof catalogExamsSlugRouteWithChildren
   '/handouts/$slug': typeof catalogHandoutsSlugRoute
   '/lessons/$slug': typeof catalogLessonsSlugRoute
   '/subjects/$code': typeof catalogSubjectsCodeRoute
+  '/exams/$slug/answers': typeof catalogExamsSlugAnswersRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof accountLoginRoute
+  '/exams': typeof catalogExamsRouteWithChildren
   '/privacy': typeof legalPrivacyRoute
   '/support': typeof legalSupportRoute
   '/terms': typeof legalTermsRoute
@@ -187,13 +209,16 @@ export interface FileRoutesByTo {
   '/': typeof siteIndexRoute
   '/admin/content': typeof adminAdminContentRoute
   '/courses/$slug': typeof catalogCoursesSlugRoute
+  '/exams/$slug': typeof catalogExamsSlugRouteWithChildren
   '/handouts/$slug': typeof catalogHandoutsSlugRoute
   '/lessons/$slug': typeof catalogLessonsSlugRoute
   '/subjects/$code': typeof catalogSubjectsCodeRoute
+  '/exams/$slug/answers': typeof catalogExamsSlugAnswersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(account)/login': typeof accountLoginRoute
+  '/(catalog)/exams': typeof catalogExamsRouteWithChildren
   '/(legal)/privacy': typeof legalPrivacyRoute
   '/(legal)/support': typeof legalSupportRoute
   '/(legal)/terms': typeof legalTermsRoute
@@ -212,14 +237,17 @@ export interface FileRoutesById {
   '/(site)/': typeof siteIndexRoute
   '/(admin)/admin/content': typeof adminAdminContentRoute
   '/(catalog)/courses/$slug': typeof catalogCoursesSlugRoute
+  '/(catalog)/exams/$slug': typeof catalogExamsSlugRouteWithChildren
   '/(catalog)/handouts/$slug': typeof catalogHandoutsSlugRoute
   '/(catalog)/lessons/$slug': typeof catalogLessonsSlugRoute
   '/(catalog)/subjects/$code': typeof catalogSubjectsCodeRoute
+  '/(catalog)/exams/$slug/answers': typeof catalogExamsSlugAnswersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/login'
+    | '/exams'
     | '/privacy'
     | '/support'
     | '/terms'
@@ -238,12 +266,15 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/content'
     | '/courses/$slug'
+    | '/exams/$slug'
     | '/handouts/$slug'
     | '/lessons/$slug'
     | '/subjects/$code'
+    | '/exams/$slug/answers'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/exams'
     | '/privacy'
     | '/support'
     | '/terms'
@@ -262,12 +293,15 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/content'
     | '/courses/$slug'
+    | '/exams/$slug'
     | '/handouts/$slug'
     | '/lessons/$slug'
     | '/subjects/$code'
+    | '/exams/$slug/answers'
   id:
     | '__root__'
     | '/(account)/login'
+    | '/(catalog)/exams'
     | '/(legal)/privacy'
     | '/(legal)/support'
     | '/(legal)/terms'
@@ -286,13 +320,16 @@ export interface FileRouteTypes {
     | '/(site)/'
     | '/(admin)/admin/content'
     | '/(catalog)/courses/$slug'
+    | '/(catalog)/exams/$slug'
     | '/(catalog)/handouts/$slug'
     | '/(catalog)/lessons/$slug'
     | '/(catalog)/subjects/$code'
+    | '/(catalog)/exams/$slug/answers'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   accountLoginRoute: typeof accountLoginRoute
+  catalogExamsRoute: typeof catalogExamsRouteWithChildren
   legalPrivacyRoute: typeof legalPrivacyRoute
   legalSupportRoute: typeof legalSupportRoute
   legalTermsRoute: typeof legalTermsRoute
@@ -323,6 +360,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof accountLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(catalog)/exams': {
+      id: '/(catalog)/exams'
+      path: '/exams'
+      fullPath: '/exams'
+      preLoaderRoute: typeof catalogExamsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(legal)/privacy': {
@@ -451,6 +495,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof catalogCoursesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(catalog)/exams/$slug': {
+      id: '/(catalog)/exams/$slug'
+      path: '/$slug'
+      fullPath: '/exams/$slug'
+      preLoaderRoute: typeof catalogExamsSlugRouteImport
+      parentRoute: typeof catalogExamsRoute
+    }
     '/(catalog)/handouts/$slug': {
       id: '/(catalog)/handouts/$slug'
       path: '/handouts/$slug'
@@ -472,11 +523,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof catalogSubjectsCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(catalog)/exams/$slug/answers': {
+      id: '/(catalog)/exams/$slug/answers'
+      path: '/answers'
+      fullPath: '/exams/$slug/answers'
+      preLoaderRoute: typeof catalogExamsSlugAnswersRouteImport
+      parentRoute: typeof catalogExamsSlugRoute
+    }
   }
 }
 
+interface catalogExamsSlugRouteChildren {
+  catalogExamsSlugAnswersRoute: typeof catalogExamsSlugAnswersRoute
+}
+
+const catalogExamsSlugRouteChildren: catalogExamsSlugRouteChildren = {
+  catalogExamsSlugAnswersRoute: catalogExamsSlugAnswersRoute,
+}
+
+const catalogExamsSlugRouteWithChildren =
+  catalogExamsSlugRoute._addFileChildren(catalogExamsSlugRouteChildren)
+
+interface catalogExamsRouteChildren {
+  catalogExamsSlugRoute: typeof catalogExamsSlugRouteWithChildren
+}
+
+const catalogExamsRouteChildren: catalogExamsRouteChildren = {
+  catalogExamsSlugRoute: catalogExamsSlugRouteWithChildren,
+}
+
+const catalogExamsRouteWithChildren = catalogExamsRoute._addFileChildren(
+  catalogExamsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   accountLoginRoute: accountLoginRoute,
+  catalogExamsRoute: catalogExamsRouteWithChildren,
   legalPrivacyRoute: legalPrivacyRoute,
   legalSupportRoute: legalSupportRoute,
   legalTermsRoute: legalTermsRoute,

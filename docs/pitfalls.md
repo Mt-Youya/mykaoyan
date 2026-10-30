@@ -132,6 +132,8 @@
 
 - **Express 默认 JSON 请求体只有 100 kB**（mk/API-01）：Nest 默认 `express.json()` 限制 100 kB，讲义 Markdown 契约上限是 1 MB，合法请求会在进入 zod 校验前被 payload 限制拒绝，表现为 413 或 500 而不是契约 400。`bootstrap.ts` 需 `bodyParser:false` 后用 `NestExpressApplication.useBodyParser('json', { limit: '2mb' })` 覆盖；该接口只在 `NestExpressApplication` 类型上，`INestApplication` 会报 TS2339，构建前先跑 API typecheck。
 
+- **试卷指纹的规范化 JSON 必须跨语言一致**（mk/API-02）：试卷内容哈希同时由 Node（zod 解析后的对象）与 Rust CLI 计算，不能直接对原始对象做 `JSON.stringify`：`serde_json` 默认按 BTreeMap 排键，JS 按插入顺序；CLI 侧另有 `typed_value` 把整数型浮点归一为整数。两侧都先递归排序对象键再序列化，测试要比较同一输入的 CLI dry-run 哈希与 API 返回哈希，而不是只断言 64 位十六进制长度。
+
 - **清理 Windows 技能 junction 时不要顺着链接递归删除**（mk/TOOL-13）：技能占位文件被 postinstall 换成 junction 后，直接对 junction 路径执行递归删除或让 `git checkout` 重建该路径，可能顺着链接删掉真实目标（本轮 `.agents/skills/mykaoyan → skills/mykaoyan` 的源码目录被连带删掉，只能从 git 恢复）。先 `cmd /c rmdir <link>` 只删链接，再 `git checkout -- <path>` 写回占位文件；`pnpm fmt` 造成全仓库行尾改动时，先用 `git diff --name-only` 找出真实内容改动，其余行尾文件用 `git checkout --pathspec-from-file` 恢复，`fmt:check` 的结论以 CI Linux 为准。
 
 ## 不再适用的条目

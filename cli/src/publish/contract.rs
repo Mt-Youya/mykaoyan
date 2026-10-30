@@ -38,3 +38,15 @@ pub(super) fn handout_result(value: &Value) -> Result<()> {
         "讲义发布结果不符合公开契约",
     )
 }
+
+pub(super) fn paper(value: &Value) -> Result<()> {
+    validate_type::<generated::PublishPaper>(value, "PublishPaper", "试卷发布数据不符合公开契约")
+}
+
+pub(super) fn paper_result(value: &Value) -> Result<()> {
+    validate_type::<generated::PublishPaperResult>(
+        value,
+        "PublishPaperResult",
+        "试卷发布结果不符合公开契约",
+    )
+}

@@ -4,7 +4,7 @@
   "info": {
     "title": "我的考研公开契约",
     "version": "1.0.0",
-    "description": "进度文件格式与公开接口说明。契约只有一个来源：packages/core 的 zod 定义，由脚本生成 JSON Schema 与 OpenAPI。\n\n进度文件 JSON Schema：https://mykaoyan.cn/schemas/progress/v1/progress.schema.json\n\n讲义发布 JSON Schema：https://mykaoyan.cn/schemas/publish/v1/handout.schema.json\n\n文档页：https://mykaoyan.cn/docs/contract\n\n版本规则：兼容变更留在 v1，破坏性变更走 /v2/，v1 至少保留一个大版本周期。"
+    "description": "进度文件格式与公开接口说明。契约只有一个来源：packages/core 的 zod 定义，由脚本生成 JSON Schema 与 OpenAPI。\n\n进度文件 JSON Schema：https://mykaoyan.cn/schemas/progress/v1/progress.schema.json\n\n讲义发布 JSON Schema：https://mykaoyan.cn/schemas/publish/v1/handout.schema.json\n\n试卷发布 JSON Schema：https://mykaoyan.cn/schemas/publish/v1/paper.schema.json\n\n文档页：https://mykaoyan.cn/docs/contract\n\n版本规则：兼容变更留在 v1，破坏性变更走 /v2/，v1 至少保留一个大版本周期。"
   },
   "servers": [
     {
@@ -288,6 +288,59 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PublishHandoutResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "内容无效，或请求体 slug 与路径不一致。"
+          },
+          "401": {
+            "description": "缺少管理员发布令牌"
+          },
+          "403": {
+            "description": "令牌用途或账号角色没有发布权限"
+          }
+        }
+      }
+    },
+    "/api/v1/publish/papers/{slug}": {
+      "put": {
+        "operationId": "putPaper",
+        "summary": "管理员发布或更新一套真题试卷（结构化题面与答案）",
+        "description": "一次请求写入试卷元数据与全部题目；题目整体替换。\n\n内容与路径 slug 必须一致；内容相同返回 unchanged=true 且不写库。\n\n新试卷默认下架、version=1；内容变化时 version 递增；更新不改变上架状态。\n\n题号必须唯一且严格升序；选择题必须有选项，非选择题不得带选项。\n\n只发布站主确认取得授权的真题；答案与解析只经登录后的答案接口读取。",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishPaper"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "发布结果；unchanged=true 表示内容未变化。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishPaperResult"
                 }
               }
             }
@@ -1318,6 +1371,206 @@
           "listed",
           "contentHash",
           "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "PublishPaper": {
+        "type": "object",
+        "properties": {
+          "subjectCode": {
+            "type": "string",
+            "pattern": "^\\d{3}$",
+            "description": "三位考试科目代码，例如 302、408。"
+          },
+          "year": {
+            "type": "integer",
+            "minimum": 2000,
+            "maximum": 2100
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "sourceNote": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "来源说明，不得包含题目原文或答案。"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "questions": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "number": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "单选",
+                    "多选",
+                    "填空",
+                    "判断",
+                    "简答",
+                    "计算",
+                    "算法",
+                    "综合"
+                  ]
+                },
+                "score": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "topics": {
+                  "maxItems": 20,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50
+                  }
+                },
+                "stemMarkdown": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50000
+                },
+                "options": {
+                  "anyOf": [
+                    {
+                      "minItems": 2,
+                      "maxItems": 8,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": {
+                            "type": "string",
+                            "pattern": "^[A-H]$"
+                          },
+                          "markdown": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 10000
+                          }
+                        },
+                        "required": [
+                          "label",
+                          "markdown"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "answerMarkdown": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50000
+                },
+                "analysisMarkdown": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 50000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "number",
+                "type",
+                "score",
+                "topics",
+                "stemMarkdown",
+                "options",
+                "answerMarkdown",
+                "analysisMarkdown"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "subjectCode",
+          "year",
+          "slug",
+          "title",
+          "sourceNote",
+          "position",
+          "questions"
+        ],
+        "additionalProperties": false
+      },
+      "PublishPaperResult": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "unchanged": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "listed": {
+            "type": "boolean"
+          },
+          "contentHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "questionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "slug",
+          "unchanged",
+          "version",
+          "listed",
+          "contentHash",
+          "questionCount"
         ],
         "additionalProperties": false
       }
