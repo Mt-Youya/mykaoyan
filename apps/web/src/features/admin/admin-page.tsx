@@ -140,7 +140,7 @@ function AdminRow(props: {
       <Button
         type="button"
         variant="outline"
-        className="col-span-2 min-h-11 w-full reading:col-span-1 reading:w-auto reading:min-w-[4.5rem]"
+        className="col-span-2 min-h-11 w-full reading:col-span-1 reading:w-auto reading:min-w-18"
         disabled={props.pending}
         onClick={props.onToggle}
       >

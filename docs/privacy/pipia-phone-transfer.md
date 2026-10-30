@@ -17,7 +17,7 @@
 | 浏览器私有内容 | 词表、私有题目与答案、私有笔记和备份不随云端进度文件上传 |
 | 邮件请求 | 用户自行通过邮箱发送必要材料，由运营者人工核验、处理、反馈；未核验邮箱服务商及其处理链路，列为上线前待补项 |
 
-依据与接收方联系程序见[隐私政策源码](../../apps/web/src/routes/-legal/documents.tsx)及[运行说明](../ops/legal-and-feedback.md)。Supabase 官方说明选区数据库/备份与跨区支持、运维的区别：[地区 FAQ](https://supabase.com/legal/privacy-resources/data-residency-and-transfers-faq)；联系 privacy@supabase.com。Cloudflare 联系程序见其[隐私政策](https://www.cloudflare.com/privacypolicy/)。
+依据与接收方联系程序见[隐私政策源码](<../../apps/web/src/routes/(legal)/-legal/documents.tsx>)及[运行说明](../ops/legal-and-feedback.md)。Supabase 官方说明选区数据库/备份与跨区支持、运维的区别：[地区 FAQ](https://supabase.com/legal/privacy-resources/data-residency-and-transfers-faq)；联系 privacy@supabase.com。Cloudflare 联系程序见其[隐私政策](https://www.cloudflare.com/privacypolicy/)。
 
 ## 2. 目的与必要性
 

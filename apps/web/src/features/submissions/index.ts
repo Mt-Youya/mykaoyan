@@ -1,2 +1,2 @@
-export { SubmissionsPanel } from "./panel"
-export { AdminSubmissionsPanel } from "./admin-panel"
+export * from "./panel"
+export * from "./admin-panel"

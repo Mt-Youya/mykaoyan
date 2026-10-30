@@ -1,1 +1,1 @@
-export { LessonPlayer } from "./player"
+export * from "./player"

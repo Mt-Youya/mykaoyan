@@ -81,13 +81,13 @@ interface SparklesTextProps {
   }
 }
 
-export const SparklesText: React.FC<SparklesTextProps> = ({
+export function SparklesText({
   children,
   colors = { first: "#9E7AFF", second: "#FE8BBB" },
   className,
   sparklesCount = 10,
   ...props
-}) => {
+}: SparklesTextProps) {
   const [sparkles, setSparkles] = useState<Sparkle[]>([])
 
   useEffect(() => {

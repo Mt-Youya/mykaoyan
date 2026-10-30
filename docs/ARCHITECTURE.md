@@ -37,6 +37,20 @@ docs/             规划、ADR、坑点、规格
 
 `apps/web/src/routeTree.gen.ts` 由 TanStack Router 生成并提交，保证干净安装后可直接类型检查；不手工编辑，不参与格式化、lint 与源码架构扫描。
 
+前端页面按功能放在 `apps/web/src/routes/` 的 route groups 中：括号目录只用于组织，不增加 URL 前缀，也不添加布局层。`__root.tsx` 保留在根目录，`routeTree.gen.ts` 继续单文件聚合。
+
+| 目录 | 页面与辅助文件 |
+| --- | --- |
+| `(site)/` | 首页、院校查询；`-home/` 放两者共用的备考选择与目录组件 |
+| `(account)/` | 登录页、`-auth.ts` 与相邻测试 |
+| `(catalog)/` | 考试科目、课程、讲、讲义 |
+| `(study)/` | 今日页、计划、每日记录、周复盘、进度、考点、错题、试卷、单词复习 |
+| `(legal)/` | 隐私政策、用户协议、投诉举报与申诉；`-legal/` 放正文和确认组件及测试 |
+| `(admin)/` | 内容管理 |
+| `docs/` | `/docs/contract` 等具有实际 URL 前缀的契约文档页 |
+
+移动页面时同步修正相对导入，再用 Router 插件生成路由树和 `createFileRoute` 标识；核对公开 URL 集合、类型检查、测试及生产构建，不手工改生成标识。
+
 媒体 Worker 的 `worker-configuration.d.ts` 由该包的 `typecheck` 先运行 `wrangler types` 生成，忽略且不提交；运行时类型由锁定的 Wrangler 版本提供。
 
 临时前端的 `cloudflare.config.ts` 使用项目内 `cf` 与 Cloudflare Vite plugin；`.cloudflare/` 中的构建产物、生成类型与状态全部忽略，不参与源码架构扫描。默认 Node 构建保留为回退方案；生产前端由 Worker 承载（[ADR 0010](./adr/0010-worker-api-proxy.md)）。

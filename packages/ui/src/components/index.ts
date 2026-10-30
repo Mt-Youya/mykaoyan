@@ -2,7 +2,7 @@
  * 由 `pnpm --filter @cyrus/ui gen` 生成（scripts/gen-lazy-index.mjs），请勿手改。
  * 新增或删除组件后重新生成；想暂时排除某个组件，加进脚本的 EXCLUDE_FILES / EXCLUDE_NAMES。
  */
-import { lazyModule } from "../utils/index.ts"
+import { lazyModule } from "../utils"
 
 export const { AnimatedCircularProgressBar } = lazyModule(() => import("./animated-circular-progress-bar"))
 export const { AnimatedListItem, AnimatedList } = lazyModule(() => import("./animated-list"))

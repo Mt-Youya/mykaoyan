@@ -46,7 +46,7 @@ export type Coverage = { total: number | null; returned: number; truncated: bool
 
 type Row = Record<string, unknown>
 
-const text = (value: unknown): string | null => {
+function text(value: unknown): string | null {
   if (typeof value !== "string") return null
   const trimmed = value.trim()
   return trimmed === "" ? null : trimmed

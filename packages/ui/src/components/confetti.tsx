@@ -9,7 +9,7 @@ import confetti from "canvas-confetti"
 import type { ReactNode } from "react"
 import React, { createContext, forwardRef, useEffect, useImperativeHandle, useRef } from "react"
 
-import { Button } from "../base/index.ts"
+import { Button } from "../base"
 
 export type ConfettiRef = {
   fire: (options?: ConfettiOptions) => Promise<void> | void

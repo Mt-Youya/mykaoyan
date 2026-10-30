@@ -9,117 +9,107 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdmissionsRouteImport } from './routes/admissions'
-import { Route as DailyRouteImport } from './routes/daily'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as MistakesRouteImport } from './routes/mistakes'
-import { Route as PapersRouteImport } from './routes/papers'
-import { Route as PlanRouteImport } from './routes/plan'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as ProgressRouteImport } from './routes/progress'
-import { Route as SupportRouteImport } from './routes/support'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as TodayRouteImport } from './routes/today'
-import { Route as TopicProgressRouteImport } from './routes/topic-progress'
-import { Route as TopicsRouteImport } from './routes/topics'
-import { Route as VocabularyRouteImport } from './routes/vocabulary'
-import { Route as WeeklyRouteImport } from './routes/weekly'
-import { Route as AdminContentRouteImport } from './routes/admin.content'
-import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
+import { Route as accountLoginRouteImport } from './routes/(account)/login'
+import { Route as legalPrivacyRouteImport } from './routes/(legal)/privacy'
+import { Route as legalSupportRouteImport } from './routes/(legal)/support'
+import { Route as legalTermsRouteImport } from './routes/(legal)/terms'
+import { Route as siteIndexRouteImport } from './routes/(site)/index'
+import { Route as siteAdmissionsRouteImport } from './routes/(site)/admissions'
+import { Route as studyDailyRouteImport } from './routes/(study)/daily'
+import { Route as studyMistakesRouteImport } from './routes/(study)/mistakes'
+import { Route as studyPapersRouteImport } from './routes/(study)/papers'
+import { Route as studyPlanRouteImport } from './routes/(study)/plan'
+import { Route as studyProgressRouteImport } from './routes/(study)/progress'
+import { Route as studyTodayRouteImport } from './routes/(study)/today'
+import { Route as studyTopicProgressRouteImport } from './routes/(study)/topic-progress'
+import { Route as studyTopicsRouteImport } from './routes/(study)/topics'
+import { Route as studyVocabularyRouteImport } from './routes/(study)/vocabulary'
+import { Route as studyWeeklyRouteImport } from './routes/(study)/weekly'
 import { Route as DocsContractRouteImport } from './routes/docs/contract'
-import { Route as HandoutsSlugRouteImport } from './routes/handouts.$slug'
-import { Route as LessonsSlugRouteImport } from './routes/lessons.$slug'
-import { Route as SubjectsCodeRouteImport } from './routes/subjects.$code'
+import { Route as adminAdminContentRouteImport } from './routes/(admin)/admin.content'
+import { Route as catalogCoursesSlugRouteImport } from './routes/(catalog)/courses.$slug'
+import { Route as catalogHandoutsSlugRouteImport } from './routes/(catalog)/handouts.$slug'
+import { Route as catalogLessonsSlugRouteImport } from './routes/(catalog)/lessons.$slug'
+import { Route as catalogSubjectsCodeRouteImport } from './routes/(catalog)/subjects.$code'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdmissionsRoute = AdmissionsRouteImport.update({
-  id: '/admissions',
-  path: '/admissions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DailyRoute = DailyRouteImport.update({
-  id: '/daily',
-  path: '/daily',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
+const accountLoginRoute = accountLoginRouteImport.update({
+  id: '/(account)/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MistakesRoute = MistakesRouteImport.update({
-  id: '/mistakes',
-  path: '/mistakes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PapersRoute = PapersRouteImport.update({
-  id: '/papers',
-  path: '/papers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlanRoute = PlanRouteImport.update({
-  id: '/plan',
-  path: '/plan',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
+const legalPrivacyRoute = legalPrivacyRouteImport.update({
+  id: '/(legal)/privacy',
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProgressRoute = ProgressRouteImport.update({
-  id: '/progress',
-  path: '/progress',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SupportRoute = SupportRouteImport.update({
-  id: '/support',
+const legalSupportRoute = legalSupportRouteImport.update({
+  id: '/(legal)/support',
   path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
+const legalTermsRoute = legalTermsRouteImport.update({
+  id: '/(legal)/terms',
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TodayRoute = TodayRouteImport.update({
-  id: '/today',
+const siteIndexRoute = siteIndexRouteImport.update({
+  id: '/(site)/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const siteAdmissionsRoute = siteAdmissionsRouteImport.update({
+  id: '/(site)/admissions',
+  path: '/admissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const studyDailyRoute = studyDailyRouteImport.update({
+  id: '/(study)/daily',
+  path: '/daily',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const studyMistakesRoute = studyMistakesRouteImport.update({
+  id: '/(study)/mistakes',
+  path: '/mistakes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const studyPapersRoute = studyPapersRouteImport.update({
+  id: '/(study)/papers',
+  path: '/papers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const studyPlanRoute = studyPlanRouteImport.update({
+  id: '/(study)/plan',
+  path: '/plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const studyProgressRoute = studyProgressRouteImport.update({
+  id: '/(study)/progress',
+  path: '/progress',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const studyTodayRoute = studyTodayRouteImport.update({
+  id: '/(study)/today',
   path: '/today',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TopicProgressRoute = TopicProgressRouteImport.update({
-  id: '/topic-progress',
+const studyTopicProgressRoute = studyTopicProgressRouteImport.update({
+  id: '/(study)/topic-progress',
   path: '/topic-progress',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TopicsRoute = TopicsRouteImport.update({
-  id: '/topics',
+const studyTopicsRoute = studyTopicsRouteImport.update({
+  id: '/(study)/topics',
   path: '/topics',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VocabularyRoute = VocabularyRouteImport.update({
-  id: '/vocabulary',
+const studyVocabularyRoute = studyVocabularyRouteImport.update({
+  id: '/(study)/vocabulary',
   path: '/vocabulary',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WeeklyRoute = WeeklyRouteImport.update({
-  id: '/weekly',
+const studyWeeklyRoute = studyWeeklyRouteImport.update({
+  id: '/(study)/weekly',
   path: '/weekly',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminContentRoute = AdminContentRouteImport.update({
-  id: '/admin/content',
-  path: '/admin/content',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoursesSlugRoute = CoursesSlugRouteImport.update({
-  id: '/courses/$slug',
-  path: '/courses/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsContractRoute = DocsContractRouteImport.update({
@@ -127,321 +117,317 @@ const DocsContractRoute = DocsContractRouteImport.update({
   path: '/docs/contract',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HandoutsSlugRoute = HandoutsSlugRouteImport.update({
-  id: '/handouts/$slug',
+const adminAdminContentRoute = adminAdminContentRouteImport.update({
+  id: '/(admin)/admin/content',
+  path: '/admin/content',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const catalogCoursesSlugRoute = catalogCoursesSlugRouteImport.update({
+  id: '/(catalog)/courses/$slug',
+  path: '/courses/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const catalogHandoutsSlugRoute = catalogHandoutsSlugRouteImport.update({
+  id: '/(catalog)/handouts/$slug',
   path: '/handouts/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LessonsSlugRoute = LessonsSlugRouteImport.update({
-  id: '/lessons/$slug',
+const catalogLessonsSlugRoute = catalogLessonsSlugRouteImport.update({
+  id: '/(catalog)/lessons/$slug',
   path: '/lessons/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SubjectsCodeRoute = SubjectsCodeRouteImport.update({
-  id: '/subjects/$code',
+const catalogSubjectsCodeRoute = catalogSubjectsCodeRouteImport.update({
+  id: '/(catalog)/subjects/$code',
   path: '/subjects/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/admissions': typeof AdmissionsRoute
-  '/daily': typeof DailyRoute
-  '/login': typeof LoginRoute
-  '/mistakes': typeof MistakesRoute
-  '/papers': typeof PapersRoute
-  '/plan': typeof PlanRoute
-  '/privacy': typeof PrivacyRoute
-  '/progress': typeof ProgressRoute
-  '/support': typeof SupportRoute
-  '/terms': typeof TermsRoute
-  '/today': typeof TodayRoute
-  '/topic-progress': typeof TopicProgressRoute
-  '/topics': typeof TopicsRoute
-  '/vocabulary': typeof VocabularyRoute
-  '/weekly': typeof WeeklyRoute
-  '/admin/content': typeof AdminContentRoute
-  '/courses/$slug': typeof CoursesSlugRoute
+  '/login': typeof accountLoginRoute
+  '/privacy': typeof legalPrivacyRoute
+  '/support': typeof legalSupportRoute
+  '/terms': typeof legalTermsRoute
+  '/admissions': typeof siteAdmissionsRoute
+  '/daily': typeof studyDailyRoute
+  '/mistakes': typeof studyMistakesRoute
+  '/papers': typeof studyPapersRoute
+  '/plan': typeof studyPlanRoute
+  '/progress': typeof studyProgressRoute
+  '/today': typeof studyTodayRoute
+  '/topic-progress': typeof studyTopicProgressRoute
+  '/topics': typeof studyTopicsRoute
+  '/vocabulary': typeof studyVocabularyRoute
+  '/weekly': typeof studyWeeklyRoute
   '/docs/contract': typeof DocsContractRoute
-  '/handouts/$slug': typeof HandoutsSlugRoute
-  '/lessons/$slug': typeof LessonsSlugRoute
-  '/subjects/$code': typeof SubjectsCodeRoute
+  '/': typeof siteIndexRoute
+  '/admin/content': typeof adminAdminContentRoute
+  '/courses/$slug': typeof catalogCoursesSlugRoute
+  '/handouts/$slug': typeof catalogHandoutsSlugRoute
+  '/lessons/$slug': typeof catalogLessonsSlugRoute
+  '/subjects/$code': typeof catalogSubjectsCodeRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/admissions': typeof AdmissionsRoute
-  '/daily': typeof DailyRoute
-  '/login': typeof LoginRoute
-  '/mistakes': typeof MistakesRoute
-  '/papers': typeof PapersRoute
-  '/plan': typeof PlanRoute
-  '/privacy': typeof PrivacyRoute
-  '/progress': typeof ProgressRoute
-  '/support': typeof SupportRoute
-  '/terms': typeof TermsRoute
-  '/today': typeof TodayRoute
-  '/topic-progress': typeof TopicProgressRoute
-  '/topics': typeof TopicsRoute
-  '/vocabulary': typeof VocabularyRoute
-  '/weekly': typeof WeeklyRoute
-  '/admin/content': typeof AdminContentRoute
-  '/courses/$slug': typeof CoursesSlugRoute
+  '/login': typeof accountLoginRoute
+  '/privacy': typeof legalPrivacyRoute
+  '/support': typeof legalSupportRoute
+  '/terms': typeof legalTermsRoute
+  '/admissions': typeof siteAdmissionsRoute
+  '/daily': typeof studyDailyRoute
+  '/mistakes': typeof studyMistakesRoute
+  '/papers': typeof studyPapersRoute
+  '/plan': typeof studyPlanRoute
+  '/progress': typeof studyProgressRoute
+  '/today': typeof studyTodayRoute
+  '/topic-progress': typeof studyTopicProgressRoute
+  '/topics': typeof studyTopicsRoute
+  '/vocabulary': typeof studyVocabularyRoute
+  '/weekly': typeof studyWeeklyRoute
   '/docs/contract': typeof DocsContractRoute
-  '/handouts/$slug': typeof HandoutsSlugRoute
-  '/lessons/$slug': typeof LessonsSlugRoute
-  '/subjects/$code': typeof SubjectsCodeRoute
+  '/': typeof siteIndexRoute
+  '/admin/content': typeof adminAdminContentRoute
+  '/courses/$slug': typeof catalogCoursesSlugRoute
+  '/handouts/$slug': typeof catalogHandoutsSlugRoute
+  '/lessons/$slug': typeof catalogLessonsSlugRoute
+  '/subjects/$code': typeof catalogSubjectsCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/admissions': typeof AdmissionsRoute
-  '/daily': typeof DailyRoute
-  '/login': typeof LoginRoute
-  '/mistakes': typeof MistakesRoute
-  '/papers': typeof PapersRoute
-  '/plan': typeof PlanRoute
-  '/privacy': typeof PrivacyRoute
-  '/progress': typeof ProgressRoute
-  '/support': typeof SupportRoute
-  '/terms': typeof TermsRoute
-  '/today': typeof TodayRoute
-  '/topic-progress': typeof TopicProgressRoute
-  '/topics': typeof TopicsRoute
-  '/vocabulary': typeof VocabularyRoute
-  '/weekly': typeof WeeklyRoute
-  '/admin/content': typeof AdminContentRoute
-  '/courses/$slug': typeof CoursesSlugRoute
+  '/(account)/login': typeof accountLoginRoute
+  '/(legal)/privacy': typeof legalPrivacyRoute
+  '/(legal)/support': typeof legalSupportRoute
+  '/(legal)/terms': typeof legalTermsRoute
+  '/(site)/admissions': typeof siteAdmissionsRoute
+  '/(study)/daily': typeof studyDailyRoute
+  '/(study)/mistakes': typeof studyMistakesRoute
+  '/(study)/papers': typeof studyPapersRoute
+  '/(study)/plan': typeof studyPlanRoute
+  '/(study)/progress': typeof studyProgressRoute
+  '/(study)/today': typeof studyTodayRoute
+  '/(study)/topic-progress': typeof studyTopicProgressRoute
+  '/(study)/topics': typeof studyTopicsRoute
+  '/(study)/vocabulary': typeof studyVocabularyRoute
+  '/(study)/weekly': typeof studyWeeklyRoute
   '/docs/contract': typeof DocsContractRoute
-  '/handouts/$slug': typeof HandoutsSlugRoute
-  '/lessons/$slug': typeof LessonsSlugRoute
-  '/subjects/$code': typeof SubjectsCodeRoute
+  '/(site)/': typeof siteIndexRoute
+  '/(admin)/admin/content': typeof adminAdminContentRoute
+  '/(catalog)/courses/$slug': typeof catalogCoursesSlugRoute
+  '/(catalog)/handouts/$slug': typeof catalogHandoutsSlugRoute
+  '/(catalog)/lessons/$slug': typeof catalogLessonsSlugRoute
+  '/(catalog)/subjects/$code': typeof catalogSubjectsCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
+    | '/login'
+    | '/privacy'
+    | '/support'
+    | '/terms'
     | '/admissions'
     | '/daily'
-    | '/login'
     | '/mistakes'
     | '/papers'
     | '/plan'
-    | '/privacy'
     | '/progress'
-    | '/support'
-    | '/terms'
     | '/today'
     | '/topic-progress'
     | '/topics'
     | '/vocabulary'
     | '/weekly'
+    | '/docs/contract'
+    | '/'
     | '/admin/content'
     | '/courses/$slug'
-    | '/docs/contract'
     | '/handouts/$slug'
     | '/lessons/$slug'
     | '/subjects/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
+    | '/login'
+    | '/privacy'
+    | '/support'
+    | '/terms'
     | '/admissions'
     | '/daily'
-    | '/login'
     | '/mistakes'
     | '/papers'
     | '/plan'
-    | '/privacy'
     | '/progress'
-    | '/support'
-    | '/terms'
     | '/today'
     | '/topic-progress'
     | '/topics'
     | '/vocabulary'
     | '/weekly'
+    | '/docs/contract'
+    | '/'
     | '/admin/content'
     | '/courses/$slug'
-    | '/docs/contract'
     | '/handouts/$slug'
     | '/lessons/$slug'
     | '/subjects/$code'
   id:
     | '__root__'
-    | '/'
-    | '/admissions'
-    | '/daily'
-    | '/login'
-    | '/mistakes'
-    | '/papers'
-    | '/plan'
-    | '/privacy'
-    | '/progress'
-    | '/support'
-    | '/terms'
-    | '/today'
-    | '/topic-progress'
-    | '/topics'
-    | '/vocabulary'
-    | '/weekly'
-    | '/admin/content'
-    | '/courses/$slug'
+    | '/(account)/login'
+    | '/(legal)/privacy'
+    | '/(legal)/support'
+    | '/(legal)/terms'
+    | '/(site)/admissions'
+    | '/(study)/daily'
+    | '/(study)/mistakes'
+    | '/(study)/papers'
+    | '/(study)/plan'
+    | '/(study)/progress'
+    | '/(study)/today'
+    | '/(study)/topic-progress'
+    | '/(study)/topics'
+    | '/(study)/vocabulary'
+    | '/(study)/weekly'
     | '/docs/contract'
-    | '/handouts/$slug'
-    | '/lessons/$slug'
-    | '/subjects/$code'
+    | '/(site)/'
+    | '/(admin)/admin/content'
+    | '/(catalog)/courses/$slug'
+    | '/(catalog)/handouts/$slug'
+    | '/(catalog)/lessons/$slug'
+    | '/(catalog)/subjects/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AdmissionsRoute: typeof AdmissionsRoute
-  DailyRoute: typeof DailyRoute
-  LoginRoute: typeof LoginRoute
-  MistakesRoute: typeof MistakesRoute
-  PapersRoute: typeof PapersRoute
-  PlanRoute: typeof PlanRoute
-  PrivacyRoute: typeof PrivacyRoute
-  ProgressRoute: typeof ProgressRoute
-  SupportRoute: typeof SupportRoute
-  TermsRoute: typeof TermsRoute
-  TodayRoute: typeof TodayRoute
-  TopicProgressRoute: typeof TopicProgressRoute
-  TopicsRoute: typeof TopicsRoute
-  VocabularyRoute: typeof VocabularyRoute
-  WeeklyRoute: typeof WeeklyRoute
-  AdminContentRoute: typeof AdminContentRoute
-  CoursesSlugRoute: typeof CoursesSlugRoute
+  accountLoginRoute: typeof accountLoginRoute
+  legalPrivacyRoute: typeof legalPrivacyRoute
+  legalSupportRoute: typeof legalSupportRoute
+  legalTermsRoute: typeof legalTermsRoute
+  siteAdmissionsRoute: typeof siteAdmissionsRoute
+  studyDailyRoute: typeof studyDailyRoute
+  studyMistakesRoute: typeof studyMistakesRoute
+  studyPapersRoute: typeof studyPapersRoute
+  studyPlanRoute: typeof studyPlanRoute
+  studyProgressRoute: typeof studyProgressRoute
+  studyTodayRoute: typeof studyTodayRoute
+  studyTopicProgressRoute: typeof studyTopicProgressRoute
+  studyTopicsRoute: typeof studyTopicsRoute
+  studyVocabularyRoute: typeof studyVocabularyRoute
+  studyWeeklyRoute: typeof studyWeeklyRoute
   DocsContractRoute: typeof DocsContractRoute
-  HandoutsSlugRoute: typeof HandoutsSlugRoute
-  LessonsSlugRoute: typeof LessonsSlugRoute
-  SubjectsCodeRoute: typeof SubjectsCodeRoute
+  siteIndexRoute: typeof siteIndexRoute
+  adminAdminContentRoute: typeof adminAdminContentRoute
+  catalogCoursesSlugRoute: typeof catalogCoursesSlugRoute
+  catalogHandoutsSlugRoute: typeof catalogHandoutsSlugRoute
+  catalogLessonsSlugRoute: typeof catalogLessonsSlugRoute
+  catalogSubjectsCodeRoute: typeof catalogSubjectsCodeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admissions': {
-      id: '/admissions'
-      path: '/admissions'
-      fullPath: '/admissions'
-      preLoaderRoute: typeof AdmissionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/daily': {
-      id: '/daily'
-      path: '/daily'
-      fullPath: '/daily'
-      preLoaderRoute: typeof DailyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
+    '/(account)/login': {
+      id: '/(account)/login'
       path: '/login'
       fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+      preLoaderRoute: typeof accountLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mistakes': {
-      id: '/mistakes'
-      path: '/mistakes'
-      fullPath: '/mistakes'
-      preLoaderRoute: typeof MistakesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/papers': {
-      id: '/papers'
-      path: '/papers'
-      fullPath: '/papers'
-      preLoaderRoute: typeof PapersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/plan': {
-      id: '/plan'
-      path: '/plan'
-      fullPath: '/plan'
-      preLoaderRoute: typeof PlanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
+    '/(legal)/privacy': {
+      id: '/(legal)/privacy'
       path: '/privacy'
       fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
+      preLoaderRoute: typeof legalPrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/progress': {
-      id: '/progress'
-      path: '/progress'
-      fullPath: '/progress'
-      preLoaderRoute: typeof ProgressRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/support': {
-      id: '/support'
+    '/(legal)/support': {
+      id: '/(legal)/support'
       path: '/support'
       fullPath: '/support'
-      preLoaderRoute: typeof SupportRouteImport
+      preLoaderRoute: typeof legalSupportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/terms': {
-      id: '/terms'
+    '/(legal)/terms': {
+      id: '/(legal)/terms'
       path: '/terms'
       fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
+      preLoaderRoute: typeof legalTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/today': {
-      id: '/today'
+    '/(site)/': {
+      id: '/(site)/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof siteIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(site)/admissions': {
+      id: '/(site)/admissions'
+      path: '/admissions'
+      fullPath: '/admissions'
+      preLoaderRoute: typeof siteAdmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(study)/daily': {
+      id: '/(study)/daily'
+      path: '/daily'
+      fullPath: '/daily'
+      preLoaderRoute: typeof studyDailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(study)/mistakes': {
+      id: '/(study)/mistakes'
+      path: '/mistakes'
+      fullPath: '/mistakes'
+      preLoaderRoute: typeof studyMistakesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(study)/papers': {
+      id: '/(study)/papers'
+      path: '/papers'
+      fullPath: '/papers'
+      preLoaderRoute: typeof studyPapersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(study)/plan': {
+      id: '/(study)/plan'
+      path: '/plan'
+      fullPath: '/plan'
+      preLoaderRoute: typeof studyPlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(study)/progress': {
+      id: '/(study)/progress'
+      path: '/progress'
+      fullPath: '/progress'
+      preLoaderRoute: typeof studyProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(study)/today': {
+      id: '/(study)/today'
       path: '/today'
       fullPath: '/today'
-      preLoaderRoute: typeof TodayRouteImport
+      preLoaderRoute: typeof studyTodayRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/topic-progress': {
-      id: '/topic-progress'
+    '/(study)/topic-progress': {
+      id: '/(study)/topic-progress'
       path: '/topic-progress'
       fullPath: '/topic-progress'
-      preLoaderRoute: typeof TopicProgressRouteImport
+      preLoaderRoute: typeof studyTopicProgressRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/topics': {
-      id: '/topics'
+    '/(study)/topics': {
+      id: '/(study)/topics'
       path: '/topics'
       fullPath: '/topics'
-      preLoaderRoute: typeof TopicsRouteImport
+      preLoaderRoute: typeof studyTopicsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/vocabulary': {
-      id: '/vocabulary'
+    '/(study)/vocabulary': {
+      id: '/(study)/vocabulary'
       path: '/vocabulary'
       fullPath: '/vocabulary'
-      preLoaderRoute: typeof VocabularyRouteImport
+      preLoaderRoute: typeof studyVocabularyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/weekly': {
-      id: '/weekly'
+    '/(study)/weekly': {
+      id: '/(study)/weekly'
       path: '/weekly'
       fullPath: '/weekly'
-      preLoaderRoute: typeof WeeklyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/content': {
-      id: '/admin/content'
-      path: '/admin/content'
-      fullPath: '/admin/content'
-      preLoaderRoute: typeof AdminContentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/$slug': {
-      id: '/courses/$slug'
-      path: '/courses/$slug'
-      fullPath: '/courses/$slug'
-      preLoaderRoute: typeof CoursesSlugRouteImport
+      preLoaderRoute: typeof studyWeeklyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs/contract': {
@@ -451,53 +437,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsContractRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/handouts/$slug': {
-      id: '/handouts/$slug'
+    '/(admin)/admin/content': {
+      id: '/(admin)/admin/content'
+      path: '/admin/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof adminAdminContentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(catalog)/courses/$slug': {
+      id: '/(catalog)/courses/$slug'
+      path: '/courses/$slug'
+      fullPath: '/courses/$slug'
+      preLoaderRoute: typeof catalogCoursesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(catalog)/handouts/$slug': {
+      id: '/(catalog)/handouts/$slug'
       path: '/handouts/$slug'
       fullPath: '/handouts/$slug'
-      preLoaderRoute: typeof HandoutsSlugRouteImport
+      preLoaderRoute: typeof catalogHandoutsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lessons/$slug': {
-      id: '/lessons/$slug'
+    '/(catalog)/lessons/$slug': {
+      id: '/(catalog)/lessons/$slug'
       path: '/lessons/$slug'
       fullPath: '/lessons/$slug'
-      preLoaderRoute: typeof LessonsSlugRouteImport
+      preLoaderRoute: typeof catalogLessonsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/subjects/$code': {
-      id: '/subjects/$code'
+    '/(catalog)/subjects/$code': {
+      id: '/(catalog)/subjects/$code'
       path: '/subjects/$code'
       fullPath: '/subjects/$code'
-      preLoaderRoute: typeof SubjectsCodeRouteImport
+      preLoaderRoute: typeof catalogSubjectsCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AdmissionsRoute: AdmissionsRoute,
-  DailyRoute: DailyRoute,
-  LoginRoute: LoginRoute,
-  MistakesRoute: MistakesRoute,
-  PapersRoute: PapersRoute,
-  PlanRoute: PlanRoute,
-  PrivacyRoute: PrivacyRoute,
-  ProgressRoute: ProgressRoute,
-  SupportRoute: SupportRoute,
-  TermsRoute: TermsRoute,
-  TodayRoute: TodayRoute,
-  TopicProgressRoute: TopicProgressRoute,
-  TopicsRoute: TopicsRoute,
-  VocabularyRoute: VocabularyRoute,
-  WeeklyRoute: WeeklyRoute,
-  AdminContentRoute: AdminContentRoute,
-  CoursesSlugRoute: CoursesSlugRoute,
+  accountLoginRoute: accountLoginRoute,
+  legalPrivacyRoute: legalPrivacyRoute,
+  legalSupportRoute: legalSupportRoute,
+  legalTermsRoute: legalTermsRoute,
+  siteAdmissionsRoute: siteAdmissionsRoute,
+  studyDailyRoute: studyDailyRoute,
+  studyMistakesRoute: studyMistakesRoute,
+  studyPapersRoute: studyPapersRoute,
+  studyPlanRoute: studyPlanRoute,
+  studyProgressRoute: studyProgressRoute,
+  studyTodayRoute: studyTodayRoute,
+  studyTopicProgressRoute: studyTopicProgressRoute,
+  studyTopicsRoute: studyTopicsRoute,
+  studyVocabularyRoute: studyVocabularyRoute,
+  studyWeeklyRoute: studyWeeklyRoute,
   DocsContractRoute: DocsContractRoute,
-  HandoutsSlugRoute: HandoutsSlugRoute,
-  LessonsSlugRoute: LessonsSlugRoute,
-  SubjectsCodeRoute: SubjectsCodeRoute,
+  siteIndexRoute: siteIndexRoute,
+  adminAdminContentRoute: adminAdminContentRoute,
+  catalogCoursesSlugRoute: catalogCoursesSlugRoute,
+  catalogHandoutsSlugRoute: catalogHandoutsSlugRoute,
+  catalogLessonsSlugRoute: catalogLessonsSlugRoute,
+  catalogSubjectsCodeRoute: catalogSubjectsCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

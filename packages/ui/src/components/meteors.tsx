@@ -13,7 +13,7 @@ interface MeteorsProps {
   className?: string
 }
 
-export const Meteors = ({
+export function Meteors({
   number = 20,
   minDelay = 0.2,
   maxDelay = 1.2,
@@ -21,7 +21,7 @@ export const Meteors = ({
   maxDuration = 10,
   angle = 215,
   className,
-}: MeteorsProps) => {
+}: MeteorsProps) {
   const [meteorStyles, setMeteorStyles] = useState<Array<React.CSSProperties>>([])
 
   useEffect(() => {

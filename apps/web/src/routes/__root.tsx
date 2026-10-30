@@ -1,7 +1,7 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
 
-import { LegalLinks } from "./-legal/documents"
+import { LegalLinks } from "./(legal)/-legal/documents"
 
 import "../globals.css"
 

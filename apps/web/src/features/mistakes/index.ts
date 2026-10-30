@@ -1,1 +1,1 @@
-export { MistakesPage } from "./mistakes-page"
+export * from "./mistakes-page"

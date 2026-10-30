@@ -116,7 +116,7 @@ function getThemeTransitionClipPaths(
   }
 }
 
-export const AnimatedThemeToggler = ({
+export function AnimatedThemeToggler({
   className,
   duration = 400,
   variant,
@@ -124,7 +124,7 @@ export const AnimatedThemeToggler = ({
   theme,
   onThemeChange,
   ...props
-}: AnimatedThemeTogglerProps) => {
+}: AnimatedThemeTogglerProps) {
   const shape = variant ?? "circle"
   const isControlled = theme !== undefined
   const [internalIsDark, setInternalIsDark] = useState(false)

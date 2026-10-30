@@ -11,6 +11,13 @@
   // typescript / unicorn / oxc 是默认就有的；这里额外加 import（ESM 问题）和 react（React 19 规则）。
   "plugins": ["typescript", "unicorn", "oxc", "import", "react"],
 
+  // 本地 JS 插件（oxlint alpha API）。内置 `func-style` 只有检测、没有 fixer，
+  // `oxlint --fix` 永远改不动箭头函数；这里用等价规则 + fixer 补上这一环。
+  // 只转换"模块级 const + 多行代码块"的具名箭头函数：
+  //   export const foo = (a: number) => { ... }  →  export function foo(a: number) { ... }
+  // 单行能写完的、回调里的、用到 this/arguments 的、let/var 的一律跳过。
+  "jsPlugins": ["./scripts/oxlint-plugin-arrow-to-function.mjs"],
+
   // 按"类别"批量开关，避免逐条列几百条规则。
   // correctness（确定是错）报 error；suspicious/perf（大概率是问题）报 warn 不挡路；
   // style/pedantic/restriction/nursery 关掉，需要的单条在下面显式打开。
@@ -73,6 +80,11 @@
     "import/no-duplicates": "warn", // 同一个模块 import 了两次
     // 配合 tsconfig 的 verbatimModuleSyntax：只作类型使用的导入必须写成 `import type`
     "typescript/consistent-type-imports": ["warn", { "prefer": "type-imports", "fixStyle": "separate-type-imports" }],
+
+    // ───── 具名箭头函数 → function 声明（可自动修复）─────
+    // 由上面的本地插件提供 fixer：`pnpm lint:fix` 会自动改，不需要手工。
+    // 只针对上面描述的窄范围，等价于"模块级、多行、具名"这一种情况。
+    "local/prefer-function-declaration": "error",
 
     // ───── React 19 / 新 JSX transform ─────
     // 新版 JSX transform 不需要在文件里 import React，这条规则在这里只会制造 1500+ 条误报。

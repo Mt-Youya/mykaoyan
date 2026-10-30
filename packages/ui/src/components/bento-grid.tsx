@@ -3,7 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { cn } from "cn"
 import { type ComponentPropsWithoutRef, type ReactNode } from "react"
 
-import { Button } from "../base/index.ts"
+import { Button } from "../base"
 
 interface BentoGridProps extends ComponentPropsWithoutRef<"div"> {
   children: ReactNode

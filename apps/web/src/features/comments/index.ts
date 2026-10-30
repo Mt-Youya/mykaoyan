@@ -1,2 +1,2 @@
-export { CommentsPanel } from "./comments-panel"
-export { AdminCommentsPanel } from "./admin-comments"
+export * from "./comments-panel"
+export * from "./admin-comments"
