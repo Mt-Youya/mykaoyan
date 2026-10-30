@@ -1,4 +1,5 @@
-// oxfmt 配置（格式化 + 自动排序）。用 .jsonc 是因为要写注释。
+// oxfmt 配置（格式化 + 自动排序）。文件名用 .json：oxc 两个工具的 schema 都声明了
+// allowComments，所以注释可以直接写在 .json 里（与 .oxlintrc.json 保持一致）。
 // 文档：https://oxc.rs/docs/guide/usage/formatter/config-file-reference.html
 // 排序能力：https://oxc.rs/docs/guide/usage/formatter/sorting.html
 //
@@ -38,7 +39,7 @@
     "order": "asc", // 组内按模块路径升序
     "ignoreCase": true, // 大小写不敏感，避免 React / zod 这种大小写混排时顺序反直觉
     "sortSideEffects": false, // 有副作用的 import（如 import "./x.css"）保持原位，最安全
-    "partitionByNewline": false, // 允许跨空行重排，保证"排一次就稳定"，不会反复横跳
+    "partitionByNewline": false // 允许跨空行重排，保证"排一次就稳定"，不会反复横跳
   },
 
   // ───────── 自动排序 2/3：Tailwind class ─────────
@@ -48,12 +49,12 @@
     "stylesheet": "./apps/web/src/globals.css",
     "functions": ["cn", "clsx", "cva", "twMerge"], // cn()/clsx() 的字符串参数同样参与排序
     "preserveWhitespace": false,
-    "preserveDuplicates": false,
+    "preserveDuplicates": false
   },
 
   // ───────── 自动排序 3/3：package.json 字段 ─────────
   "sortPackageJson": {
-    "sortScripts": false, // 字段按约定顺序排；scripts 保留手写顺序（有阅读/执行语义，别按字母打乱）
+    "sortScripts": false // 字段按约定顺序排；scripts 保留手写顺序（有阅读/执行语义，别按字母打乱）
   },
 
   // JSDoc 重排默认关闭：它会改写注释的换行、大写化描述，对中文注释收益小、风险大。
@@ -69,6 +70,6 @@
     "apps/web/public/**",
     "cli/contracts/openapi.json",
     "skills/mykaoyan/references/progress.schema.json",
-    "packages/db/supabase/migrations/meta/**",
-  ],
+    "packages/db/supabase/migrations/meta/**"
+  ]
 }

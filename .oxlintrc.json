@@ -2,7 +2,7 @@
 // 文档：https://oxc.rs/docs/guide/usage/linter/config.html
 // 规则表（含是否可自动修复）：https://oxc.rs/docs/guide/usage/linter/rules.html
 //
-// 分工：排版 / import 语句顺序交给 oxfmt（见 .oxfmtrc.jsonc）；
+// 分工：排版 / import 语句顺序交给 oxfmt（见 .oxfmtrc.json）；
 //       这里负责"语义 + 可自动修复的写法统一"。
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
