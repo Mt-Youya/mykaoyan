@@ -13,6 +13,7 @@ import type { Environment } from "../environment"
 import { PlaybackModule } from "../playback"
 import { PublishingModule } from "../publishing"
 import { MembershipModule } from "../membership"
+import { CommentsModule } from "../comments"
 import { ProgressModule } from "../progress"
 
 /**
@@ -39,6 +40,7 @@ export class AppModule {
               AgentTokensModule,
               ProgressModule,
               MembershipModule,
+              CommentsModule,
               PublishingModule,
             ]
           : [CatalogEmptyModule]),

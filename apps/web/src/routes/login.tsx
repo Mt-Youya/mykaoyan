@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start"
 import { getRequest, setResponseHeader } from "@tanstack/react-start/server"
 import { Button, Input, Label } from "@mykaoyan/ui"
 import { useEffect, useState } from "react"
-import { loadLoginState, postJson } from "./-auth"
+import { loadLoginState, postJson, loginSuccessPath } from "./-auth"
 import { MemberPanel } from "../features/membership"
 import type { LoginState } from "./-auth"
 
@@ -69,7 +69,10 @@ export function LoginPage() {
       setMessage(result.message)
       return
     }
-    window.location.assign("/")
+    const destination = loginSuccessPath(window.location.hash)
+    // 同一页的锚点跳转不会重新加载会话，需要刷新服务端登录状态。
+    if (destination === "/login#membership") window.location.reload()
+    else window.location.assign(destination)
   }
 
   async function signOut(all: boolean) {

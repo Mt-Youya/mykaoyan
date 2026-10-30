@@ -78,6 +78,14 @@ describe("空库迁移与权限", () => {
     }
   })
 
+  it("评论、关键词和删除审计启用RLS且公开角色无权限", () => {
+    for (const table of ["comments", "comment_keywords", "comment_deletions"]) {
+      expect(sql(`select relrowsecurity from pg_class where oid='public.${table}'::regclass`)).toBe("t")
+      for (const role of ["anon", "authenticated"])
+        expect(sql(`select has_table_privilege('${role}','public.${table}','SELECT,INSERT,UPDATE,DELETE')`)).toBe("f")
+    }
+  })
+
   it("public schema 的函数没有向 PUBLIC、anon、authenticated 开放执行", () => {
     expect(sql(functionViolations)).toBe("")
   })

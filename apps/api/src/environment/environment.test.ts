@@ -31,6 +31,13 @@ describe("启动配置", () => {
     expect(() => readEnvironment({ ...valid, PORT: undefined })).toThrow(StartupConfigError)
   })
 
+  it("社区开关未设置时关闭，空串和其他值拒绝启动", () => {
+    expect(readEnvironment(valid).COMMUNITY_ENABLED).toBe(false)
+    expect(readEnvironment({ ...valid, COMMUNITY_ENABLED: "true" }).COMMUNITY_ENABLED).toBe(true)
+    for (const value of ["", "1", "yes"])
+      expect(() => readEnvironment({ ...valid, COMMUNITY_ENABLED: value })).toThrow("COMMUNITY_ENABLED")
+  })
+
   it("接受显式配置并解析端口", () => {
     expect(readEnvironment(valid).PORT).toBe(3001)
   })

@@ -53,7 +53,7 @@ export function MemberPanel() {
     }
   }
   return (
-    <section className="mbs-8 border-t border-border pbs-6" aria-labelledby="member-title">
+    <section id="membership" className="mbs-8 border-t border-border pbs-6" aria-labelledby="member-title">
       <h2 id="member-title" className="text-lg">
         会员期
       </h2>

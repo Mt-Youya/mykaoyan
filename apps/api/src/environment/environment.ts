@@ -12,6 +12,10 @@ const environmentSchema = z
       })
       .optional(),
     DATABASE_CA: z.string().trim().min(1).optional(),
+    COMMUNITY_ENABLED: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((v) => v === "true"),
     MEDIA_SIGNING_KEY: z.string().min(32),
     R2_ACCOUNT_ID: z
       .string()

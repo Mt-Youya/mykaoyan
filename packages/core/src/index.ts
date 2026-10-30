@@ -11,3 +11,5 @@ export * from "./catalog"
 
 export { membershipPeriodSchema, membershipStatus, nextMembershipPeriod } from "./membership/index"
 export type { MembershipPeriod } from "./membership/index"
+
+export { normalizeKeywords, blockedComment } from "./comments/index"

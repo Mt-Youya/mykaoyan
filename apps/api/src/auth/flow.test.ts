@@ -39,6 +39,7 @@ class ProbeModule {}
 
 const config: Environment = {
   NODE_ENV: "test",
+  COMMUNITY_ENABLED: false,
   PORT: 3001,
   DATABASE_URL: "postgresql://127.0.0.1:5432/mykaoyan_test",
   MEDIA_SIGNING_KEY: "test-only-media-signing-key-32-chars-min",

@@ -86,3 +86,8 @@ export async function postJson(
     ...(Number.isFinite(retryAfter) ? { retryAfterSeconds: retryAfter } : {}),
   }
 }
+
+/** 仅保留本站会员入口锚点，普通登录仍回首页。 */
+export function loginSuccessPath(hash: string) {
+  return hash === "#membership" ? "/login#membership" : "/"
+}

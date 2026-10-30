@@ -7,3 +7,5 @@ export * from "./progress/index"
 export * from "./publishing"
 
 export * from "./membership"
+
+export * from "./comments"

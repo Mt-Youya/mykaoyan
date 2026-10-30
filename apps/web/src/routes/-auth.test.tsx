@@ -1,3 +1,4 @@
+import { loginSuccessPath } from "./-auth"
 import { describe, expect, it } from "vitest"
 import { apiOrigin, collectSetCookies, problemMessage } from "./-auth"
 
@@ -38,5 +39,13 @@ describe("API 地址", () => {
   it("没有配置时按请求 origin 推", () => {
     delete process.env.API_ORIGIN
     expect(apiOrigin(new Request("https://web.example/login"))).toBe("https://web.example")
+  })
+})
+
+describe("会员入口登录返回路径", () => {
+  it("登录后回到会员兑换位置，普通登录回首页且不接收外站跳转", () => {
+    expect(loginSuccessPath("#membership")).toBe("/login#membership")
+    expect(loginSuccessPath("")).toBe("/")
+    expect(loginSuccessPath("https://example.invalid")).toBe("/")
   })
 })

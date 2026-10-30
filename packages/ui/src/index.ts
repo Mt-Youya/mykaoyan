@@ -11,3 +11,5 @@ export { Input } from "./base/input"
 export { Label } from "./base/label"
 
 export { Field, FieldGroup, FieldLabel } from "./base/field"
+
+export { Textarea } from "./base/textarea"

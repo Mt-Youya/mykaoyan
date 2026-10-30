@@ -1,3 +1,4 @@
+import { CommentsPanel } from "../comments"
 import { LessonPlayer } from "../playback"
 import type { LessonDetail } from "./api"
 import { Markdown } from "./markdown"
@@ -40,6 +41,7 @@ export function LessonPage({ slug }: { slug: string }) {
               </h2>
               <Markdown markdown={data.scriptMarkdown} />
             </section>
+            <CommentsPanel slug={data.slug} />
           </>
         )}
       </LoadGuard>
