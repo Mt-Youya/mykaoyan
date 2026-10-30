@@ -10,3 +10,4 @@ export * from "./membership"
 
 export * from "./comments"
 export * from "./submissions"
+export * from "./ratings"

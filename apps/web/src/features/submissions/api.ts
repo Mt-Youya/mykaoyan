@@ -1,5 +1,6 @@
 import { SUBMISSION_PART_SIZE, uploadPartSize } from "@mykaoyan/core"
 import type { SubmissionInput } from "@mykaoyan/core"
+import type { RatingSummary } from "@mykaoyan/core"
 export type Submission = {
   id: string
   title: string
@@ -20,6 +21,7 @@ export type OwnSubmission = Submission & {
   deleteMarked: boolean
   deleted: boolean
 }
+export type RatedSubmission = Submission & RatingSummary
 export type AdminSubmission = OwnSubmission & { listingChange: { actorId: string; listed: boolean; at: string } | null }
 export type SubmissionList<T = Submission> = { enabled: boolean; items: T[]; hasMore: boolean }
 export class SubmissionRequestError extends Error {

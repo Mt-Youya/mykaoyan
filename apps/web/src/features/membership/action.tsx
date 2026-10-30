@@ -27,6 +27,7 @@ export function MembershipAction({
   return (
     <>
       <Button
+        className="min-h-11"
         variant="outline"
         type="button"
         disabled={disabled || access === "loading" || access === "error"}

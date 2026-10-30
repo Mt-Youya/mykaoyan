@@ -3,20 +3,20 @@ import { z } from "zod"
 import { SubmissionAccess, ownSubmissionView, submissionView } from "./access"
 import type { Actor, SubmissionRow } from "./access"
 import { DEFAULT_TOKEN_TTL_SECONDS, MAX_TOKEN_TTL_SECONDS, PlaybackService } from "../playback"
+import { RatingsService } from "../ratings"
 @Injectable()
 export class SubmissionsService {
   constructor(
     @Inject(SubmissionAccess) private access: SubmissionAccess,
-    @Inject(PlaybackService) private playback: PlaybackService
+    @Inject(PlaybackService) private playback: PlaybackService,
+    @Inject(RatingsService) private ratings: RatingsService
   ) {}
-  async list(subject: string, page: number) {
-    this.access.page(page)
-    if (!/^[0-9]{3}$/.test(subject)) throw new BadRequestException("考试科目须为三位数字")
-    if (!this.access.config.COMMUNITY_ENABLED) return { enabled: false, items: [], hasMore: false }
-    const rows = await this.access.database.client<
-      SubmissionRow[]
-    >`select * from submissions where status='approved' and listed and delete_marked_at is null and deleted_at is null and subject_code=${subject} order by created_at desc,id desc limit 51 offset ${page * 50}`
-    return { enabled: true, items: rows.slice(0, 50).map(submissionView), hasMore: rows.length > 50 }
+  async list(subject: string, page: number, topic = "") {
+    const result = await this.ratings.ranked(subject, page, topic)
+    return {
+      ...result,
+      items: result.items.map(({ submission, stats }) => ({ ...submissionView(submission), ...stats })),
+    }
   }
   async mine(accountId: string, page: number) {
     this.access.page(page)

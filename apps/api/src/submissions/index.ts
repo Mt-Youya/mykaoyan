@@ -2,6 +2,7 @@ import { Controller, Get, Inject, Module, ServiceUnavailableException } from "@n
 import { AuthModule } from "../auth"
 import { MembershipModule } from "../membership"
 import { PlaybackModule } from "../playback"
+import { RatingsModule } from "../ratings"
 import { CONFIG } from "../config"
 import type { Environment } from "../environment"
 import { SubmissionAccess } from "./access"
@@ -13,7 +14,7 @@ import { AdminSubmissionsController, SubmissionsController } from "./controller"
 export { SUBMISSION_STORAGE } from "./storage"
 export type { SubmissionStorage, UploadedPart } from "./storage"
 @Module({
-  imports: [AuthModule, MembershipModule, PlaybackModule],
+  imports: [AuthModule, MembershipModule, PlaybackModule, RatingsModule],
   controllers: [SubmissionsController, AdminSubmissionsController],
   providers: [
     SubmissionAccess,

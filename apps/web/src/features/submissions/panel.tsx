@@ -6,6 +6,8 @@ import { LessonPlayer } from "../playback"
 import { SubmissionRequestError, submissionRequest } from "./api"
 import type { OwnSubmission, Submission, SubmissionList } from "./api"
 import { SubmissionUploadForm } from "./upload-form"
+import { RatingControl, RatingFilters, RatingStats } from "../ratings"
+import type { RatedSubmission } from "./api"
 export const submissionStatus = { uploading: "上传未完成", pending: "待审核", approved: "已通过", rejected: "已驳回" }
 export function SubmissionCard({
   item,
@@ -42,7 +44,7 @@ export function SubmissionCard({
   )
 }
 export function SubmissionsPanel({ subjectCode }: { subjectCode: string }) {
-  const [list, setList] = useState<SubmissionList | null>(null),
+  const [list, setList] = useState<SubmissionList<RatedSubmission> | null>(null),
     [mine, setMine] = useState<SubmissionList<OwnSubmission> | null>(null),
     [access, setAccess] = useState<MembershipAccess>("loading"),
     [page, setPage] = useState(0),
@@ -52,6 +54,8 @@ export function SubmissionsPanel({ subjectCode }: { subjectCode: string }) {
     [resume, setResume] = useState<OwnSubmission | null>(null),
     [formKey, setFormKey] = useState(0),
     [message, setMessage] = useState("")
+  const [subject, setSubject] = useState(subjectCode),
+    [topic, setTopic] = useState("")
   useEffect(() => {
     let active = true
     setList(null)
@@ -60,8 +64,8 @@ export function SubmissionsPanel({ subjectCode }: { subjectCode: string }) {
     setMessage("")
     setOpen(false)
     void (async () => {
-      const data = await submissionRequest<SubmissionList>(
-        `submissions?subject=${encodeURIComponent(subjectCode)}&page=${page}`
+      const data = await submissionRequest<SubmissionList<RatedSubmission>>(
+        `submissions?subject=${encodeURIComponent(subject)}&topic=${encodeURIComponent(topic)}&page=${page}`
       )
       if (!active) return
       setList(data)
@@ -85,7 +89,7 @@ export function SubmissionsPanel({ subjectCode }: { subjectCode: string }) {
     return () => {
       active = false
     }
-  }, [subjectCode, page, minePage, reload])
+  }, [subject, topic, page, minePage, reload])
   function edit(item: OwnSubmission | null) {
     setResume(item)
     setFormKey((n) => n + 1)
@@ -103,13 +107,24 @@ export function SubmissionsPanel({ subjectCode }: { subjectCode: string }) {
         <p>投稿暂未开放。</p>
       ) : (
         <>
+          <p>投稿按加权平均分排序；至少5人评分且得分达到4.0时显示推荐。</p>
+          <RatingFilters
+            key={`${subject}:${topic}`}
+            subject={subject}
+            topic={topic}
+            onApply={(nextSubject, nextTopic) => {
+              setSubject(nextSubject)
+              setTopic(nextTopic)
+              setPage(0)
+            }}
+          />
           <div>
             <MembershipAction label="投稿视频" access={access} onAllowed={() => edit(null)} />
           </div>
           {open && access === "member" ? (
             <SubmissionUploadForm
               key={formKey}
-              subjectCode={subjectCode}
+              subjectCode={subject}
               resume={resume}
               onDone={() => {
                 setOpen(false)
@@ -125,11 +140,14 @@ export function SubmissionsPanel({ subjectCode }: { subjectCode: string }) {
           {list.items.length ? (
             <ul>
               {list.items.map((item) => (
-                <SubmissionCard key={item.id} item={item} />
+                <SubmissionCard key={item.id} item={item}>
+                  <RatingStats value={item} />
+                  <RatingControl submissionId={item.id} access={access} onSaved={() => setReload((n) => n + 1)} />
+                </SubmissionCard>
               ))}
             </ul>
           ) : (
-            <p>这个考试科目下还没有已上架的投稿。</p>
+            <p>所选考试科目与考点下还没有已上架的投稿。</p>
           )}
           <div className="flex flex-wrap items-center gap-3">
             <Button className="min-h-11" variant="outline" disabled={page === 0} onClick={() => setPage((n) => n - 1)}>

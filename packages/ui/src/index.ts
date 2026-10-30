@@ -13,3 +13,4 @@ export { Label } from "./base/label"
 export { Field, FieldGroup, FieldLabel } from "./base/field"
 
 export { Textarea } from "./base/textarea"
+export { ToggleGroup, ToggleGroupItem } from "./base/toggle-group"

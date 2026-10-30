@@ -52,7 +52,7 @@ docs/             规划、ADR、坑点、规格
 | `membership` | 会员期、兑换码、会员判断 | core / db / api / web |
 | `comments` | 评论与回复、关键词过滤、删除记录 | core / db / api / web |
 | `submissions` | 投稿、审核、上传登记 | core / db / api / web |
-| `ratings` | 评分、贝叶斯平均、推荐 | core / api |
+| `ratings` | 评分、贝叶斯平均、推荐 | core / db / api / web |
 | `progress-file` | 进度文件格式、校验、版本与历史 | core / api |
 | `profile`、`plan`、`mistakes`、`daily`、`today`、`topics`、`weekly` | 学习追踪 | core / api / web |
 | `vocab`、`backup` | 浏览器本地的词表、单词复习、备份 | core / web |

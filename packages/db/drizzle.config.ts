@@ -3,6 +3,7 @@ import { defineConfig } from "drizzle-kit"
 export default defineConfig({
   dialect: "postgresql",
   schema: [
+    "./src/ratings/index.ts",
     "./src/submissions/index.ts",
     "./src/comments/index.ts",
     "./src/membership/index.ts",

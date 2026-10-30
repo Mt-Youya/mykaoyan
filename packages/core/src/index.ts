@@ -14,3 +14,4 @@ export type { MembershipPeriod } from "./membership/index"
 
 export { normalizeKeywords, blockedComment } from "./comments/index"
 export * from "./submissions"
+export * from "./ratings"

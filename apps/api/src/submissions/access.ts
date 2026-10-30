@@ -26,7 +26,21 @@ export type SubmissionRow = {
   delete_marked_at: string | Date | null
   deleted_at: string | Date | null
 }
-export function submissionView(r: SubmissionRow) {
+export function submissionView(
+  r: Pick<
+    SubmissionRow,
+    | "id"
+    | "title"
+    | "summary"
+    | "subject_code"
+    | "topic_id"
+    | "duration"
+    | "status"
+    | "listed"
+    | "account_id"
+    | "created_at"
+  >
+) {
   return {
     id: r.id,
     title: r.title,

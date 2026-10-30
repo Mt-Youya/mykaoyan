@@ -13,8 +13,12 @@ export class SubmissionsController {
     @Inject(SubmissionUploads) private uploads: SubmissionUploads,
     @Inject(AUTH) private auth: Auth
   ) {}
-  @Get() @Header("Cache-Control", "no-store") list(@Query("subject") subject = "", @Query("page") page = "0") {
-    return this.service.list(subject, Number(page))
+  @Get() @Header("Cache-Control", "no-store") list(
+    @Query("subject") subject = "",
+    @Query("page") page = "0",
+    @Query("topic") topic = ""
+  ) {
+    return this.service.list(subject, Number(page), topic)
   }
   @Get("mine") @UseGuards(SessionGuard) @Header("Cache-Control", "no-store") mine(
     @CurrentSession() s: AuthSession,
