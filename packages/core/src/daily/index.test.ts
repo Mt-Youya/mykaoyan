@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { parseLocalDate } from "../dates/index"
-import { fullProgressFileFixture } from "../progress/fixtures/index"
-import { progressFileSchema } from "../progress/index"
-import { getDailyLog, getRecordedMinutes, upsertDailyLog } from "./index"
+import { parseLocalDate } from "../dates"
+import { fullProgressFileFixture } from "../progress/fixtures"
+import { progressFileSchema } from "../progress"
+import { getDailyLog, getRecordedMinutes, upsertDailyLog } from "."
 
 const file = progressFileSchema.parse(fullProgressFileFixture.value)
 const existing = file.data.daily[0]!

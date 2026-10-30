@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { publishHandoutSchema, publishLessonSchema } from "./index"
+import { publishHandoutSchema, publishLessonSchema } from "."
 const request = {
   course: { slug: "fictional", title: "虚构课程", subjectCode: "302" },
   chapter: { slug: "fictional-chapter", title: "虚构章", position: 1 },

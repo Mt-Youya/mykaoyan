@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import { parseLocalDate } from "../dates/index"
-import { getRetestState } from "../mistakes/index"
-import { fullProgressFileFixture } from "../progress/fixtures/index"
-import { mistakeSchema, progressFileSchema } from "../progress/index"
-import type { Mistake } from "../progress/index"
+import { parseLocalDate } from "../dates"
+import { getRetestState } from "../mistakes"
+import { fullProgressFileFixture } from "../progress/fixtures"
+import { mistakeSchema, progressFileSchema } from "../progress"
+import type { Mistake } from "../progress"
 import {
   getTopicProgressList,
   getTopicStableOn,
@@ -12,7 +12,7 @@ import {
   publicTopics,
   topicSchema,
   upsertTopicProgress,
-} from "./index"
+} from "."
 
 const file = progressFileSchema.parse(fullProgressFileFixture.value)
 const base = file.data.mistakes[0]!

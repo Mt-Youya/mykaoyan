@@ -17,7 +17,7 @@ import { AgentTokensService } from "../agent-tokens"
 import { AppModule } from "../app"
 import { ProblemFilter } from "../common"
 import { readEnvironment } from "../environment"
-import { PUBLISH_STORAGE, PublishingService } from "./index"
+import { PUBLISH_STORAGE, PublishingService } from "."
 import type { PublishStorage } from "./storage"
 
 class FakeStorage implements PublishStorage {

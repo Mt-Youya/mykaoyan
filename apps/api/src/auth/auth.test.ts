@@ -24,8 +24,8 @@ import {
   readAuthEnvironment,
   SessionGuard,
   SMS_VERIFIER,
-} from "./index"
-import type { AuthEnvironment } from "./index"
+} from "."
+import type { AuthEnvironment } from "."
 
 /**
  * 真实 Postgres 路径：Drizzle store + Drizzle adapter + 迁移后的真实表。

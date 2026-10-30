@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { parseLocalDate } from "../dates/index"
-import { fullProgressFileFixture } from "../progress/fixtures/index"
-import { progressFileSchema } from "../progress/index"
-import type { WeeklyReview } from "../progress/index"
-import { publicTopics } from "../topics/index"
-import { getWeeklyReview, getWeeklySummary, startOfWeek, upsertWeeklyReview } from "./index"
+import { parseLocalDate } from "../dates"
+import { fullProgressFileFixture } from "../progress/fixtures"
+import { progressFileSchema } from "../progress"
+import type { WeeklyReview } from "../progress"
+import { publicTopics } from "../topics"
+import { getWeeklyReview, getWeeklySummary, startOfWeek, upsertWeeklyReview } from "."
 
 const file = progressFileSchema.parse(fullProgressFileFixture.value)
 const weekStart = parseLocalDate("2030-03-04")

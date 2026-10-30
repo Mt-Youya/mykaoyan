@@ -1,8 +1,9 @@
-import "katex/dist/katex.min.css"
 import ReactMarkdown from "react-markdown"
 import rehypeKatex from "rehype-katex"
 import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math"
+
+import "katex/dist/katex.min.css"
 
 /**
  * Markdown 版式：@tailwindcss/typography 的 prose 负责排版尺度，

@@ -1,7 +1,7 @@
 import { z } from "zod"
 
-import { addDays, localDateSchema } from "../dates/index"
-import type { LocalDate } from "../dates/index"
+import { addDays, localDateSchema } from "../dates"
+import type { LocalDate } from "../dates"
 
 const nonBlankText = z.string().trim().min(1).max(500)
 

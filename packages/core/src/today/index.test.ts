@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import { parseLocalDate } from "../dates/index"
-import { fullProgressFileFixture } from "../progress/fixtures/index"
-import { mistakeSchema, progressFileSchema } from "../progress/index"
-import type { Mistake, RetestAttempt } from "../progress/index"
-import { getTodayTasks } from "./index"
+import { parseLocalDate } from "../dates"
+import { fullProgressFileFixture } from "../progress/fixtures"
+import { mistakeSchema, progressFileSchema } from "../progress"
+import type { Mistake, RetestAttempt } from "../progress"
+import { getTodayTasks } from "."
 
 const base = progressFileSchema.parse(fullProgressFileFixture.value).data.mistakes[0]!
 

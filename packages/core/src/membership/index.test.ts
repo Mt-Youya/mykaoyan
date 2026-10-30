@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { membershipStatus, nextMembershipPeriod } from "./index"
+import { membershipStatus, nextMembershipPeriod } from "."
 const now = Date.parse("2030-01-01T00:00:00Z")
 describe("会员期固定365天与叠加", () => {
   it("非会员从开通时开始，跨年仍为365天", () => {

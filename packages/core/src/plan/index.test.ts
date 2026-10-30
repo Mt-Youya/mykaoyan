@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { parseLocalDate } from "../dates/index"
-import { fullProgressFileFixture } from "../progress/fixtures/index"
-import { progressFileSchema, validatePhases } from "../progress/index"
-import { getDayPlan, getPlanTotal, getWeekDays, isWeekend, upsertDayPlan } from "./index"
+import { parseLocalDate } from "../dates"
+import { fullProgressFileFixture } from "../progress/fixtures"
+import { progressFileSchema, validatePhases } from "../progress"
+import { getDayPlan, getPlanTotal, getWeekDays, isWeekend, upsertDayPlan } from "."
 
 const file = progressFileSchema.parse(fullProgressFileFixture.value)
 const profile = file.data.profile!

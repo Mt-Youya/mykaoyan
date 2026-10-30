@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { addDays, parseLocalDate, toLocalDate, weekdayOf } from "../index"
+import { addDays, parseLocalDate, toLocalDate, weekdayOf } from ".."
 
 describe("LocalDate", () => {
   it.each([

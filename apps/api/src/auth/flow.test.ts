@@ -19,8 +19,8 @@ import {
   readAuthEnvironment,
   SessionGuard,
   SMS_VERIFIER,
-} from "./index"
-import type { AuthEnvironment } from "./index"
+} from "."
+import type { AuthEnvironment } from "."
 import { PRIVACY_POLICY_VERSION } from "./policy"
 import { createMemoryStores } from "./stores"
 import type { MemoryAuthStores } from "./stores"

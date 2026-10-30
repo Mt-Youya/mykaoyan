@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { localDateSchema } from "../dates/index"
+import { localDateSchema } from "../dates"
 
 /** 进度文件识别字段；只接受本站的进度文件，不兼容旧站文件。 */
 export const PROGRESS_FILE_APP = "mykaoyan" as const

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { fullProgressFileFixture } from "./fixtures/index"
+import { fullProgressFileFixture } from "./fixtures"
 import { progressFileSchema } from "./schema"
 
 describe("学习数据随进度文件往返", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { parseLocalDate } from "../dates/index"
+import { parseLocalDate } from "../dates"
 import {
   createVocabCard,
   DAILY_NEW_CARD_LIMIT,
@@ -8,8 +8,8 @@ import {
   getVocabQueue,
   reviewVocabCard,
   scheduleVocabCard,
-} from "./index"
-import type { VocabData } from "./index"
+} from "."
+import type { VocabData } from "."
 
 const entries = [
   { id: "one", term: "one", meaning: "一" },

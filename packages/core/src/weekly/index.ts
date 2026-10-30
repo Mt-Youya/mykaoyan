@@ -1,10 +1,10 @@
-import { addDays, weekdayOf } from "../dates/index"
-import type { LocalDate } from "../dates/index"
-import { getStableOn } from "../mistakes/index"
-import { getDayPlan, getPlanTotal, getWeekDays } from "../plan/index"
-import type { DailyLog, DayPlan, Mistake, StudyProfile, TopicProgress, WeeklyReview } from "../progress/index"
-import { getTopicStableOn } from "../topics/index"
-import type { Topic } from "../topics/index"
+import { addDays, weekdayOf } from "../dates"
+import type { LocalDate } from "../dates"
+import { getStableOn } from "../mistakes"
+import { getDayPlan, getPlanTotal, getWeekDays } from "../plan"
+import type { DailyLog, DayPlan, Mistake, StudyProfile, TopicProgress, WeeklyReview } from "../progress"
+import { getTopicStableOn } from "../topics"
+import type { Topic } from "../topics"
 
 export type WeeklySubjectSummary = {
   code: string

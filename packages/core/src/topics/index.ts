@@ -1,7 +1,7 @@
 import { upsertUniqueBy } from "../collections"
-import type { LocalDate } from "../dates/index"
-import { getStableOn, isMistakeStable } from "../mistakes/index"
-import type { Mistake, TopicManualState, TopicProgress } from "../progress/index"
+import type { LocalDate } from "../dates"
+import { getStableOn, isMistakeStable } from "../mistakes"
+import type { Mistake, TopicManualState, TopicProgress } from "../progress"
 import type { Topic } from "./data"
 
 export { publicTopics, topicSchema } from "./data"

@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url"
+
 import { cloudflare } from "@cloudflare/vite-plugin"
 import tailwindcss from "@tailwindcss/vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
@@ -23,4 +25,38 @@ export default defineConfig(({ mode }) => ({
         ]),
     react(),
   ],
+  resolve: {
+    alias: [
+      {
+        find: "@",
+        replacement: fileURLToPath(new URL("./src", import.meta.url)),
+      },
+    ],
+  },
+
+  build: {
+    rolldownOptions: {
+      output: {
+        chunkFileNames: "assets/js/[name]-[hash].js",
+        entryFileNames: "assets/js/[name].[hash].js",
+        codeSplitting: {
+          groups: [
+            {
+              name(moduleId) {
+                if (moduleId.includes("tanstack")) return "tanstack"
+                if (moduleId.includes("markdown")) return "markdown"
+                if (moduleId.includes("remark")) return "remark"
+                if (moduleId.includes("hugeicons")) return "hugeicons"
+                if (moduleId.includes("motion")) return "motion"
+                if (moduleId.includes("gsap")) return "gsap"
+                if (moduleId.includes("chart")) return "charts"
+                return null
+              },
+            },
+          ],
+        },
+        minify: true,
+      },
+    },
+  },
 }))

@@ -3,7 +3,7 @@ import { unstable_readConfig } from "wrangler"
 import { z } from "zod"
 
 import { key, secret, token } from "./fixtures/token"
-import worker from "./index"
+import worker from "."
 
 const config = unstable_readConfig({ config: "wrangler.jsonc" })
 const origins = z.array(z.string()).min(1).parse(config.vars.ALLOWED_ORIGINS)

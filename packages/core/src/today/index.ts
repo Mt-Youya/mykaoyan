@@ -1,7 +1,7 @@
-import type { LocalDate } from "../dates/index"
-import { getDueRetests } from "../mistakes/index"
-import type { DueRetest } from "../mistakes/index"
-import type { Mistake } from "../progress/index"
+import type { LocalDate } from "../dates"
+import { getDueRetests } from "../mistakes"
+import type { DueRetest } from "../mistakes"
+import type { Mistake } from "../progress"
 
 /** 单词卡数量；浏览器本地没有词表时按 0 处理。 */
 export type VocabCounts = { due: number; newAvailable: number }

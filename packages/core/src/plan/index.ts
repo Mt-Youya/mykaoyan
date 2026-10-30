@@ -1,7 +1,7 @@
 import { upsertUniqueBy } from "../collections"
-import { addDays, weekdayOf } from "../dates/index"
-import type { LocalDate } from "../dates/index"
-import type { DayPlan, MinutesBySubject, StudyProfile } from "../progress/index"
+import { addDays, weekdayOf } from "../dates"
+import type { LocalDate } from "../dates"
+import type { DayPlan, MinutesBySubject, StudyProfile } from "../progress"
 
 /** 某天生效的计划：各科分钟与弹性时间。 */
 export type DailyPlan = { minutes: MinutesBySubject; flexMin: number }

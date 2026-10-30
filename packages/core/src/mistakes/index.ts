@@ -1,6 +1,6 @@
-import { addDays, localDateSchema } from "../dates/index"
-import type { LocalDate } from "../dates/index"
-import type { Mistake, RetestAttempt, RetestResult } from "../progress/index"
+import { addDays, localDateSchema } from "../dates"
+import type { LocalDate } from "../dates"
+import type { Mistake, RetestAttempt, RetestResult } from "../progress"
 
 export type RetestState = { stable: true } | { stable: false; attempt: 1 | 2; nextOn: LocalDate; overdueDays: number }
 
