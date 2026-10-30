@@ -41,7 +41,7 @@ describe("全仓库手写文件行数守卫", () => {
   it("生成器、Rust、技能、脚本、文档和手写配置均不豁免", () => {
     for (const path of [
       "cli/build.rs",
-      "cli/src/contract.rs",
+      "cli/src/support/schema.rs",
       "packages/core/scripts/generate-contract.mjs",
       "skills/mykaoyan/SKILL.md",
       "skills/mykaoyan/validate.mjs",

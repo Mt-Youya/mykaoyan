@@ -151,7 +151,7 @@ M0 的本地代码与配置已准备，云端尚未验收，状态见 [本地交
   - 手机号登录用 Better Auth `phoneNumber` 插件，`sendOTP` 调阿里云号码认证 `SendSmsVerifyCode`，`verifyOTP` 调 `CheckSmsVerifyCode`：验证码由阿里云生成和校验。不要自己生成验证码再传给阿里云，那样 `CheckSmsVerifyCode` 不负责校验，只能自己存储比对。验证即注册需要 `getTempEmail` 生成占位邮箱，占位邮箱不对外展示、不用于发信。号码认证套餐包要单独购买，短信服务的套餐包不能抵扣。
   - Drizzle 用 postgres.js 连 Supavisor transaction 模式（6543 端口，IPv4），必须设 `prepare: false`；SSL `verify-full`。Supabase 直连地址默认只有 IPv6，不用。
 - **媒体** `apps/media-worker`：Cloudflare Worker，校验 HMAC 播放令牌后从 R2 读取并支持 Range。
-- **CLI** `apps/cli`：Rust（clap），类型从 OpenAPI 生成。
+- **CLI** `cli/`：Rust（clap），类型从 OpenAPI 生成。
 - **Skill** `skills/mykaoyan`：按 agentskills.io 规范，包含进度文件说明、零依赖校验脚本、空白模板。
 - **部署**：API 由 GitHub Actions 构建镜像 → 阿里云 ACR → SSH 到广州 ECS 执行 `docker compose pull && up -d` → 冒烟 `/api/health` 200 且连上数据库；前端 Worker 用 `pnpm --filter @mykaoyan/web deploy:workers` 手动发布。镜像中不含任何密钥，密钥只在 ECS 的 `.env`。
 - **ECS**：广州（华南 3），2 核 4G，固定带宽 3–5 Mbps，云监控在 CPU、内存、磁盘持续超过 80% 时告警。

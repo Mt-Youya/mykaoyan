@@ -22,7 +22,7 @@ apps/
   web/            TanStack Start：路由、页面、页面专属组件；不含业务规则
   api/            NestJS：模块、控制器、服务层、Better Auth、权限判断
   media-worker/   Cloudflare Worker：HMAC 播放令牌校验、R2 Range 读取
-  cli/            Rust CLI（独立 Cargo 工程，不进 pnpm workspace 依赖图）
+cli/              Rust CLI（独立 Cargo 工程，不进 pnpm workspace 依赖图）
 packages/
   core/           zod 定义与纯函数领域模型；生成公开契约的脚本
   db/             Drizzle 表结构、SQL 迁移、迁移重放测试

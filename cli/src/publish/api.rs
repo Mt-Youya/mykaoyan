@@ -1,10 +1,13 @@
-use crate::{config::Config, contract};
+//! 发布接口客户端：prepare、complete、读回。错误只映射为可读提示，不自动重试。
+
+use super::contract;
+use crate::auth::Config;
 use anyhow::{Result, bail};
 use reqwest::blocking::{Client, Response};
 use serde_json::{Value, json};
 use std::time::Duration;
 
-pub struct Api {
+pub(super) struct Api {
     client: Client,
     config: Config,
 }
@@ -21,7 +24,7 @@ fn checked(response: Response) -> Result<Value> {
 }
 
 impl Api {
-    pub fn new(config: Config) -> Result<Self> {
+    pub(super) fn new(config: Config) -> Result<Self> {
         let client = Client::builder()
             .redirect(reqwest::redirect::Policy::none())
             .timeout(Duration::from_secs(1800))
@@ -29,7 +32,7 @@ impl Api {
         Ok(Self { client, config })
     }
 
-    pub fn prepare(&self, input: &Value) -> Result<Value> {
+    pub(super) fn prepare(&self, input: &Value) -> Result<Value> {
         let plan = checked(
             self.client
                 .post(format!("{}/api/v1/publish/prepare", self.config.origin))
@@ -38,11 +41,11 @@ impl Api {
                 .send()
                 .map_err(|_| anyhow::anyhow!("发布计划请求失败"))?,
         )?;
-        contract::publish_prepared(&plan)?;
+        contract::prepared(&plan)?;
         Ok(plan)
     }
 
-    pub fn complete(&self, id: &str) -> Result<Value> {
+    pub(super) fn complete(&self, id: &str) -> Result<Value> {
         let result = checked(
             self.client
                 .post(format!(
@@ -54,11 +57,11 @@ impl Api {
                 .send()
                 .map_err(|_| anyhow::anyhow!("登记结果未知，请读回核对或重新发布；不自动重试"))?,
         )?;
-        contract::validate_publish_result(&result)?;
+        contract::result(&result)?;
         Ok(result)
     }
 
-    pub fn readback(&self, slug: &str) -> Result<Value> {
+    pub(super) fn readback(&self, slug: &str) -> Result<Value> {
         let result = checked(
             self.client
                 .get(format!(
@@ -69,11 +72,11 @@ impl Api {
                 .send()
                 .map_err(|_| anyhow::anyhow!("发布读回失败"))?,
         )?;
-        contract::validate_publish_result(&result)?;
+        contract::result(&result)?;
         Ok(result)
     }
 
-    pub fn local_uploads(&self) -> bool {
+    pub(super) fn local_uploads(&self) -> bool {
         self.config.origin.starts_with("http://127.0.0.1:")
     }
 }

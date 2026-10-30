@@ -1,3 +1,5 @@
+//! 章目录扫描：按「视频/字幕/讲稿」同名配对，排除答案类内容与不完整组合。
+
 use anyhow::{Context, Result, bail};
 use base64::{Engine, engine::general_purpose::STANDARD};
 use serde_json::{Value, json};
@@ -8,27 +10,31 @@ use std::{
     path::{Path, PathBuf},
 };
 
-pub struct Lesson {
-    pub input: Value,
-    pub video: PathBuf,
-    pub subtitle: PathBuf,
+pub(super) struct Lesson {
+    pub(super) input: Value,
+    pub(super) video: PathBuf,
+    pub(super) subtitle: PathBuf,
 }
-pub struct Chapter {
-    pub lessons: Vec<Lesson>,
-    pub skipped: Vec<String>,
+
+pub(super) struct Chapter {
+    pub(super) lessons: Vec<Lesson>,
+    pub(super) skipped: Vec<String>,
 }
+
 fn excluded(name: &str) -> bool {
     let name = name.to_lowercase();
     ["答案", "解答", "真题", "answer", "solution", "m-p"]
         .iter()
         .any(|word| name.contains(word))
 }
+
 fn id(prefix: &str, text: &str) -> String {
     format!(
         "{prefix}-{}",
         &format!("{:x}", Sha256::digest(text.as_bytes()))[..24]
     )
 }
+
 fn digest(path: &Path) -> Result<Value> {
     if fs::symlink_metadata(path)
         .context("课程文件不存在")?
@@ -57,7 +63,8 @@ fn digest(path: &Path) -> Result<Value> {
         json!({"sha256":format!("{:x}",sha.finalize()),"md5":STANDARD.encode(md5.finalize()),"size":size}),
     )
 }
-pub fn scan(directory: &Path) -> Result<Chapter> {
+
+pub(super) fn scan(directory: &Path) -> Result<Chapter> {
     if fs::symlink_metadata(directory)
         .context("章目录不存在")?
         .file_type()

@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use std::{io::Write, path::Path};
 
-pub fn write(path: &Path, data: &[u8]) -> Result<()> {
+pub(crate) fn write(path: &Path, data: &[u8]) -> Result<()> {
     let parent = path
         .parent()
         .filter(|p| !p.as_os_str().is_empty())

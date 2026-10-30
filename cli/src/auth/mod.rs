@@ -1,39 +1,21 @@
-use crate::private_file;
+//! Agent 令牌：登录保存、读取，以及站点地址与凭据文件权限校验。
+
+use crate::support::private_file;
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::{
     fs,
     io::{self, Read},
 };
 
-#[derive(Serialize, Deserialize)]
-pub struct Config {
-    pub origin: String,
-    pub token: String,
+#[derive(Clone, Serialize, Deserialize)]
+pub(crate) struct Config {
+    pub(crate) origin: String,
+    pub(crate) token: String,
 }
 
-pub fn origin(input: &str) -> Result<String> {
-    let url = reqwest::Url::parse(input).context("站点地址无效")?;
-    let local = matches!(url.host_str(), Some("localhost" | "127.0.0.1" | "[::1]"));
-    if !(url.scheme() == "https" || (url.scheme() == "http" && local))
-        || !url.username().is_empty()
-        || url.password().is_some()
-        || url.query().is_some()
-        || url.fragment().is_some()
-        || url.path() != "/"
-    {
-        bail!("站点地址必须是 HTTPS 根地址；仅本地回环允许 HTTP");
-    }
-    Ok(url.as_str().trim_end_matches('/').to_owned())
-}
-
-fn path() -> Result<std::path::PathBuf> {
-    Ok(dirs::config_dir()
-        .context("无法定位系统配置目录")?
-        .join("mykaoyan/config.json"))
-}
-
-pub fn login(selected: Option<&str>, stdin: bool) -> Result<serde_json::Value> {
+pub(crate) fn login(selected: Option<&str>, stdin: bool) -> Result<Value> {
     let selected = origin(selected.unwrap_or("https://mykaoyan.cn"))?;
     let token = if stdin {
         let mut value = String::new();
@@ -63,14 +45,7 @@ pub fn login(selected: Option<&str>, stdin: bool) -> Result<serde_json::Value> {
     Ok(serde_json::json!({"saved":true}))
 }
 
-fn valid_token(token: &str) -> Result<()> {
-    if token.is_empty() || token.chars().any(char::is_whitespace) || !token.is_ascii() {
-        bail!("Agent 令牌为空或格式无效");
-    }
-    Ok(())
-}
-
-pub fn load(selected: Option<&str>) -> Result<Config> {
+pub(crate) fn load(selected: Option<&str>) -> Result<Config> {
     if let Some(token) = std::env::var_os("MYKAOYAN_TOKEN") {
         let token = token
             .into_string()
@@ -104,4 +79,32 @@ pub fn load(selected: Option<&str>) -> Result<Config> {
         origin: stored,
         ..config
     })
+}
+
+fn origin(input: &str) -> Result<String> {
+    let url = reqwest::Url::parse(input).context("站点地址无效")?;
+    let local = matches!(url.host_str(), Some("localhost" | "127.0.0.1" | "[::1]"));
+    if !(url.scheme() == "https" || (url.scheme() == "http" && local))
+        || !url.username().is_empty()
+        || url.password().is_some()
+        || url.query().is_some()
+        || url.fragment().is_some()
+        || url.path() != "/"
+    {
+        bail!("站点地址必须是 HTTPS 根地址；仅本地回环允许 HTTP");
+    }
+    Ok(url.as_str().trim_end_matches('/').to_owned())
+}
+
+fn valid_token(token: &str) -> Result<()> {
+    if token.is_empty() || token.chars().any(char::is_whitespace) || !token.is_ascii() {
+        bail!("Agent 令牌为空或格式无效");
+    }
+    Ok(())
+}
+
+fn path() -> Result<std::path::PathBuf> {
+    Ok(dirs::config_dir()
+        .context("无法定位系统配置目录")?
+        .join("mykaoyan/config.json"))
 }

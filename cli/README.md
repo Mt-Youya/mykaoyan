@@ -36,11 +36,11 @@ mykaoyan progress push progress.json
 
 ## 契约与验证
 
-`contracts/openapi.json` 由公开契约生成脚本同步；`build.rs` 用 typify 从其 `ProgressFile` 和 `ProgressChangeSummary` 组件生成 Rust 类型到 Cargo OUT_DIR。代码不导入网站内部模块。纯字符串 anyOf 在类型生成时宽化为 String，以绕过 typify 的结构体映射；运行时仍用原始 schema 完整校验，HTTP 请求保留原始 JSON，避免类型序列化改变数据。
+`contracts/openapi.json` 由公开契约生成脚本同步；`build.rs` 用 typify 从其 `ProgressFile`、`ProgressChangeSummary` 与发布相关的 `PublishLesson`、`PublishPrepared`、`PublishResult` 组件生成 Rust 类型到 Cargo OUT_DIR。代码不导入网站内部模块。纯字符串 anyOf 在类型生成时宽化为 String，以绕过 typify 的结构体映射；运行时仍用原始 schema 完整校验，HTTP 请求保留原始 JSON，避免类型序列化改变数据。
 
 ```sh
 cargo fmt --manifest-path cli/Cargo.toml --check
-cargo clippy --manifest-path cli/Cargo.toml --all-targets -- -D warnings
+cargo clippy --manifest-path cli/Cargo.toml --locked --all-targets -- -D warnings
 cargo test --manifest-path cli/Cargo.toml --locked
 ```
 
@@ -56,3 +56,32 @@ mykaoyan publish "$SRC/课程/数学二/01-导数"
 需要专用 `scope=publish` 的管理员令牌；普通进度令牌不能发布。CLI 按数学二或408下的章相对路径生成稳定标识，在“视频/字幕/讲稿”三个目录按同名 mp4/srt/md 配对。答案与不完整组合会跳过并报告，符号链接拒绝读取。dry-run 不联网；正式发布先准备计划再直传对象、登记、读回哈希。服务器只更新内容，已有上架状态保留，新内容默认下架；重复发布同内容不会增加版本或重复上传。章节路径改名会生成新标识，不会自动迁移旧内容。
 
 发布成功 JSON：`{"published":[{"slug":"…","unchanged":false,"version":1,"listed":false,"keys":["…"],"cleanupPending":false,"publicationId":"…"}],"skipped":[]}`。若 cleanupPending=true，重新发布会重试旧对象清理；也可用发布令牌重试输出 publicationId 的 complete 接口。详细 R2 本机配置与验收边界见 `docs/ops/r2-publishing.md`。
+
+## 代码结构
+
+按 feature 分目录：每个目录承载一个关注点，依赖方向单向，只允许 feature → `auth` / `support`，`support` 不依赖任何 feature。`auth` 既是 `login` 的实现，也是 `progress`、`publish` 读取凭据的入口。
+
+```
+src/
+  main.rs              进程外壳：参数分发、输出、退出码
+  cli.rs               clap 命令定义，不含业务逻辑
+  auth/
+    mod.rs             Agent 令牌：login、读取、站点地址与凭据文件权限
+  progress/
+    mod.rs             pull / validate / push 编排
+    api.rs             HTTP 与状态码映射
+    state.rs           本地 ETag 边车
+    contract.rs        进度契约校验
+  publish/
+    mod.rs             prepare → upload → complete → readback 编排
+    scan.rs            章目录扫描与配对
+    api.rs             发布接口
+    upload.rs          预签名直传
+    contract.rs        发布契约校验
+  support/
+    mod.rs             横切能力的模块声明
+    schema.rs          随包公开契约的加载与校验原语
+    private_file.rs    私有文件写入
+```
+
+feature 内部模块用 `pub(super)` 收口，跨 feature 只能看到 `auth::Config` 与 `support`；新增命令时只需在自己的目录里加模块，并在 `cli.rs` 与 `main.rs` 各挂一处分发。

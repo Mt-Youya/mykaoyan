@@ -1,10 +1,12 @@
-use crate::publish_scan::Lesson;
+//! 预签名直传：只发送对象字节与服务器给定的请求头，不接触站点配置与令牌。
+
+use super::scan::Lesson;
 use anyhow::{Context, Result, bail};
 use reqwest::blocking::Client;
 use serde_json::Value;
 use std::time::Duration;
 
-pub fn upload(plan: &Value, lesson: &Lesson, local: bool) -> Result<()> {
+pub(super) fn upload(plan: &Value, lesson: &Lesson, local: bool) -> Result<()> {
     // 上传客户端不接触 Config；预签名 URL 自带权限，不附加站点的 Agent 令牌。
     let client = Client::builder()
         .redirect(reqwest::redirect::Policy::none())

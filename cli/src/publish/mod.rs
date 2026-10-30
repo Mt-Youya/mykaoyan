@@ -1,15 +1,19 @@
+//! 发布 feature：扫描一章的本地课程目录，上传视频与字幕，登记并读回内容。
+
 mod api;
+mod contract;
+mod scan;
 mod upload;
 
-use crate::{config::Config, contract, publish_scan};
+use crate::auth::Config;
 use anyhow::{Context, Result, bail};
 use serde_json::{Value, json};
 use std::path::Path;
 
-pub fn run(config: Option<Config>, directory: &Path, dry_run: bool) -> Result<Value> {
-    let chapter = publish_scan::scan(directory)?;
+pub(crate) fn run(config: Option<Config>, directory: &Path, dry_run: bool) -> Result<Value> {
+    let chapter = scan::scan(directory)?;
     for lesson in &chapter.lessons {
-        contract::publish_lesson(&lesson.input)?;
+        contract::lesson(&lesson.input)?;
     }
     if dry_run {
         return Ok(
