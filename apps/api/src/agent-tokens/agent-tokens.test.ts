@@ -60,6 +60,7 @@ describe("Agent 令牌 HTTP 接口", () => {
         phone,
         code: sms().peekCode(`+86${phone}`),
         acceptedPolicyVersion: PRIVACY_POLICY_VERSION,
+        acceptedTermsVersion: "2026-10-30",
       }),
     })
     expect(verified.status).toBe(200)

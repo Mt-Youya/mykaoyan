@@ -16,7 +16,10 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as MistakesRouteImport } from './routes/mistakes'
 import { Route as PapersRouteImport } from './routes/papers'
 import { Route as PlanRouteImport } from './routes/plan'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProgressRouteImport } from './routes/progress'
+import { Route as SupportRouteImport } from './routes/support'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TodayRouteImport } from './routes/today'
 import { Route as TopicProgressRouteImport } from './routes/topic-progress'
 import { Route as TopicsRouteImport } from './routes/topics'
@@ -64,9 +67,24 @@ const PlanRoute = PlanRouteImport.update({
   path: '/plan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProgressRoute = ProgressRouteImport.update({
   id: '/progress',
   path: '/progress',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TodayRoute = TodayRouteImport.update({
@@ -133,7 +151,10 @@ export interface FileRoutesByFullPath {
   '/mistakes': typeof MistakesRoute
   '/papers': typeof PapersRoute
   '/plan': typeof PlanRoute
+  '/privacy': typeof PrivacyRoute
   '/progress': typeof ProgressRoute
+  '/support': typeof SupportRoute
+  '/terms': typeof TermsRoute
   '/today': typeof TodayRoute
   '/topic-progress': typeof TopicProgressRoute
   '/topics': typeof TopicsRoute
@@ -154,7 +175,10 @@ export interface FileRoutesByTo {
   '/mistakes': typeof MistakesRoute
   '/papers': typeof PapersRoute
   '/plan': typeof PlanRoute
+  '/privacy': typeof PrivacyRoute
   '/progress': typeof ProgressRoute
+  '/support': typeof SupportRoute
+  '/terms': typeof TermsRoute
   '/today': typeof TodayRoute
   '/topic-progress': typeof TopicProgressRoute
   '/topics': typeof TopicsRoute
@@ -176,7 +200,10 @@ export interface FileRoutesById {
   '/mistakes': typeof MistakesRoute
   '/papers': typeof PapersRoute
   '/plan': typeof PlanRoute
+  '/privacy': typeof PrivacyRoute
   '/progress': typeof ProgressRoute
+  '/support': typeof SupportRoute
+  '/terms': typeof TermsRoute
   '/today': typeof TodayRoute
   '/topic-progress': typeof TopicProgressRoute
   '/topics': typeof TopicsRoute
@@ -199,7 +226,10 @@ export interface FileRouteTypes {
     | '/mistakes'
     | '/papers'
     | '/plan'
+    | '/privacy'
     | '/progress'
+    | '/support'
+    | '/terms'
     | '/today'
     | '/topic-progress'
     | '/topics'
@@ -220,7 +250,10 @@ export interface FileRouteTypes {
     | '/mistakes'
     | '/papers'
     | '/plan'
+    | '/privacy'
     | '/progress'
+    | '/support'
+    | '/terms'
     | '/today'
     | '/topic-progress'
     | '/topics'
@@ -241,7 +274,10 @@ export interface FileRouteTypes {
     | '/mistakes'
     | '/papers'
     | '/plan'
+    | '/privacy'
     | '/progress'
+    | '/support'
+    | '/terms'
     | '/today'
     | '/topic-progress'
     | '/topics'
@@ -263,7 +299,10 @@ export interface RootRouteChildren {
   MistakesRoute: typeof MistakesRoute
   PapersRoute: typeof PapersRoute
   PlanRoute: typeof PlanRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProgressRoute: typeof ProgressRoute
+  SupportRoute: typeof SupportRoute
+  TermsRoute: typeof TermsRoute
   TodayRoute: typeof TodayRoute
   TopicProgressRoute: typeof TopicProgressRoute
   TopicsRoute: typeof TopicsRoute
@@ -328,11 +367,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/progress': {
       id: '/progress'
       path: '/progress'
       fullPath: '/progress'
       preLoaderRoute: typeof ProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/today': {
@@ -423,7 +483,10 @@ const rootRouteChildren: RootRouteChildren = {
   MistakesRoute: MistakesRoute,
   PapersRoute: PapersRoute,
   PlanRoute: PlanRoute,
+  PrivacyRoute: PrivacyRoute,
   ProgressRoute: ProgressRoute,
+  SupportRoute: SupportRoute,
+  TermsRoute: TermsRoute,
   TodayRoute: TodayRoute,
   TopicProgressRoute: TopicProgressRoute,
   TopicsRoute: TopicsRoute,

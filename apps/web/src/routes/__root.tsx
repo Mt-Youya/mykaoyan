@@ -1,5 +1,6 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
+import { LegalLinks } from "./-legal/documents"
 import "../globals.css"
 
 export const Route = createRootRoute({
@@ -11,12 +12,13 @@ export const Route = createRootRoute({
     ],
   }),
   component: () => (
-    <html lang="zh-CN">
+    <html lang="zh-CN" className="overflow-x-clip">
       <head>
         <HeadContent />
       </head>
       <body>
         <Outlet />
+        <LegalLinks />
         {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
         <Scripts />
       </body>

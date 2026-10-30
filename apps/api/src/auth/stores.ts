@@ -1,9 +1,9 @@
 import { and, count, desc, eq, gte } from "drizzle-orm"
-import { accounts, personalInfoTransferConsents, phoneLoginAttempts } from "@mykaoyan/db"
+import { personalInfoTransferConsents, phoneLoginAttempts } from "@mykaoyan/db"
 import type { Database } from "../database"
 
 /**
- * 认证用到的三块持久化：发送频率记录、出境同意记录、按手机号查账号。
+ * 认证用到的持久化：发送频率记录与政策同意记录。
  *
  * 手机号在频率记录里只以 HMAC 哈希出现（「手机号只存于账号表」）。测试与 `NODE_ENV=test`
  * 使用内存实现，真实 Postgres 路径见各 Drizzle 实现。
@@ -17,17 +17,12 @@ export interface PhoneAttemptStore {
 }
 
 export interface ConsentStore {
-  record(accountId: string, policyVersion: string, at: Date): Promise<void>
-}
-
-export interface AccountPhoneLookup {
-  findIdByPhone(e164Phone: string): Promise<string | undefined>
+  record(accountId: string, policyVersion: string, at: Date, termsVersion?: string): Promise<void>
 }
 
 export type AuthStores = {
   attempts: PhoneAttemptStore
   consents: ConsentStore
-  accountPhones: AccountPhoneLookup
 }
 
 /** 发送验证码的记录类型；以后加「校验失败」等类型时往这里加常量。 */
@@ -78,22 +73,24 @@ export function createDrizzleStores(db: Database): AuthStores {
       },
     },
     consents: {
-      async record(accountId, policyVersion, at) {
+      async record(accountId, policyVersion, at, termsVersion) {
         // 同一账号同一政策版本只留一条；重复提交不报错也不重复记录。
         await db
           .insert(personalInfoTransferConsents)
-          .values({ accountId, policyVersion, consentedAt: at })
+          .values({ accountId, policyVersion, consentedAt: at, termsVersion })
           .onConflictDoNothing()
-      },
-    },
-    accountPhones: {
-      async findIdByPhone(e164Phone) {
-        const [row] = await db
-          .select({ id: accounts.id })
-          .from(accounts)
-          .where(eq(accounts.phoneNumber, e164Phone))
+        const [saved] = await db
+          .select()
+          .from(personalInfoTransferConsents)
+          .where(
+            and(
+              eq(personalInfoTransferConsents.accountId, accountId),
+              eq(personalInfoTransferConsents.policyVersion, policyVersion)
+            )
+          )
           .limit(1)
-        return row?.id
+        if (!saved || (termsVersion !== undefined && saved.termsVersion !== termsVersion))
+          throw new Error("同意记录未保存")
       },
     },
   }
@@ -101,16 +98,13 @@ export function createDrizzleStores(db: Database): AuthStores {
 
 /** 内存实现：测试与 NODE_ENV=test 用，不连数据库。 */
 export type MemoryAuthStores = AuthStores & {
-  /** 测试专用：预置一个已注册账号，模拟「不是首次登录」。 */
-  seedAccount(phone: string, id: string): void
   /** 测试专用：读出已记录的出境同意。 */
-  listConsents(): { accountId: string; policyVersion: string; at: Date }[]
+  listConsents(): { accountId: string; policyVersion: string; termsVersion?: string; at: Date }[]
 }
 
 export function createMemoryStores(): MemoryAuthStores {
   const attempts: { phoneHash: string; kind: string; at: Date }[] = []
-  const consents: { accountId: string; policyVersion: string; at: Date }[] = []
-  const phones = new Map<string, string>()
+  const consents: { accountId: string; policyVersion: string; termsVersion?: string; at: Date }[] = []
   return {
     attempts: {
       async record(phoneHash, kind, at) {
@@ -137,18 +131,10 @@ export function createMemoryStores(): MemoryAuthStores {
       },
     },
     consents: {
-      async record(accountId, policyVersion, at) {
+      async record(accountId, policyVersion, at, termsVersion) {
         if (consents.some((item) => item.accountId === accountId && item.policyVersion === policyVersion)) return
-        consents.push({ accountId, policyVersion, at: new Date(at) })
+        consents.push({ accountId, policyVersion, ...(termsVersion ? { termsVersion } : {}), at: new Date(at) })
       },
-    },
-    accountPhones: {
-      async findIdByPhone(e164Phone) {
-        return phones.get(e164Phone)
-      },
-    },
-    seedAccount(phone, id) {
-      phones.set(phone, id)
     },
     listConsents() {
       return consents.map((item) => Object.assign({}, item))

@@ -29,7 +29,13 @@ function setup(overrides: { auth?: Auth; sms?: SmsVerifier } = {}) {
   const stores = createMemoryStores()
   const auth =
     overrides.auth ?? fakeAuth(async () => ({ headers: new Headers(), response: { user: { id: "acct-1" } } })).auth
-  const service = new PhoneAuthService(sms, stores, auth, env, () => new Date(now))
+  const service = new PhoneAuthService(sms, stores, auth, env, () => new Date(now), {
+    NODE_ENV: "test",
+    PORT: 3001,
+    COMMUNITY_ENABLED: false,
+    MEDIA_SIGNING_KEY: "test-only-media-signing-key-32-chars-min",
+    DATABASE_URL: "postgresql://127.0.0.1:5432/mykaoyan_test",
+  })
   return {
     service,
     sms,
@@ -122,7 +128,7 @@ describe("校验验证码", () => {
     await test.service.requestCode({ phone })
     test.advance(OTP_TTL_SECONDS + 1)
     const result = await test.service.verify(
-      { phone, code: "123456", acceptedPolicyVersion: PRIVACY_POLICY_VERSION },
+      { phone, code: "123456", acceptedPolicyVersion: PRIVACY_POLICY_VERSION, acceptedTermsVersion: "2026-10-30" },
       new Headers()
     )
     expect(result.ok).toBe(false)
@@ -137,7 +143,7 @@ describe("校验验证码", () => {
     const test = setup({ auth })
     await test.service.requestCode({ phone })
     const result = await test.service.verify(
-      { phone, code: "000000", acceptedPolicyVersion: PRIVACY_POLICY_VERSION },
+      { phone, code: "000000", acceptedPolicyVersion: PRIVACY_POLICY_VERSION, acceptedTermsVersion: "2026-10-30" },
       new Headers()
     )
     expect(result.ok).toBe(false)
@@ -156,20 +162,28 @@ describe("校验验证码", () => {
     const test = setup({ auth })
     await test.service.requestCode({ phone })
     const first = await test.service.verify(
-      { phone, code: "123456", acceptedPolicyVersion: PRIVACY_POLICY_VERSION },
+      { phone, code: "123456", acceptedPolicyVersion: PRIVACY_POLICY_VERSION, acceptedTermsVersion: "2026-10-30" },
       new Headers()
     )
     expect(first).toMatchObject({ ok: true, accountId: "acct-1" })
     if (first.ok) expect(first.setCookies.length).toBeGreaterThan(0)
     expect(test.stores.listConsents()).toEqual([
-      { accountId: "acct-1", policyVersion: PRIVACY_POLICY_VERSION, at: new Date(1_800_000_000_000) },
+      {
+        accountId: "acct-1",
+        policyVersion: PRIVACY_POLICY_VERSION,
+        termsVersion: "2026-10-30",
+        at: new Date(1_800_000_000_000),
+      },
     ])
 
-    // 已注册账号再次登录不再要求同意版本（真实库里账号已落库，这里手动预置）。
-    test.stores.seedAccount("+8613800138000", "acct-1")
+    // 再次登录仍须当前版本，重复记录保持幂等。
+
     test.advance(61)
     await test.service.requestCode({ phone })
-    const second = await test.service.verify({ phone, code: "123456" }, new Headers())
+    const second = await test.service.verify(
+      { phone, code: "123456", acceptedPolicyVersion: PRIVACY_POLICY_VERSION, acceptedTermsVersion: "2026-10-30" },
+      new Headers()
+    )
     expect(second.ok).toBe(true)
     expect(test.stores.listConsents()).toHaveLength(1)
   })

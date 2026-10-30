@@ -43,6 +43,7 @@ describe("评论权限、回复与删除 HTTP", () => {
       phone,
       code: (app.get(SMS_VERIFIER) as MemorySmsVerifier).peekCode(`+86${phone}`),
       acceptedPolicyVersion: PRIVACY_POLICY_VERSION,
+      acceptedTermsVersion: "2026-10-30",
     })
     expect(response.status).toBe(200)
     const cookie = response.headers

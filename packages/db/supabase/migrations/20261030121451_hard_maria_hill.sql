@@ -1,0 +1,1 @@
+ALTER TABLE "personal_info_transfer_consents" ADD COLUMN "terms_version" text;

@@ -145,7 +145,8 @@ export const phoneLoginAttempts = pgTable(
  * 个人信息出境同意记录。
  *
  * 《个人信息保护法》第三十九条要求单独同意、第五十五条要求做影响评估；PLAN §2 与 ADR 0005
- * 定的是手机号存储在新加坡。每次同意留一行：谁、同意哪一版政策、什么时候同意。
+ * 出境同意版本绑定实际数据库地区；另外记录同一时刻单独勾选的协议/隐私政策版本。
+ * termsVersion 为空的历史行只证明旧版出境同意，不能作为新版协议已接受的证据。
  * 同一账号同一政策版本只有一条（重复提交不重复记录）。
  */
 export const personalInfoTransferConsents = pgTable(
@@ -156,6 +157,7 @@ export const personalInfoTransferConsents = pgTable(
       .notNull()
       .references(() => accounts.id, { onDelete: "cascade" }),
     policyVersion: text("policy_version").notNull(),
+    termsVersion: text("terms_version"),
     consentedAt: timestamp("consented_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [

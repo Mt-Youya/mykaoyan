@@ -103,6 +103,8 @@
 
 ## 9. 本地工具链（macOS + zsh）
 
+- **共享测试库不能全表清账号**（mk/TOOL-12）：`auth.test.ts` 在其他串行测试已留下上架审计后执行 `delete from accounts`，报 `listing_changes_actor_id_accounts_id_fk`，导致整个认证集成文件跳过；仅串行并不能解决跨文件清表依赖。认证用例应使用独有的虚构号码并保留其他文件的数据，不靠测试顺序或补删其他领域的表来通过。
+
 - **cf beta 的 workspace 框架检测**（mk/TOOL-03）：`cf build --mode workers` 在本仓库会将框架命令识别为 `npx vite build` 并拒绝传递 mode。直接用包内 `vite build --mode workers` 生成 Build Output，再用 `cf deploy --prebuilt --mode workers` 检查或发布同一产物；预构建部署不能省略产物记录的 mode。
 
 - **TypeScript 7 工具 API**（mk/TOOL-01）：根入口只提供版本信息；AST 与工程快照改用锁定 SDK 的 `typescript/unstable/ast`、`typescript/unstable/sync`。按安装包声明迁移并重新跑架构守卫，不能沿用 TS5 编译器 API 的验证结论。

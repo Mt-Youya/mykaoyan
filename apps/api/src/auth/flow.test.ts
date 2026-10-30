@@ -88,6 +88,7 @@ async function login(phone: string) {
     phone,
     code: sms().peekCode(`+86${phone}`),
     acceptedPolicyVersion: PRIVACY_POLICY_VERSION,
+    acceptedTermsVersion: "2026-10-30",
   })
   expect(response.status).toBe(200)
   return { cookie: await sessionCookieOf(response), body: (await response.json()) as { accountId: string } }
@@ -126,10 +127,84 @@ describe("手机号验证码登录 HTTP 链路（内存短信 + 内存 store）"
     await app?.close()
   })
 
+  it("协议与出境同意分别校验，新旧账号都不能用缺失或旧版同意登录", async () => {
+    const phone = "13600002401"
+    expect((await requestCode(phone)).status).toBe(200)
+    const code = sms().peekCode(`+86${phone}`)
+    const missingTerms = await post("/api/phone/verify", { phone, code, acceptedPolicyVersion: PRIVACY_POLICY_VERSION })
+    expect(missingTerms.status).toBe(400)
+    expect(((await missingTerms.json()) as { code: string }).code).toBe("AGREEMENT_REQUIRED")
+    expect(missingTerms.headers.getSetCookie()).toEqual([])
+    const oldTerms = await post("/api/phone/verify", {
+      phone,
+      code,
+      acceptedPolicyVersion: PRIVACY_POLICY_VERSION,
+      acceptedTermsVersion: "2026-10-27",
+    })
+    expect(oldTerms.status).toBe(400)
+    expect(((await oldTerms.json()) as { code: string }).code).toBe("AGREEMENT_REQUIRED")
+    const oldTransfer = await post("/api/phone/verify", {
+      phone,
+      code,
+      acceptedPolicyVersion: "2026-10-27",
+      acceptedTermsVersion: "2026-10-30",
+    })
+    expect(oldTransfer.status).toBe(400)
+    expect(((await oldTransfer.json()) as { code: string }).code).toBe("CONSENT_REQUIRED")
+    const complete = { phone, code, acceptedPolicyVersion: PRIVACY_POLICY_VERSION, acceptedTermsVersion: "2026-10-30" }
+    const created = await post("/api/phone/verify", complete)
+    expect(created.status).toBe(200)
+    const accountId = ((await created.json()) as { accountId: string }).accountId
+    expect(stores().listConsents()).toEqual([
+      { accountId, policyVersion: PRIVACY_POLICY_VERSION, termsVersion: "2026-10-30", at: new Date(now) },
+    ])
+    now += 61_000
+    expect((await requestCode(phone)).status).toBe(200)
+    const returning = await post("/api/phone/verify", {
+      phone,
+      code: sms().peekCode(`+86${phone}`),
+      acceptedTermsVersion: "2026-10-30",
+    })
+    expect(returning.status).toBe(400)
+    expect(((await returning.json()) as { code: string }).code).toBe("CONSENT_REQUIRED")
+  })
+
+  it("出境告知按实际连接地区下发，未知地区暂停登录且不泄露连接信息", async () => {
+    const previous = config.DATABASE_URL
+    try {
+      for (const [region, label, suffix] of [
+        ["ap-northeast-1", "日本东京", "tokyo"],
+        ["ap-southeast-1", "新加坡", "singapore"],
+      ]) {
+        config.DATABASE_URL = `postgresql://fictional:secret@aws-0-${region}.pooler.supabase.com:6543/postgres`
+        const response = await get("/api/phone/policy")
+        const body = (await response.json()) as Record<string, unknown>
+        expect(body.databaseRegion).toBe(label)
+        expect(body.privacyPolicyVersion).toBe(`2026-10-30-${suffix}`)
+        expect(body.loginEnabled).toBe(true)
+        expect(JSON.stringify(body)).not.toMatch(/fictional|secret|pooler/)
+      }
+      config.DATABASE_URL = "postgresql://fictional:secret@unconfirmed.invalid/postgres"
+      const policy = await get("/api/phone/policy")
+      expect(await policy.json()).toMatchObject({ loginEnabled: false, databaseRegion: "尚未确认" })
+      const blocked = await requestCode("13600002402")
+      expect(blocked.status).toBe(503)
+      const direct = await post("/api/phone/verify", {
+        phone: "13600002402",
+        code: "123456",
+        acceptedPolicyVersion: "2026-10-30-unconfirmed",
+        acceptedTermsVersion: "2026-10-30",
+      })
+      expect(direct.status).toBe(503)
+    } finally {
+      config.DATABASE_URL = previous
+    }
+  })
+
   it("策略接口下发的位数、有效期、冷却与政策版本是唯一来源", async () => {
     const response = await get("/api/phone/policy")
     expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({
+    expect(await response.json()).toMatchObject({
       codeLength: 6,
       codeTtlSeconds: 300,
       cooldownSeconds: 60,
@@ -166,6 +241,7 @@ describe("手机号验证码登录 HTTP 链路（内存短信 + 内存 store）"
       phone: "13700137000",
       code: "000000",
       acceptedPolicyVersion: PRIVACY_POLICY_VERSION,
+      acceptedTermsVersion: "2026-10-30",
     })
     expect(wrongCode.status).toBe(400)
     expect(((await wrongCode.json()) as { code: string }).code).toBe("INVALID_OTP")
@@ -175,10 +251,16 @@ describe("手机号验证码登录 HTTP 链路（内存短信 + 内存 store）"
       phone: "13700137000",
       code: correctCode,
       acceptedPolicyVersion: PRIVACY_POLICY_VERSION,
+      acceptedTermsVersion: "2026-10-30",
     })
     expect(created.status).toBe(200)
     const accountId = ((await created.json()) as { accountId: string }).accountId
-    expect(stores().listConsents()).toEqual([{ accountId, policyVersion: PRIVACY_POLICY_VERSION, at: new Date(now) }])
+    expect(stores().listConsents()).toContainEqual({
+      accountId,
+      policyVersion: PRIVACY_POLICY_VERSION,
+      termsVersion: "2026-10-30",
+      at: new Date(now),
+    })
   })
 
   it("未登录访问学习数据接口返回 401，登录后可以访问", async () => {

@@ -22,6 +22,7 @@ describe("会员期与兑换码 HTTP", () => {
         phone,
         code: (app.get(SMS_VERIFIER) as MemorySmsVerifier).peekCode(`+86${phone}`),
         acceptedPolicyVersion: PRIVACY_POLICY_VERSION,
+        acceptedTermsVersion: "2026-10-30",
       }),
     })
     expect(result.status).toBe(200)

@@ -1,4 +1,8 @@
 import { z } from "zod"
+import { LEGAL_VERSION } from "@mykaoyan/core"
+import type { Environment } from "../../environment"
+
+export const TERMS_VERSION = LEGAL_VERSION
 
 /**
  * 手机号验证码登录的唯一策略来源。
@@ -15,7 +19,7 @@ export const OTP_SEND_WINDOW_LIMIT = 10
 export const OTP_MAX_ATTEMPTS = 5
 
 /** 个人信息出境同意当前的政策版本；政策文案改动时同步升版（ADR 0005、PLAN §2）。 */
-export const PRIVACY_POLICY_VERSION = "2026-10-27"
+export const PRIVACY_POLICY_VERSION = `${LEGAL_VERSION}-local`
 
 /** 大陆手机号：页面输入 11 位，落库与 Better Auth 用 E.164 形式。 */
 export const mainlandPhoneSchema = z
@@ -28,8 +32,9 @@ export const otpCodeSchema = z.string().regex(new RegExp(`^\\d{${OTP_CODE_LENGTH
 export const verifyBodySchema = z.object({
   phone: mainlandPhoneSchema,
   code: otpCodeSchema,
-  /** 只有首次登录（即注册）必须勾选；值必须等于当前政策版本，过期版本会被拒绝。 */
+  /** 每次登录确认当前版本；出境同意与协议确认分开提交。 */
   acceptedPolicyVersion: z.string().trim().min(1).optional(),
+  acceptedTermsVersion: z.string().trim().min(1).optional(),
 })
 
 export const requestCodeBodySchema = z.object({ phone: mainlandPhoneSchema })
@@ -42,7 +47,31 @@ export const phoneLoginPolicy = {
   codeTtlSeconds: OTP_TTL_SECONDS,
   cooldownSeconds: OTP_SEND_COOLDOWN_SECONDS,
   privacyPolicyVersion: PRIVACY_POLICY_VERSION,
+  termsVersion: TERMS_VERSION,
 } as const
+
+/** 只返回公开地区名称，绝不把连接串、主机或项目标识传给浏览器。 */
+export function phonePolicyForEnvironment(config: Pick<Environment, "DATABASE_URL" | "NODE_ENV">) {
+  const host = config.DATABASE_URL ? new URL(config.DATABASE_URL).hostname : ""
+  let region = "unconfirmed",
+    databaseRegion = "尚未确认"
+  if (config.NODE_ENV === "test" && ["localhost", "127.0.0.1"].includes(host)) {
+    region = "local"
+    databaseRegion = "本机测试数据库"
+  } else if (/^aws-\d+-ap-northeast-1\.pooler\.supabase\.com$/.test(host)) {
+    region = "tokyo"
+    databaseRegion = "日本东京"
+  } else if (/^aws-\d+-ap-southeast-1\.pooler\.supabase\.com$/.test(host)) {
+    region = "singapore"
+    databaseRegion = "新加坡"
+  }
+  return {
+    ...phoneLoginPolicy,
+    privacyPolicyVersion: `${LEGAL_VERSION}-${region}`,
+    databaseRegion,
+    loginEnabled: region !== "unconfirmed",
+  }
+}
 
 /** 把 11 位大陆手机号转成 E.164（Better Auth 与阿里云都接受 +86 前缀的形式）。 */
 export function toE164(phone: string): string {

@@ -8,6 +8,9 @@ export type PhonePolicy = {
   codeTtlSeconds: number
   cooldownSeconds: number
   privacyPolicyVersion: string
+  termsVersion: string
+  databaseRegion: string
+  loginEnabled: boolean
 }
 
 export type SessionUser = { id: string }
@@ -57,6 +60,9 @@ export async function loadLoginState(request: Request): Promise<{ state: LoginSt
     codeTtlSeconds: 300,
     cooldownSeconds: 60,
     privacyPolicyVersion: "",
+    termsVersion: "",
+    databaseRegion: "尚未确认",
+    loginEnabled: false,
   }
   const session = sessionResponse.ok ? await readJson<{ user?: SessionUser }>(sessionResponse) : null
   return {

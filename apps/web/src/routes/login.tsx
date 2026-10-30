@@ -5,6 +5,7 @@ import { Button, Input, Label } from "@mykaoyan/ui"
 import { useEffect, useState } from "react"
 import { loadLoginState, postJson, loginSuccessPath } from "./-auth"
 import { MemberPanel } from "../features/membership"
+import { PolicyChecks } from "./-legal/documents"
 import type { LoginState } from "./-auth"
 
 /**
@@ -32,6 +33,7 @@ export function LoginPage() {
   const [phone, setPhone] = useState("")
   const [code, setCode] = useState("")
   const [consented, setConsented] = useState(false)
+  const [agreed, setAgreed] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [cooldown, setCooldown] = useState(0)
   const [busy, setBusy] = useState(false)
@@ -63,6 +65,7 @@ export function LoginPage() {
       phone,
       code,
       acceptedPolicyVersion: policy.privacyPolicyVersion,
+      acceptedTermsVersion: policy.termsVersion,
     })
     setBusy(false)
     if (!result.ok) {
@@ -91,7 +94,7 @@ export function LoginPage() {
   if (step === "signed-in") {
     return (
       <main className="page-container py-section">
-        <div className="mx-auto max-w-[30rem]">
+        <div className="mx-auto max-w-120">
           <h1 className="font-serif text-section">已登录</h1>
           <MemberPanel />
           <p className="mt-4 text-muted-foreground">退出默认只结束当前设备；要结束所有设备请用下面的按钮。</p>
@@ -121,15 +124,17 @@ export function LoginPage() {
 
   return (
     <main className="page-container py-section">
-      <div className="mx-auto max-w-[30rem]">
+      <div className="mx-auto max-w-120">
         <h1 className="font-serif text-section">手机号登录</h1>
         <p className="mt-4 text-muted-foreground">
-          第一次登录即注册。手机号与登录记录存储在新加坡，仅用于登录与账号识别。
+          第一次登录即注册。手机号、账号与云端学习数据的数据库地区为 {policy.databaseRegion}
+          ，请先阅读下方政策与出境说明。
         </p>
         <form
           className="mt-8 grid gap-5"
           onSubmit={(event) => {
             event.preventDefault()
+            if (!policy.loginEnabled || !agreed || !consented) return
             if (step === "phone") void requestCode()
             else void verify()
           }}
@@ -168,24 +173,20 @@ export function LoginPage() {
             </Label>
           ) : null}
 
-          <Label className="items-start gap-3 py-1 text-base font-normal leading-relaxed">
-            <input
-              name="personal-info-transfer-consent"
-              type="checkbox"
-              checked={consented}
-              onChange={(event) => setConsented(event.target.checked)}
-              className="mt-1 size-5 shrink-0 accent-primary outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring"
-            />
-            <span className="min-w-0">
-              我同意将手机号存储在新加坡用于账号识别（政策版本 {policy.privacyPolicyVersion}）。未勾选不能注册。
-            </span>
-          </Label>
+          <PolicyChecks
+            policy={policy}
+            agreed={agreed}
+            consented={consented}
+            onAgreement={setAgreed}
+            onConsent={setConsented}
+          />
+          {!policy.loginEnabled ? <p role="alert">数据存储位置尚未确认，暂不能登录；可浏览无需登录的内容。</p> : null}
 
           <div className="grid gap-3">
             <Button
               type="submit"
               className="min-h-11 text-base"
-              disabled={busy || (step === "phone" && cooldown > 0) || !consented}
+              disabled={busy || (step === "phone" && cooldown > 0) || !consented || !agreed || !policy.loginEnabled}
             >
               {step === "phone" ? (cooldown > 0 ? `${cooldown} 秒后可重新获取` : "获取验证码") : "登录"}
             </Button>
@@ -194,7 +195,7 @@ export function LoginPage() {
                 type="button"
                 variant="outline"
                 className="min-h-11 text-base"
-                disabled={busy || cooldown > 0}
+                disabled={busy || cooldown > 0 || !consented || !agreed || !policy.loginEnabled}
                 onClick={() => void requestCode()}
               >
                 {cooldown > 0 ? `${cooldown} 秒后可重新获取` : "重新获取验证码"}

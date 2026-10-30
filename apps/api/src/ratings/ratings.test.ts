@@ -42,6 +42,7 @@ describe("评分权限、修改与推荐 HTTP", () => {
         phone,
         code: (app.get(SMS_VERIFIER) as MemorySmsVerifier).peekCode(`+86${phone}`),
         acceptedPolicyVersion: PRIVACY_POLICY_VERSION,
+        acceptedTermsVersion: "2026-10-30",
       },
       "POST"
     )

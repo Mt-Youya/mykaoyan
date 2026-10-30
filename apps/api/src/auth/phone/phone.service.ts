@@ -4,6 +4,8 @@ import { APIError } from "better-auth/api"
 import { getCookies } from "better-auth/cookies"
 import type { Auth } from "../auth"
 import type { AuthEnvironment } from "../environment"
+import { CONFIG } from "../../config"
+import type { Environment } from "../../environment"
 import {
   maskPhone,
   OTP_SEND_COOLDOWN_SECONDS,
@@ -11,7 +13,8 @@ import {
   OTP_SEND_WINDOW_SECONDS,
   OTP_MAX_ATTEMPTS,
   OTP_TTL_SECONDS,
-  PRIVACY_POLICY_VERSION,
+  TERMS_VERSION,
+  phonePolicyForEnvironment,
   requestCodeBodySchema,
   toE164,
   verifyBodySchema,
@@ -55,10 +58,20 @@ export class PhoneAuthService {
     @Inject(AUTH_STORES) private readonly stores: AuthStores,
     @Inject(AUTH) private readonly auth: Auth,
     @Inject(AUTH_ENV) private readonly env: AuthEnvironment,
-    @Inject(CLOCK) private readonly now: () => Date = () => new Date()
+    @Inject(CLOCK) private readonly now: () => Date,
+    @Inject(CONFIG) private readonly config: Environment
   ) {}
 
+  policy() {
+    return phonePolicyForEnvironment(this.config)
+  }
+
   async requestCode(body: unknown): Promise<RequestCodeResult> {
+    if (!this.policy().loginEnabled)
+      return {
+        ok: false,
+        problem: { status: 503, code: "POLICY_NOT_READY", title: "数据存储位置尚未确认，暂不能登录" },
+      }
     const parsed = requestCodeBodySchema.safeParse(body)
     if (!parsed.success) return invalidInput(parsed.error.issues[0]?.message ?? "手机号格式不正确")
 
@@ -119,19 +132,26 @@ export class PhoneAuthService {
   }
 
   async verify(body: unknown, headers: Headers): Promise<VerifyResult> {
+    const policy = this.policy()
+    if (!policy.loginEnabled)
+      return {
+        ok: false,
+        problem: { status: 503, code: "POLICY_NOT_READY", title: "数据存储位置尚未确认，暂不能登录" },
+      }
     const parsed = verifyBodySchema.safeParse(body)
     if (!parsed.success) return invalidInput(parsed.error.issues[0]?.message ?? "参数格式不正确")
 
     const e164 = toE164(parsed.data.phone)
-    const existingAccountId = await this.stores.accountPhones.findIdByPhone(e164)
-    if (!existingAccountId && parsed.data.acceptedPolicyVersion !== PRIVACY_POLICY_VERSION) {
+    if (parsed.data.acceptedPolicyVersion !== policy.privacyPolicyVersion) {
       return {
         ok: false,
-        problem: {
-          status: 400,
-          code: "CONSENT_REQUIRED",
-          title: "首次登录前请先勾选同意《个人信息存储于新加坡的说明》",
-        },
+        problem: { status: 400, code: "CONSENT_REQUIRED", title: "请阅读并单独同意当前版本的个人信息出境说明" },
+      }
+    }
+    if (parsed.data.acceptedTermsVersion !== TERMS_VERSION) {
+      return {
+        ok: false,
+        problem: { status: 400, code: "AGREEMENT_REQUIRED", title: "请阅读并同意当前版本的用户协议和隐私政策" },
       }
     }
 
@@ -153,9 +173,7 @@ export class PhoneAuthService {
         returnHeaders: true,
       })
       const user = result.response.user as { id: string }
-      if (!existingAccountId) {
-        await this.stores.consents.record(user.id, PRIVACY_POLICY_VERSION, this.now())
-      }
+      await this.stores.consents.record(user.id, policy.privacyPolicyVersion, this.now(), TERMS_VERSION)
       return { ok: true, accountId: user.id, setCookies: result.headers.getSetCookie() }
     } catch (error) {
       const code = this.errorCode(error)

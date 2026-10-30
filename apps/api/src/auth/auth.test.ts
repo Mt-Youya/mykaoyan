@@ -87,6 +87,7 @@ async function login(phone: string) {
     phone,
     code: sms().peekCode(`+86${phone}`),
     acceptedPolicyVersion: PRIVACY_POLICY_VERSION,
+    acceptedTermsVersion: "2026-10-30",
   })
   expect(verified.status).toBe(200)
   return { cookie: await sessionCookieOf(verified), body: (await verified.json()) as { accountId: string } }
@@ -100,11 +101,7 @@ describe.runIf(enabled)("手机号登录（真实 Postgres）", () => {
       throw new Error("集成测试只允许专用的本机 mykaoyan_test 临时库")
     }
     sql = postgres(config.DATABASE_URL!, { prepare: false, ssl: false })
-    await sql`delete from personal_info_transfer_consents`
-    await sql`delete from sessions`
-    await sql`delete from login_methods`
-    await sql`delete from accounts`
-    await sql`delete from phone_login_attempts`
+    // 共用测试库中其他文件可能已有账号审计记录；只使用本文件独有的号码，不全表删除。
 
     database = new DatabaseService(config)
     const stores = createDrizzleStores(database.db)
@@ -142,18 +139,18 @@ describe.runIf(enabled)("手机号登录（真实 Postgres）", () => {
   })
 
   it("首次登录即注册：写账号、手机号只在 phone 列，并记录出境同意", async () => {
-    const { body } = await login("13800138000")
+    const { body } = await login("13600002471")
     const [account] = await sql<
       { id: string; phone: string; email: string; role: string }[]
     >`select id, phone, email, role from accounts where id = ${body.accountId}`
-    expect(account?.phone).toBe("+8613800138000")
+    expect(account?.phone).toBe("+8613600002471")
     expect(account?.role).toBe("account")
-    expect(account?.email).not.toContain("13800138000")
+    expect(account?.email).not.toContain("13600002471")
     expect(account?.email).toMatch(/^phone-[0-9a-f]{32}@phone\.invalid$/)
 
-    const consents = await sql<{ policy_version: string }[]>`
-      select policy_version from personal_info_transfer_consents where account_id = ${body.accountId}`
-    expect(consents).toEqual([{ policy_version: PRIVACY_POLICY_VERSION }])
+    const consents = await sql<{ policy_version: string; terms_version: string }[]>`
+      select policy_version, terms_version from personal_info_transfer_consents where account_id = ${body.accountId}`
+    expect(consents).toEqual([{ policy_version: PRIVACY_POLICY_VERSION, terms_version: "2026-10-30" }])
 
     const sessions = await sql<{ account_id: string }[]>`
       select account_id from sessions where account_id = ${body.accountId}`
@@ -162,16 +159,16 @@ describe.runIf(enabled)("手机号登录（真实 Postgres）", () => {
 
   it("同一手机号第二次登录命中已有账号，不新增账号", async () => {
     const [before] = await sql<{ count: string }[]>`select count(*)::text as count from accounts`
-    const second = await login("13800138000")
+    const second = await login("13600002471")
     const [after] = await sql<{ count: string }[]>`select count(*)::text as count from accounts`
     expect(after?.count).toBe(before?.count)
-    const rows = await sql<{ id: string }[]>`select id from accounts where phone = '+8613800138000'`
+    const rows = await sql<{ id: string }[]>`select id from accounts where phone = '+8613600002471'`
     expect(rows).toHaveLength(1)
     expect(second.body.accountId).toBe(rows[0]?.id)
   })
 
   it("重复记录同一政策版本的同意是幂等的（唯一约束不报 500）", async () => {
-    const [account] = await sql<{ id: string }[]>`select id from accounts where phone = '+8613800138000'`
+    const [account] = await sql<{ id: string }[]>`select id from accounts where phone = '+8613600002471'`
     const stores = app.get(AUTH_STORES) as ReturnType<typeof createDrizzleStores>
     await stores.consents.record(account!.id, PRIVACY_POLICY_VERSION, new Date(now))
     await stores.consents.record(account!.id, PRIVACY_POLICY_VERSION, new Date(now))
@@ -183,8 +180,8 @@ describe.runIf(enabled)("手机号登录（真实 Postgres）", () => {
   it("未勾选出境同意时新手机号不能注册", async () => {
     const [before] = await sql<{ count: string }[]>`select count(*)::text as count from accounts`
     now += 61_000
-    await post("/api/phone/request-code", { phone: "13900139000" })
-    const verified = await post("/api/phone/verify", { phone: "13900139000", code: sms().peekCode("+8613900139000") })
+    await post("/api/phone/request-code", { phone: "13600002472" })
+    const verified = await post("/api/phone/verify", { phone: "13600002472", code: sms().peekCode("+8613600002472") })
     expect(verified.status).toBe(400)
     expect(((await verified.json()) as { code: string }).code).toBe("CONSENT_REQUIRED")
     const [after] = await sql<{ count: string }[]>`select count(*)::text as count from accounts`
@@ -192,13 +189,13 @@ describe.runIf(enabled)("手机号登录（真实 Postgres）", () => {
   })
 
   it("数据库唯一约束拒绝重复手机号", async () => {
-    const duplicate = sql`insert into accounts (name, email, phone) values ('dup', 'dup@phone.invalid', '+8613800138000')`
+    const duplicate = sql`insert into accounts (name, email, phone) values ('dup', 'dup@phone.invalid', '+8613600002471')`
     await expect(duplicate).rejects.toThrow()
   })
 
   it("退出当前设备只删本次会话；退出所有设备删掉剩余会话", async () => {
-    const first = await login("13700137000")
-    const second = await login("13700137000")
+    const first = await login("13600002473")
+    const second = await login("13600002473")
     expect((await post("/api/phone/sign-out", {}, first.cookie)).status).toBe(200)
     const [left] = await sql<{ count: string }[]>`
       select count(*)::text as count from sessions where account_id = ${second.body.accountId}`

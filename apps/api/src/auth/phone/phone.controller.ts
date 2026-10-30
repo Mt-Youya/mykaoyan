@@ -1,7 +1,6 @@
-import { Body, Controller, Get, Inject, Post, Req, Res } from "@nestjs/common"
+import { Body, Controller, Get, Header, Inject, Post, Req, Res } from "@nestjs/common"
 import { toFetchHeaders, writeJson, writeProblem } from "../http"
 import type { NodeRequestLike, NodeResponseLike } from "../http"
-import { phoneLoginPolicy } from "../policy"
 import { PhoneAuthService } from "./phone.service"
 
 /**
@@ -17,8 +16,9 @@ export class PhoneController {
 
   /** 前端读取位数、有效期与政策版本，避免在页面里写死。 */
   @Get("policy")
+  @Header("Cache-Control", "no-store")
   policy() {
-    return phoneLoginPolicy
+    return this.phone.policy()
   }
 
   @Post("request-code")
