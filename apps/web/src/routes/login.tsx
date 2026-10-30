@@ -4,6 +4,7 @@ import { getRequest, setResponseHeader } from "@tanstack/react-start/server"
 import { Button, Input, Label } from "@mykaoyan/ui"
 import { useEffect, useState } from "react"
 import { loadLoginState, postJson } from "./-auth"
+import { MemberPanel } from "../features/membership"
 import type { LoginState } from "./-auth"
 
 /**
@@ -89,6 +90,7 @@ export function LoginPage() {
       <main className="page-container py-section">
         <div className="mx-auto max-w-[30rem]">
           <h1 className="font-serif text-section">已登录</h1>
+          <MemberPanel />
           <p className="mt-4 text-muted-foreground">退出默认只结束当前设备；要结束所有设备请用下面的按钮。</p>
           <div className="mt-8 flex flex-col gap-3">
             <Button type="button" className="min-h-11 text-base" onClick={() => signOut(false)} disabled={busy}>

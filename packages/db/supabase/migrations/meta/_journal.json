@@ -43,6 +43,13 @@
       "when": 1793261144912,
       "tag": "20261029080544_tiny_randall_flagg",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793326675425,
+      "tag": "20261030021755_giant_shocker",
+      "breakpoints": true
     }
   ]
 }

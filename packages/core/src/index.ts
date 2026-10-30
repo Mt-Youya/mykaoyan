@@ -8,3 +8,6 @@ export * from "./topics"
 export * from "./weekly"
 export * from "./progress"
 export * from "./catalog"
+
+export { membershipPeriodSchema, membershipStatus, nextMembershipPeriod } from "./membership/index"
+export type { MembershipPeriod } from "./membership/index"

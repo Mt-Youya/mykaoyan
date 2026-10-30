@@ -79,6 +79,8 @@
 
 - **R2 单次 PUT 校验与重放**（mk/MEDIA-01）：不能把 S3 的 FULL_OBJECT SHA-256 支持直接套到 R2；按当前兼容表使用 Content-MD5 与单次 PUT ETag 校验，签入 If-None-Match 防已上传对象被签名重放覆盖。登记前 HEAD；删除失败留计划并重试，不能在同哈希 no-op 时隐藏清理状态。
 
+- **Drizzle 与原生 postgres.js 共用时间类型**（mk/DATA-03）：共用客户端时，查询的 timestamptz 可能按字符串返回，裸 SQL 传 Date 也可能触发序列化错误。领域边界先规范成 ISO 字符串，写原生 SQL 同样传 ISO；用真实临时库验证，不只靠 TypeScript 的泛型断言。
+
 ## 7. Agent 行为
 
 - **单写者**（pf/AGENT-02、pf/AGENT-03、pf/AGENT-09、pg/TOOL-10）：同一工作区同一时间只有一个会话写入；接手前看 `git status`；恢复只回滚自己改的部分。

@@ -5,3 +5,5 @@ export * from "./catalog/index"
 export * from "./progress/index"
 
 export * from "./publishing"
+
+export * from "./membership"

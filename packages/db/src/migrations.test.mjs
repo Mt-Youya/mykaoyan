@@ -70,6 +70,14 @@ describe("空库迁移与权限", () => {
     ).toContain("progress")
   })
 
+  it("会员期与兑换码开启RLS，公开角色不能读写", () => {
+    for (const table of ["membership_periods", "redemption_codes"]) {
+      expect(sql(`select relrowsecurity from pg_class where oid='public.${table}'::regclass`)).toBe("t")
+      for (const role of ["anon", "authenticated"])
+        expect(sql(`select has_table_privilege('${role}','public.${table}','SELECT,INSERT,UPDATE,DELETE')`)).toBe("f")
+    }
+  })
+
   it("public schema 的函数没有向 PUBLIC、anon、authenticated 开放执行", () => {
     expect(sql(functionViolations)).toBe("")
   })

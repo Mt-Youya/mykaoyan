@@ -49,7 +49,7 @@ docs/             规划、ADR、坑点、规格
 | `dates` | 上海日期 `LocalDate` 与日期运算 | core |
 | `catalog` | 课程、章、讲、讲义、上架状态 | core / api |
 | `accounts` | 账号、登录方式、手机号绑定、Agent 令牌 | api（Better Auth）/ db |
-| `membership` | 会员期、兑换码、会员判断 | core / api |
+| `membership` | 会员期、兑换码、会员判断 | core / db / api / web |
 | `comments` | 评论与回复、关键词过滤、删除记录 | core / api |
 | `submissions` | 投稿、审核、上传登记 | core / api |
 | `ratings` | 评分、贝叶斯平均、推荐 | core / api |

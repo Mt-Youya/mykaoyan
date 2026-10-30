@@ -1,5 +1,6 @@
 import { Badge, Button } from "@mykaoyan/ui"
 import { useCallback, useEffect, useState } from "react"
+import { AdminMembershipPanel } from "../membership"
 import { fetchAdminContent, setListing } from "./api"
 import type { AdminContent, AdminLesson } from "./api"
 
@@ -67,6 +68,7 @@ export function AdminPage() {
         <h1 className="text-section leading-tight">内容管理</h1>
         <p className={note}>上下架只影响访客可见性，不改内容本身；每次操作都会留下记录。</p>
       </header>
+      <AdminMembershipPanel />
 
       {message ? (
         <p className={`my-4 ${note}`} role="alert">

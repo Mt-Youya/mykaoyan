@@ -9,3 +9,5 @@ export { Badge, badgeVariants } from "./base/badge"
 export { Button, buttonVariants } from "./base/button"
 export { Input } from "./base/input"
 export { Label } from "./base/label"
+
+export { Field, FieldGroup, FieldLabel } from "./base/field"
