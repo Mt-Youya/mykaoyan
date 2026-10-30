@@ -51,7 +51,7 @@ docs/             规划、ADR、坑点、规格
 | `accounts` | 账号、登录方式、手机号绑定、Agent 令牌 | api（Better Auth）/ db |
 | `membership` | 会员期、兑换码、会员判断 | core / db / api / web |
 | `comments` | 评论与回复、关键词过滤、删除记录 | core / db / api / web |
-| `submissions` | 投稿、审核、上传登记 | core / api |
+| `submissions` | 投稿、审核、上传登记 | core / db / api / web |
 | `ratings` | 评分、贝叶斯平均、推荐 | core / api |
 | `progress-file` | 进度文件格式、校验、版本与历史 | core / api |
 | `profile`、`plan`、`mistakes`、`daily`、`today`、`topics`、`weekly` | 学习追踪 | core / api / web |

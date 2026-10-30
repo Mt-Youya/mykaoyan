@@ -17,8 +17,8 @@ const RENEW_BEFORE_MS = 60_000
 /** 续签失败的重试间隔（毫秒）。 */
 const RETRY_DELAYS_MS = [1_000, 2_000, 4_000]
 
-async function fetchToken(slug: string): Promise<PlaybackToken> {
-  const response = await fetch(`/api/lessons/${encodeURIComponent(slug)}/playback-token`, {
+async function fetchToken(slug: string, kind: "lessons" | "submissions"): Promise<PlaybackToken> {
+  const response = await fetch(`/api/${kind}/${encodeURIComponent(slug)}/playback-token`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ttlSeconds: 600 }),
@@ -35,7 +35,15 @@ async function fetchToken(slug: string): Promise<PlaybackToken> {
  * 最终失败时明确提示而不是静默停止。切换到另一讲时按新 slug 重新签发并替换视频源，
  * 不会沿用上一讲的视频。
  */
-export function LessonPlayer({ slug, title }: { slug: string; title: string }) {
+export function LessonPlayer({
+  slug,
+  title,
+  kind = "lessons",
+}: {
+  slug: string
+  title: string
+  kind?: "lessons" | "submissions"
+}) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [token, setToken] = useState<PlaybackToken | null>(null)
   const [error, setError] = useState<PlayerError | null>(null)
@@ -56,7 +64,7 @@ export function LessonPlayer({ slug, title }: { slug: string; title: string }) {
 
   const renew = useCallback(async () => {
     try {
-      applyToken(await fetchToken(slug), true)
+      applyToken(await fetchToken(slug, kind), true)
     } catch {
       const delay = RETRY_DELAYS_MS[retryIndex.current]
       if (delay === undefined) {
@@ -66,7 +74,7 @@ export function LessonPlayer({ slug, title }: { slug: string; title: string }) {
       retryIndex.current += 1
       window.setTimeout(() => void renew(), delay)
     }
-  }, [applyToken, slug])
+  }, [applyToken, slug, kind])
 
   // 换讲时清空状态：避免沿用上一讲的视频与令牌。
   useEffect(() => {
@@ -76,7 +84,7 @@ export function LessonPlayer({ slug, title }: { slug: string; title: string }) {
     pendingPlay.current = false
     retryIndex.current = 0
     let cancelled = false
-    void fetchToken(slug)
+    void fetchToken(slug, kind)
       .then((next) => {
         if (!cancelled) applyToken(next, false)
       })
@@ -86,7 +94,7 @@ export function LessonPlayer({ slug, title }: { slug: string; title: string }) {
     return () => {
       cancelled = true
     }
-  }, [applyToken, slug])
+  }, [applyToken, slug, kind])
 
   // 到期前续签；每次令牌变化都重新排期。
   useEffect(() => {

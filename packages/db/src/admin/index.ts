@@ -10,7 +10,7 @@ export const listingChanges = pgTable(
   "listing_changes",
   {
     id: uuid().defaultRandom().primaryKey(),
-    /** 被操作内容的类型：lesson 或 handout。 */
+    /** 被操作内容的类型：lesson、handout 或 submission。 */
     targetType: text("target_type").notNull(),
     targetId: uuid("target_id").notNull(),
     /** 操作之后的上下架状态：true 为上架，false 为下架。 */

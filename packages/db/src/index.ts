@@ -9,3 +9,4 @@ export * from "./publishing"
 export * from "./membership"
 
 export * from "./comments"
+export * from "./submissions"

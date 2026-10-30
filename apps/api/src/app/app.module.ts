@@ -14,6 +14,7 @@ import { PlaybackModule } from "../playback"
 import { PublishingModule } from "../publishing"
 import { MembershipModule } from "../membership"
 import { CommentsModule } from "../comments"
+import { SubmissionsEmptyModule, SubmissionsModule } from "../submissions"
 import { ProgressModule } from "../progress"
 
 /**
@@ -41,9 +42,10 @@ export class AppModule {
               ProgressModule,
               MembershipModule,
               CommentsModule,
+              SubmissionsModule,
               PublishingModule,
             ]
-          : [CatalogEmptyModule]),
+          : [CatalogEmptyModule, SubmissionsEmptyModule]),
         AdmissionsModule,
       ],
       controllers: database ? [AppController] : [],

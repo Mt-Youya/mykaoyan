@@ -86,6 +86,12 @@ describe("空库迁移与权限", () => {
     }
   })
 
+  it("投稿元数据启用RLS且公开角色无权限", () => {
+    expect(sql("select relrowsecurity from pg_class where oid='public.submissions'::regclass")).toBe("t")
+    for (const role of ["anon", "authenticated"])
+      expect(sql(`select has_table_privilege('${role}','public.submissions','SELECT,INSERT,UPDATE,DELETE')`)).toBe("f")
+  })
+
   it("public schema 的函数没有向 PUBLIC、anon、authenticated 开放执行", () => {
     expect(sql(functionViolations)).toBe("")
   })

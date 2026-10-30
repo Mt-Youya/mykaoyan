@@ -1,6 +1,7 @@
 import { Badge, Button } from "@mykaoyan/ui"
 import { useCallback, useEffect, useState } from "react"
 import { AdminCommentsPanel } from "../comments"
+import { AdminSubmissionsPanel } from "../submissions"
 import { AdminMembershipPanel } from "../membership"
 import { fetchAdminContent, setListing } from "./api"
 import type { AdminContent, AdminLesson } from "./api"
@@ -71,6 +72,7 @@ export function AdminPage() {
       </header>
       <AdminMembershipPanel />
       <AdminCommentsPanel />
+      <AdminSubmissionsPanel />
 
       {message ? (
         <p className={`my-4 ${note}`} role="alert">

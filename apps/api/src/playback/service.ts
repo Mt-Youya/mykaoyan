@@ -39,6 +39,11 @@ export class PlaybackService {
   async signForLesson(slug: string, subject: string, ttlSeconds: number): Promise<PlaybackToken | undefined> {
     const lesson = await this.catalog.getLesson(slug)
     if (!lesson) return undefined
+    return this.signMedia(lesson.videoKey, subject, ttlSeconds, lesson.subtitleKey)
+  }
+
+  /** 调用方负责可见性与权限；讲和投稿共用同一令牌格式。 */
+  signMedia(videoKey: string, subject: string, ttlSeconds: number, subtitleKey: string | null = null): PlaybackToken {
     const now = Math.floor(Date.now() / 1000)
     const signed = (key: string): SignedMedia => {
       const claims = { v: 1, key, subject, iat: now, exp: now + ttlSeconds }
@@ -48,13 +53,13 @@ export class PlaybackService {
       return { key, token, url: `${base}/${key}?token=${encodeURIComponent(token)}` }
     }
     const base = (this.config.MEDIA_BASE_URL ?? "https://media.mykaoyan.cn").replace(/\/$/, "")
-    const video = signed(lesson.videoKey)
+    const video = signed(videoKey)
     return {
-      videoKey: lesson.videoKey,
+      videoKey,
       token: video.token,
       expiresAt: new Date((now + ttlSeconds) * 1000).toISOString(),
       mediaUrl: video.url,
-      subtitle: lesson.subtitleKey ? signed(lesson.subtitleKey) : null,
+      subtitle: subtitleKey ? signed(subtitleKey) : null,
     }
   }
 }
