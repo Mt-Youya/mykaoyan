@@ -9,6 +9,7 @@ mykaoyan login
 mykaoyan progress pull progress.json
 mykaoyan progress validate progress.json
 mykaoyan progress push progress.json
+mykaoyan publish-handout handout.md --subject 408 --slug my-handout --title "题面" --dry-run
 ```
 
 `login` 交互输入 Agent 令牌，不回显；自动化可用 `login --token-stdin` 从标准输入读入。不要把令牌写在命令参数、聊天或公开仓库。登录只保存令牌，不创建网页会话，也不联网验证；后续读写时由服务端鉴权。
@@ -31,12 +32,13 @@ mykaoyan progress push progress.json
 | progress pull | `{"saved":true,"etag":"\"revision-0\""}` |
 | progress validate | `{"valid":true}` |
 | progress push | 透传公开契约的变更摘要 `{app,version,etag,changes}` |
+| publish-handout | 透传发布结果 `{slug,unchanged,listed,contentHash,updatedAt}` |
 
 离线校验仅检查格式，不证明复测独立完成、记录真实或日期之间的业务关系。题目、答案、词表等私有内容不应放入上传文件。详细字段见 `skills/mykaoyan/references/progress-v1.md`。
 
 ## 契约与验证
 
-`contracts/openapi.json` 由公开契约生成脚本同步；`build.rs` 用 typify 从其 `ProgressFile`、`ProgressChangeSummary` 与发布相关的 `PublishLesson`、`PublishPrepared`、`PublishResult` 组件生成 Rust 类型到 Cargo OUT_DIR。代码不导入网站内部模块。纯字符串 anyOf 在类型生成时宽化为 String，以绕过 typify 的结构体映射；运行时仍用原始 schema 完整校验，HTTP 请求保留原始 JSON，避免类型序列化改变数据。
+`contracts/openapi.json` 由公开契约生成脚本同步；`build.rs` 用 typify 从其 `ProgressFile`、`ProgressChangeSummary` 与发布相关的 `PublishLesson`、`PublishPrepared`、`PublishResult`、`PublishHandout`、`PublishHandoutResult` 组件生成 Rust 类型到 Cargo OUT_DIR。代码不导入网站内部模块。纯字符串 anyOf 在类型生成时宽化为 String，以绕过 typify 的结构体映射；运行时仍用原始 schema 完整校验，HTTP 请求保留原始 JSON，避免类型序列化改变数据。
 
 ```sh
 cargo fmt --manifest-path cli/Cargo.toml --check
@@ -56,6 +58,17 @@ mykaoyan publish "$SRC/课程/数学二/01-导数"
 需要专用 `scope=publish` 的管理员令牌；普通进度令牌不能发布。CLI 按数学二或408下的章相对路径生成稳定标识，在“视频/字幕/讲稿”三个目录按同名 mp4/srt/md 配对。答案与不完整组合会跳过并报告，符号链接拒绝读取。dry-run 不联网；正式发布先准备计划再直传对象、登记、读回哈希。服务器只更新内容，已有上架状态保留，新内容默认下架；重复发布同内容不会增加版本或重复上传。章节路径改名会生成新标识，不会自动迁移旧内容。
 
 发布成功 JSON：`{"published":[{"slug":"…","unchanged":false,"version":1,"listed":false,"keys":["…"],"cleanupPending":false,"publicationId":"…"}],"skipped":[]}`。若 cleanupPending=true，重新发布会重试旧对象清理；也可用发布令牌重试输出 publicationId 的 complete 接口。详细 R2 本机配置与验收边界见 `docs/ops/r2-publishing.md`。
+
+## 发布讲义（题面）
+
+```sh
+mykaoyan publish-handout handout.md --subject 408 --slug 408-ds-tree --title "数据结构 · 树与二叉树（题面）" --position 1 --dry-run
+mykaoyan publish-handout handout.md --subject 408 --slug 408-ds-tree --title "数据结构 · 树与二叉树（题面）" --position 1
+```
+
+一份 Markdown 单请求发布为讲义，不经过对象存储，也不改变上架状态：新讲义默认下架，已有上架状态在更新后保留。服务端按内容判断是否变化，重复发布同内容返回 `unchanged:true`，不写库。文件名或路径含 `答案`、`解析`、`answer`、`solution` 会被直接拒绝且不读取内容；只发布题面与自学材料，答案、解析、真题原文和模拟卷整题不上站。需要 `scope=publish` 的管理员令牌，规则与发布课程相同。
+
+`--dry-run` 离线校验参数、Markdown 大小（≤ 1 MiB）与公开契约，输出 `{"dryRun":true,"slug":"…","bytes":N,"contentHash":"…"}`；成功 JSON 为 `{"slug":"…","unchanged":false,"listed":false,"contentHash":"…","updatedAt":"…"}`。讲义 JSON Schema：`https://mykaoyan.cn/schemas/publish/v1/handout.schema.json`。
 
 ## 代码结构
 
@@ -77,6 +90,7 @@ src/
     scan.rs            章目录扫描与配对
     api.rs             发布接口
     upload.rs          预签名直传
+    handout.rs         讲义（Markdown）单请求发布
     contract.rs        发布契约校验
   support/
     mod.rs             横切能力的模块声明

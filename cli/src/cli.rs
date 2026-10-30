@@ -27,6 +27,20 @@ pub(crate) enum Commands {
         #[arg(long)]
         dry_run: bool,
     },
+    /// 把一份 Markdown 发布为讲义（速查表、自编题面）；不会改变上架状态
+    PublishHandout {
+        file: PathBuf,
+        #[arg(long)]
+        subject: String,
+        #[arg(long)]
+        slug: String,
+        #[arg(long)]
+        title: String,
+        #[arg(long, default_value_t = 1)]
+        position: u32,
+        #[arg(long)]
+        dry_run: bool,
+    },
     /// 下载、离线校验、整份替换进度文件
     Progress {
         #[command(subcommand)]

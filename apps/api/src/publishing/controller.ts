@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Inject, Param, Post, UseGuards } from "@nestjs/common"
+import { BadRequestException, Body, Controller, Get, Inject, Param, Post, Put, UseGuards } from "@nestjs/common"
 import { z } from "zod"
 
 import { CurrentSession } from "../auth"
@@ -18,5 +18,12 @@ export class PublishingController {
   }
   @Get("lessons/:slug") read(@CurrentSession() session: AuthSession, @Param("slug") slug: string) {
     return this.service.read(session.user, slug)
+  }
+  @Put("handouts/:slug") publishHandout(
+    @CurrentSession() session: AuthSession,
+    @Param("slug") slug: string,
+    @Body() body: unknown,
+  ) {
+    return this.service.publishHandout(session.user, slug, body)
   }
 }

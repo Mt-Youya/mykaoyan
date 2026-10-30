@@ -9,14 +9,23 @@ import {
   NotFoundException,
 } from "@nestjs/common"
 
-import { publishLessonSchema } from "@mykaoyan/core"
-import type { PublishLesson } from "@mykaoyan/core"
+import { publishHandoutSchema, publishLessonSchema } from "@mykaoyan/core"
+import type { PublishHandout, PublishLesson } from "@mykaoyan/core"
 
 import { DatabaseService } from "../database"
 import { PUBLISH_STORAGE } from "./storage"
 import type { PublishStorage } from "./storage"
 type Actor = { id: string; role: string }
 type Document = { input: PublishLesson; videoKey: string; subtitleKey: string | null }
+type HandoutRow = {
+  slug: string
+  subject_code: string
+  title: string
+  markdown: string
+  position: number
+  listed: boolean
+  updated_at: Date | string
+}
 type Job = {
   id: string
   document: Document
@@ -32,6 +41,12 @@ type Lesson = {
   listed: boolean
   video_key: string
   subtitle_key: string | null
+}
+/** 讲义内容指纹：拼接顺序固定，客户端与服务端都可复算；不作为版本号。 */
+function handoutHash(input: PublishHandout) {
+  return createHash("sha256")
+    .update([input.subjectCode, input.slug, input.title, String(input.position), input.markdown].join("\0"))
+    .digest("hex")
 }
 @Injectable()
 export class PublishingService {
@@ -158,6 +173,47 @@ export class PublishingService {
       listed: row.listed,
       keys: [row.video_key, ...(row.subtitle_key ? [row.subtitle_key] : [])],
       cleanupPending: pending?.pending ?? false,
+    }
+  }
+
+  /** 讲义发布：单请求写库；内容相同不写库；更新不改变上架状态。 */
+  async publishHandout(actor: Actor, slug: string, body: unknown) {
+    await this.authorize(actor)
+    const parsed = publishHandoutSchema.safeParse(body)
+    if (!parsed.success) throw new BadRequestException("讲义内容格式无效")
+    const input = parsed.data
+    if (input.slug !== slug) throw new BadRequestException("路径与内容的标识不一致")
+    const hash = handoutHash(input)
+    const [current] = await this.database.client<
+      HandoutRow[]
+    >`select slug,subject_code,title,markdown,position,listed,updated_at from handouts where slug=${slug}`
+    if (
+      current &&
+      handoutHash({
+        subjectCode: current.subject_code,
+        slug: current.slug,
+        title: current.title,
+        position: current.position,
+        markdown: current.markdown,
+      }) === hash
+    )
+      return {
+        slug,
+        unchanged: true,
+        listed: current.listed,
+        contentHash: hash,
+        updatedAt: new Date(current.updated_at).toISOString(),
+      }
+    const [saved] = await this.database.client<
+      HandoutRow[]
+    >`insert into handouts(subject_code,slug,title,markdown,position) values(${input.subjectCode},${input.slug},${input.title},${input.markdown},${input.position}) on conflict (slug) do update set subject_code=excluded.subject_code,title=excluded.title,markdown=excluded.markdown,position=excluded.position,updated_at=now() returning slug,subject_code,title,markdown,position,listed,updated_at`
+    if (!saved) throw new Error("讲义写入未返回记录")
+    return {
+      slug: saved.slug,
+      unchanged: false,
+      listed: saved.listed,
+      contentHash: hash,
+      updatedAt: new Date(saved.updated_at).toISOString(),
     }
   }
 }

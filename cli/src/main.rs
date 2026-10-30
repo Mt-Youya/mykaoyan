@@ -24,6 +24,26 @@ fn run(args: &Args) -> Result<Value> {
             directory,
             *dry_run,
         ),
+        Commands::PublishHandout {
+            file,
+            subject,
+            slug,
+            title,
+            position,
+            dry_run,
+        } => publish::run_handout(
+            if *dry_run {
+                None
+            } else {
+                Some(auth::load(origin)?)
+            },
+            file,
+            subject,
+            slug,
+            title,
+            *position,
+            *dry_run,
+        ),
         Commands::Login { token_stdin } => auth::login(origin, *token_stdin),
         Commands::Progress { command } => match command {
             Progress::Validate { file } => progress::validate(file),

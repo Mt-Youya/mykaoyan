@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mykaoyan.cn/schemas/publish/v1/handout.schema.json",
+  "type": "object",
+  "properties": {
+    "subjectCode": {
+      "type": "string",
+      "pattern": "^\\d{3}$",
+      "description": "三位考试科目代码，例如 302、408。"
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "position": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "markdown": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000000,
+      "description": "讲义 Markdown；只发布题面或自学材料，不包含答案与解析。"
+    }
+  },
+  "required": [
+    "subjectCode",
+    "slug",
+    "title",
+    "position",
+    "markdown"
+  ],
+  "additionalProperties": false
+}

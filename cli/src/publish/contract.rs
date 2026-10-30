@@ -22,3 +22,19 @@ pub(super) fn prepared(value: &Value) -> Result<()> {
 pub(super) fn result(value: &Value) -> Result<()> {
     schema::validate(value, "PublishResult", "发布数据不符合公开契约")
 }
+
+pub(super) fn handout(value: &Value) -> Result<()> {
+    validate_type::<generated::PublishHandout>(
+        value,
+        "PublishHandout",
+        "讲义发布数据不符合公开契约",
+    )
+}
+
+pub(super) fn handout_result(value: &Value) -> Result<()> {
+    validate_type::<generated::PublishHandoutResult>(
+        value,
+        "PublishHandoutResult",
+        "讲义发布结果不符合公开契约",
+    )
+}

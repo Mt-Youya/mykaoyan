@@ -36,3 +36,23 @@ export const publishResultSchema = z.strictObject({
   keys: z.array(z.string()),
   cleanupPending: z.boolean(),
 })
+/** 讲义发布输入：Markdown 单独发布，不带上架状态与对象 key。 */
+export const publishHandoutSchema = z.strictObject({
+  subjectCode: z
+    .string()
+    .regex(/^\d{3}$/)
+    .describe("三位考试科目代码，例如 302、408。"),
+  slug,
+  title: text,
+  position: z.number().int().nonnegative().max(2147483647),
+  markdown: z.string().min(1).max(1_000_000).describe("讲义 Markdown；只发布题面或自学材料，不包含答案与解析。"),
+})
+export type PublishHandout = z.infer<typeof publishHandoutSchema>
+/** 讲义发布结果：内容哈希用于客户端判断是否变化，不作为版本号。 */
+export const publishHandoutResultSchema = z.strictObject({
+  slug: z.string(),
+  unchanged: z.boolean(),
+  listed: z.boolean(),
+  contentHash: z.string().regex(/^[a-f0-9]{64}$/),
+  updatedAt: z.iso.datetime({ offset: true }).describe("本次登记后的更新时间，带时区。"),
+})

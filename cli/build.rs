@@ -26,6 +26,8 @@ fn main() {
         "PublishLesson",
         "PublishPrepared",
         "PublishResult",
+        "PublishHandout",
+        "PublishHandoutResult",
     ] {
         let mut schema = api["components"]["schemas"][name].clone();
         schema["title"] = name.into();

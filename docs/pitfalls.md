@@ -130,6 +130,10 @@
 
 - **不要用 PowerShell 批量改写源码**（mk/TOOL-11）：Windows 下把 `Get-Content -Raw` 的结果 `Set-Content` 回文件会按默认编码写回，UTF-8 中文会变成乱码（本轮 4 个表单文件被写坏，只能从 git 索引恢复）。批量替换只在无中文的配置里做；改源码用编辑工具，或显式 `-Encoding utf8NoBOM` 并在写后逐文件核对中文与 `git diff`。同一轮还遇到 JSX 属性 `pattern="\\d{3}"`：双引号内不处理转义，浏览器拿到字面 `\\d{3}`，`validity.patternMismatch` 恒为真并阻止表单提交；写 `pattern="[0-9]{3}"`。改表单后要在浏览器里检查 `input.validity`，不能只靠 SSR/单元测试。
 
+- **Express 默认 JSON 请求体只有 100 kB**（mk/API-01）：Nest 默认 `express.json()` 限制 100 kB，讲义 Markdown 契约上限是 1 MB，合法请求会在进入 zod 校验前被 payload 限制拒绝，表现为 413 或 500 而不是契约 400。`bootstrap.ts` 需 `bodyParser:false` 后用 `NestExpressApplication.useBodyParser('json', { limit: '2mb' })` 覆盖；该接口只在 `NestExpressApplication` 类型上，`INestApplication` 会报 TS2339，构建前先跑 API typecheck。
+
+- **清理 Windows 技能 junction 时不要顺着链接递归删除**（mk/TOOL-13）：技能占位文件被 postinstall 换成 junction 后，直接对 junction 路径执行递归删除或让 `git checkout` 重建该路径，可能顺着链接删掉真实目标（本轮 `.agents/skills/mykaoyan → skills/mykaoyan` 的源码目录被连带删掉，只能从 git 恢复）。先 `cmd /c rmdir <link>` 只删链接，再 `git checkout -- <path>` 写回占位文件；`pnpm fmt` 造成全仓库行尾改动时，先用 `git diff --name-only` 找出真实内容改动，其余行尾文件用 `git checkout --pathspec-from-file` 恢复，`fmt:check` 的结论以 CI Linux 为准。
+
 ## 不再适用的条目
 
 | 条目 | 原因 |

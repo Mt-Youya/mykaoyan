@@ -4,7 +4,7 @@
   "info": {
     "title": "我的考研公开契约",
     "version": "1.0.0",
-    "description": "进度文件格式与公开接口说明。契约只有一个来源：packages/core 的 zod 定义，由脚本生成 JSON Schema 与 OpenAPI。\n\n进度文件 JSON Schema：https://mykaoyan.cn/schemas/progress/v1/progress.schema.json\n\n文档页：https://mykaoyan.cn/docs/contract\n\n版本规则：兼容变更留在 v1，破坏性变更走 /v2/，v1 至少保留一个大版本周期。"
+    "description": "进度文件格式与公开接口说明。契约只有一个来源：packages/core 的 zod 定义，由脚本生成 JSON Schema 与 OpenAPI。\n\n进度文件 JSON Schema：https://mykaoyan.cn/schemas/progress/v1/progress.schema.json\n\n讲义发布 JSON Schema：https://mykaoyan.cn/schemas/publish/v1/handout.schema.json\n\n文档页：https://mykaoyan.cn/docs/contract\n\n版本规则：兼容变更留在 v1，破坏性变更走 /v2/，v1 至少保留一个大版本周期。"
   },
   "servers": [
     {
@@ -250,6 +250,59 @@
           }
         }
       }
+    },
+    "/api/v1/publish/handouts/{slug}": {
+      "put": {
+        "operationId": "putHandout",
+        "summary": "管理员发布或更新一份讲义（Markdown）",
+        "description": "一次请求写入讲义内容，用于速查表、自编题面等不带视频的 Markdown。\n\n内容与路径 slug 必须一致；内容相同返回 unchanged=true 且不写库。\n\n新讲义默认下架；更新不改变上架状态，上架走管理员上下架接口。\n\n只发布题面或自学材料，答案、解析与真题原文不得发布。",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishHandout"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "发布结果；unchanged=true 表示内容未变化。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishHandoutResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "内容无效，或请求体 slug 与路径不一致。"
+          },
+          "401": {
+            "description": "缺少管理员发布令牌"
+          },
+          "403": {
+            "description": "令牌用途或账号角色没有发布权限"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -336,7 +389,11 @@
                               "description": "该科目标分。"
                             }
                           },
-                          "required": ["code", "name", "targetScore"],
+                          "required": [
+                            "code",
+                            "name",
+                            "targetScore"
+                          ],
                           "additionalProperties": false,
                           "description": "备考档案中的考试科目。"
                         },
@@ -394,7 +451,10 @@
                                   "description": "弹性时间分钟，不预先分给任何科目。"
                                 }
                               },
-                              "required": ["minutes", "flexMin"],
+                              "required": [
+                                "minutes",
+                                "flexMin"
+                              ],
                               "additionalProperties": false,
                               "description": "工作日（周一到周五）的计划分钟。"
                             },
@@ -422,7 +482,10 @@
                                   "description": "弹性时间分钟，不预先分给任何科目。"
                                 }
                               },
-                              "required": ["minutes", "flexMin"],
+                              "required": [
+                                "minutes",
+                                "flexMin"
+                              ],
                               "additionalProperties": false,
                               "description": "周六与周日的计划分钟。"
                             }
@@ -440,7 +503,12 @@
                         "description": "按日期先后排列、互不重叠的阶段。"
                       }
                     },
-                    "required": ["examDate", "subjects", "otherMin", "phases"],
+                    "required": [
+                      "examDate",
+                      "subjects",
+                      "otherMin",
+                      "phases"
+                    ],
                     "additionalProperties": false,
                     "description": "考生的备考档案。"
                   },
@@ -462,7 +530,11 @@
                     },
                     "manual": {
                       "type": "string",
-                      "enum": ["untested", "learning", "practiced"],
+                      "enum": [
+                        "untested",
+                        "learning",
+                        "practiced"
+                      ],
                       "description": "未测 untested、学习中 learning、已练 practiced；稳定与待重测由错题推算。"
                     },
                     "updatedAt": {
@@ -472,7 +544,11 @@
                       "description": "最后更新时间。"
                     }
                   },
-                  "required": ["topicId", "manual", "updatedAt"],
+                  "required": [
+                    "topicId",
+                    "manual",
+                    "updatedAt"
+                  ],
                   "additionalProperties": false,
                   "description": "考点进度，只保存考生手动设置的状态。"
                 },
@@ -560,11 +636,18 @@
                           },
                           "result": {
                             "type": "string",
-                            "enum": ["independent", "with-hint", "failed"],
+                            "enum": [
+                              "independent",
+                              "with-hint",
+                              "failed"
+                            ],
                             "description": "独立完成 independent、提示后完成 with-hint、不会 failed。"
                           }
                         },
-                        "required": ["on", "result"],
+                        "required": [
+                          "on",
+                          "result"
+                        ],
                         "additionalProperties": false,
                         "description": "一次原始复测记录。"
                       },
@@ -675,7 +758,11 @@
                       "description": "弹性时间分钟。"
                     }
                   },
-                  "required": ["date", "minutes", "flexMin"],
+                  "required": [
+                    "date",
+                    "minutes",
+                    "flexMin"
+                  ],
                   "additionalProperties": false,
                   "description": "按天覆盖的计划分钟。"
                 },
@@ -697,7 +784,10 @@
                       "description": "下周调整。"
                     }
                   },
-                  "required": ["weekStart", "nextWeekAdjustment"],
+                  "required": [
+                    "weekStart",
+                    "nextWeekAdjustment"
+                  ],
                   "additionalProperties": false,
                   "description": "周复盘，只保存考生填写的下周调整；其余汇总由本站推算。"
                 },
@@ -902,12 +992,21 @@
                 "description": "删除条数。"
               }
             },
-            "required": ["added", "updated", "removed"],
+            "required": [
+              "added",
+              "updated",
+              "removed"
+            ],
             "additionalProperties": false,
             "description": "按记录类别统计的新增、修改、删除条数。"
           }
         },
-        "required": ["app", "version", "etag", "changes"],
+        "required": [
+          "app",
+          "version",
+          "etag",
+          "changes"
+        ],
         "additionalProperties": false,
         "description": "进度文件 PUT 成功后的变更摘要；完整文件用 GET 读取。"
       },
@@ -931,7 +1030,11 @@
                 "pattern": "^\\d{3}$"
               }
             },
-            "required": ["slug", "title", "subjectCode"],
+            "required": [
+              "slug",
+              "title",
+              "subjectCode"
+            ],
             "additionalProperties": false
           },
           "chapter": {
@@ -952,7 +1055,11 @@
                 "maximum": 2147483647
               }
             },
-            "required": ["slug", "title", "position"],
+            "required": [
+              "slug",
+              "title",
+              "position"
+            ],
             "additionalProperties": false
           },
           "slug": {
@@ -990,7 +1097,11 @@
                 "maximum": 5000000000
               }
             },
-            "required": ["sha256", "md5", "size"],
+            "required": [
+              "sha256",
+              "md5",
+              "size"
+            ],
             "additionalProperties": false
           },
           "subtitle": {
@@ -1012,7 +1123,11 @@
                     "maximum": 5000000000
                   }
                 },
-                "required": ["sha256", "md5", "size"],
+                "required": [
+                  "sha256",
+                  "md5",
+                  "size"
+                ],
                 "additionalProperties": false
               },
               {
@@ -1061,7 +1176,10 @@
               "properties": {
                 "kind": {
                   "type": "string",
-                  "enum": ["video", "subtitle"]
+                  "enum": [
+                    "video",
+                    "subtitle"
+                  ]
                 },
                 "url": {
                   "type": "string"
@@ -1076,12 +1194,21 @@
                   }
                 }
               },
-              "required": ["kind", "url", "headers"],
+              "required": [
+                "kind",
+                "url",
+                "headers"
+              ],
               "additionalProperties": false
             }
           }
         },
-        "required": ["id", "unchanged", "contentHash", "uploads"],
+        "required": [
+          "id",
+          "unchanged",
+          "contentHash",
+          "uploads"
+        ],
         "additionalProperties": false
       },
       "PublishResult": {
@@ -1091,7 +1218,10 @@
             "type": "string"
           },
           "contentHash": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "version": {
             "type": "integer",
@@ -1118,6 +1248,76 @@
           "listed",
           "keys",
           "cleanupPending"
+        ],
+        "additionalProperties": false
+      },
+      "PublishHandout": {
+        "type": "object",
+        "properties": {
+          "subjectCode": {
+            "type": "string",
+            "pattern": "^\\d{3}$",
+            "description": "三位考试科目代码，例如 302、408。"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "markdown": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000000,
+            "description": "讲义 Markdown；只发布题面或自学材料，不包含答案与解析。"
+          }
+        },
+        "required": [
+          "subjectCode",
+          "slug",
+          "title",
+          "position",
+          "markdown"
+        ],
+        "additionalProperties": false
+      },
+      "PublishHandoutResult": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "unchanged": {
+            "type": "boolean"
+          },
+          "listed": {
+            "type": "boolean"
+          },
+          "contentHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+            "description": "本次登记后的更新时间，带时区。"
+          }
+        },
+        "required": [
+          "slug",
+          "unchanged",
+          "listed",
+          "contentHash",
+          "updatedAt"
         ],
         "additionalProperties": false
       }

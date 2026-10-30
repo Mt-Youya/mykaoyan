@@ -4,7 +4,7 @@
   "info": {
     "title": "我的考研公开契约",
     "version": "1.0.0",
-    "description": "进度文件格式与公开接口说明。契约只有一个来源：packages/core 的 zod 定义，由脚本生成 JSON Schema 与 OpenAPI。\n\n进度文件 JSON Schema：https://mykaoyan.cn/schemas/progress/v1/progress.schema.json\n\n文档页：https://mykaoyan.cn/docs/contract\n\n版本规则：兼容变更留在 v1，破坏性变更走 /v2/，v1 至少保留一个大版本周期。"
+    "description": "进度文件格式与公开接口说明。契约只有一个来源：packages/core 的 zod 定义，由脚本生成 JSON Schema 与 OpenAPI。\n\n进度文件 JSON Schema：https://mykaoyan.cn/schemas/progress/v1/progress.schema.json\n\n讲义发布 JSON Schema：https://mykaoyan.cn/schemas/publish/v1/handout.schema.json\n\n文档页：https://mykaoyan.cn/docs/contract\n\n版本规则：兼容变更留在 v1，破坏性变更走 /v2/，v1 至少保留一个大版本周期。"
   },
   "servers": [
     {
@@ -247,6 +247,59 @@
           },
           "404": {
             "description": "讲不存在"
+          }
+        }
+      }
+    },
+    "/api/v1/publish/handouts/{slug}": {
+      "put": {
+        "operationId": "putHandout",
+        "summary": "管理员发布或更新一份讲义（Markdown）",
+        "description": "一次请求写入讲义内容，用于速查表、自编题面等不带视频的 Markdown。\n\n内容与路径 slug 必须一致；内容相同返回 unchanged=true 且不写库。\n\n新讲义默认下架；更新不改变上架状态，上架走管理员上下架接口。\n\n只发布题面或自学材料，答案、解析与真题原文不得发布。",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishHandout"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "发布结果；unchanged=true 表示内容未变化。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishHandoutResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "内容无效，或请求体 slug 与路径不一致。"
+          },
+          "401": {
+            "description": "缺少管理员发布令牌"
+          },
+          "403": {
+            "description": "令牌用途或账号角色没有发布权限"
           }
         }
       }
@@ -1195,6 +1248,76 @@
           "listed",
           "keys",
           "cleanupPending"
+        ],
+        "additionalProperties": false
+      },
+      "PublishHandout": {
+        "type": "object",
+        "properties": {
+          "subjectCode": {
+            "type": "string",
+            "pattern": "^\\d{3}$",
+            "description": "三位考试科目代码，例如 302、408。"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,119}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "markdown": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000000,
+            "description": "讲义 Markdown；只发布题面或自学材料，不包含答案与解析。"
+          }
+        },
+        "required": [
+          "subjectCode",
+          "slug",
+          "title",
+          "position",
+          "markdown"
+        ],
+        "additionalProperties": false
+      },
+      "PublishHandoutResult": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "unchanged": {
+            "type": "boolean"
+          },
+          "listed": {
+            "type": "boolean"
+          },
+          "contentHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$",
+            "description": "本次登记后的更新时间，带时区。"
+          }
+        },
+        "required": [
+          "slug",
+          "unchanged",
+          "listed",
+          "contentHash",
+          "updatedAt"
         ],
         "additionalProperties": false
       }
