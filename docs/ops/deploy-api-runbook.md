@@ -11,9 +11,9 @@
 | 备案 | 管局审核中（预估 10 个工作日，最长 20） |
 | mykaoyan.cn DNS | 仍在阿里云 hichina；**备案通过前不动**，网站暂不对外 |
 | 前端 Worker | 已部署 `mykaoyan-web`，等 NS 切换后生效 |
-| ACR 仓库 | 已建 `mykaoyan/api`（华南 3 广州，私有） |
-| GitHub `production` | 已配 5 个 secrets + 2 个 variables；`DEPLOY_KNOWN_HOSTS` 已移除（部署时自动抓取主机公钥） |
-| API 部署工作流 | 已新增 [.github/workflows/deploy-api.yml](../.github/workflows/deploy-api.yml)：只构建/部署 `api` 镜像 |
+| ACR 仓库 | **已弃用（2026-10-31）**：个人版域名 `crpi-…personal.cr.aliyuncs.com` 公网 NXDOMAIN，部署改为 registry-less：runner 构建镜像后 `docker save | gzip | ssh docker load` 到 ECS |
+| GitHub `production` | 部署只需 `DEPLOY_HOST`、`DEPLOY_USER`、`DEPLOY_SSH_KEY` 三个 secrets；`DEPLOY_KNOWN_HOSTS` 已移除（部署时自动抓取主机公钥）；ACR 变量保留但不再使用 |
+| API 部署工作流 | 已更新 [.github/workflows/deploy-api.yml](../deploy-api.yml)：构建 `api` 镜像、SSH 上传、`docker load`、compose 更新与容器健康检查 |
 | API 镜像入口 | 已改为容器内 `node --import tsx src/main.ts`（`apps/api` 的 `build` 是类型检查，不再依赖 `dist`） |
 | Worker `/api` 反代 | 已加到 `apps/web/worker-entry.ts`，`/api/**` 转发到 `https://api.mykaoyan.cn` |
 
@@ -23,13 +23,15 @@
 
 | 名称 | 类型 | 取值来源 | 状态 |
 | --- | --- | --- | --- |
-| `ACR_REGISTRY` | Variable | ACR 控制台 → 个人版 → 华南 3（广州）→ 仓库详情页「公网地址」的域名部分 | 已配 |
-| `ACR_NAMESPACE` | Variable | `mykaoyan` | 已配 |
-| `ACR_USERNAME` | Secret | ACR → 访问凭证页显示的用户名（个人版通常是阿里云账号全名） | 已配 |
-| `ACR_PASSWORD` | Secret | 同一页「设置固定密码」设的登录密码（不是阿里云登录密码） | 已配 |
+| `ACR_REGISTRY` | Variable | 已弃用（部署不再推送镜像仓库；保留仅为历史记录） | 未使用 |
+| `ACR_NAMESPACE` | Variable | 已弃用 | 未使用 |
+| `ACR_USERNAME` | Secret | 已弃用 | 未使用 |
+| `ACR_PASSWORD` | Secret | 已弃用 | 未使用 |
 | `DEPLOY_HOST` | Secret | ECS 公网 IP 或绑定的 EIP（**先填 IP**，不要填域名） | 已配 |
 | `DEPLOY_USER` | Secret | SSH 登录 ECS 的用户（`whoami` 确认，常见 `root` / `ubuntu`） | 已配 |
 | `DEPLOY_SSH_KEY` | Secret | 部署私钥文件全文（含 BEGIN/END 行） | 已配 |
+
+部署镜像不再经过任何 registry：GitHub runner 用 `deploy/Dockerfile` 构建 `mykaoyan-web:<sha>` / `mykaoyan-api:<sha>`，`docker save` 后经 SSH（gzip 流）在 ECS 上 `docker load`，再 `docker compose up -d`。因此 ACR 实例不存在/过期不影响部署；代价是每次部署多传约数百 MB、耗时更长。
 
 `DEPLOY_KNOWN_HOSTS` 不再是必需 secret：部署工作流在 ECS 上执行前用 `ssh-keyscan -H "$DEPLOY_HOST"` 抓取主机公钥写入 `~/.ssh/known_hosts`（TOFU），并用 SSH 进入容器做健康检查。若要固定指纹，可另加一个可选的 `DEPLOY_KNOWN_HOSTS` secret，并在工作流里优先使用它。
 
