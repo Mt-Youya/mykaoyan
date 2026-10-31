@@ -2,11 +2,11 @@
 
 只在拉取、合并、上传或处理冲突时读取。进度文件字段、证据和合并键由入口的字段说明提供；只下载或上传已准备好的文件时不必先读它。
 
-公开接口是 `GET/PUT https://mykaoyan.cn/api/v1/progress`。本站 [公开契约](https://mykaoyan.cn/docs/contract)、[JSON Schema](https://mykaoyan.cn/schemas/progress/v1/progress.schema.json) 和 [OpenAPI](https://mykaoyan.cn/openapi.json) 是版本核对入口，不需要每次下载。随包 schema 同源生成；服务端拒绝时检查版本差异，不绕过校验。
+公开接口是 `GET/PUT https://mykaoyan.cn/api/v1/progress`。公开契约当前是 OpenAPI 3.2.0，JSON Schema 方言为 draft 2020-12；本站 [公开契约](https://mykaoyan.cn/docs/contract)、[JSON Schema](https://mykaoyan.cn/schemas/progress/v1/progress.schema.json) 和 [OpenAPI](https://mykaoyan.cn/openapi.json) 是版本核对入口，不需要每次下载。随包 schema 同源生成，CLI 的类型与校验器都来自这份契约；服务端拒绝时检查版本差异，不绕过校验。
 
 ## 选择执行路径
 
-先检查 `mykaoyan --help`。已安装 CLI 时走下面的流程；没有 CLI 时可用本页 curl 回退。纯离线任务不检查认证、不联网，不为此安装 CLI。
+先检查 `mykaoyan --version` 与 `mykaoyan --help`。已安装 CLI 时走下面的流程；没有 CLI 时可用本页 curl 回退。纯离线任务不检查认证、不联网，不为此安装 CLI；需要在线同步但 CLI 未安装时，请考生提供安装方式（如在其 CLI 源码目录执行 `cargo install --path cli --locked`），不要自行下载来源不明的二进制。课程章、讲义、试卷的发布是管理员操作，使用同一 CLI 的 `publish`、`publish-handout`、`publish-paper`（需要 `scope=publish` 令牌），不在本页的进度同步流程内；对应公开 schema 是 [handout.schema.json](https://mykaoyan.cn/schemas/publish/v1/handout.schema.json) 与 [paper.schema.json](https://mykaoyan.cn/schemas/publish/v1/paper.schema.json)。
 
 ## 认证与站点
 
@@ -22,6 +22,8 @@ Agent 令牌只能访问本人公开接口，不能登录网页。由考生在�
 mykaoyan --json progress pull current.json
 mykaoyan --json progress validate current.json
 ```
+
+CLI 的 `progress validate` 与随包 `validate.mjs` 使用同一份公开契约（JSON Schema draft 2020-12 子集，未知约束直接报错）；两者结论不一致时停止上传，按公开契约核对 CLI 或 skill 版本。
 
 `pull` 仅写新文件并生成 `current.json.etag.json`，绑定原样 ETag、站点和令牌摘要。保留这两个基线文件的私有副本，然后合并到 `current.json`；不要改写 sidecar。已有另一个候选文件时，将确认的变更合并进本次拉取的基线。
 

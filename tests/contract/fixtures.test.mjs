@@ -49,7 +49,7 @@ describe("公开契约 fixture", () => {
 
   it("生成的 OpenAPI 是 3.1，包含 GET/PUT、If-Match 与 ETag", () => {
     const openapi = JSON.parse(readFileSync(openapiUrl, "utf8"))
-    expect(openapi.openapi).toBe("3.1.0")
+    expect(openapi.openapi).toBe("3.2.0")
     const path = openapi.paths["/api/v1/progress"]
     expect(path.get.responses["200"].headers.ETag).toBeTruthy()
     expect(path.get.responses["200"].content["application/json"].schema.$ref).toBe("#/components/schemas/ProgressFile")

@@ -56,7 +56,7 @@ const etagHeader = {
 const unauthorized = { description: "未登录，或 Agent 令牌缺失、无效。" }
 
 const openapi = {
-  openapi: "3.1.0",
+  openapi: "3.2.0",
   jsonSchemaDialect: "https://json-schema.org/draft/2020-12/schema",
   info: {
     title: "我的考研公开契约",

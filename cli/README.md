@@ -2,6 +2,8 @@
 
 需要 Rust 1.93+。这是独立 Cargo 工程，不加入 pnpm workspace。
 
+配套 skill：`skills/mykaoyan`（考生进度文件；在线同步首选本 CLI，离线校验另有零依赖 Node 脚本）与 `skills/mykaoyan-publish`（管理员发布课程章、讲义、试卷）。CLI 与 skill 的随包 schema 共用同一公开契约（OpenAPI 3.2.0，JSON Schema 2020-12）。
+
 ```sh
 cargo install --path cli --locked
 mykaoyan --help

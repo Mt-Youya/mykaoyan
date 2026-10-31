@@ -43,10 +43,16 @@ describe("mykaoyan skill 的独立校验入口", () => {
     }
     const entry = readFileSync(new URL("SKILL.md", skill), "utf8")
     expect(entry).toMatch(/name: mykaoyan/)
+    expect(entry).toMatch(/^compatibility:/m)
     expect(entry).toContain("不用于词表、题库、浏览器备份、发布课程或修改网站代码")
     expect(entry).toContain("不要一次读取全部")
     expect(entry).toContain("只检查已有文件是否合法")
     expect(entry).toContain("没有基线先询问，不擅自联网")
+    expect(entry).toContain("mykaoyan --json progress pull")
+    expect(entry).toContain("mykaoyan --json progress validate")
+    expect(entry).toContain("publish-handout")
+    expect(entry).toContain("OpenAPI 3.2.0")
+    expect(entry).toContain("JSON Schema")
     expect(entry).not.toContain("curl --")
     expect(entry).not.toContain("--request PUT")
     for (const [, target] of entry.matchAll(/\]\(([^)]+)\)/g)) {
@@ -54,7 +60,10 @@ describe("mykaoyan skill 的独立校验入口", () => {
       expect(existsSync(new URL(target, skill)), target).toBe(true)
     }
     const sync = readFileSync(new URL("references/sync.md", skill), "utf8")
+    expect(sync).toContain("mykaoyan --version")
     expect(sync).toContain("mykaoyan --json progress push")
+    expect(sync).toContain("OpenAPI 3.2.0")
+    expect(sync).toContain("draft 2020-12")
     expect(sync).toContain("PowerShell")
     expect(sync).toContain("不能只换 ETag 重发旧文件")
   })

@@ -25,7 +25,7 @@ export function ContractPage() {
             </code>
           </li>
           <li>
-            OpenAPI 3.1：
+            OpenAPI 3.2：
             <a
               className="underline decoration-border underline-offset-4 hover:decoration-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               href="https://mykaoyan.cn/openapi.json"
