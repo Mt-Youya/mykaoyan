@@ -1,6 +1,8 @@
 FROM node:24.22.1-bookworm-slim AS build
 WORKDIR /workspace
-RUN npm install --global pnpm@12.15.0
+# 与 package.json 的 packageManager 保持一致，避免 pnpm 自切换时未通过锁文件签名校验。
+COPY package.json ./
+RUN npm install --global "pnpm@$(node -p 'require("./package.json").packageManager.split("@").pop()')"
 COPY . .
 RUN pnpm install --frozen-lockfile && pnpm build
 RUN pnpm --filter @mykaoyan/api deploy --prod --legacy /api
