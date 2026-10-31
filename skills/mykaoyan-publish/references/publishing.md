@@ -34,7 +34,7 @@ mykaoyan --json publish-handout <handout.md> --subject 408 --slug <slug> --title
 ```
 
 - 单请求写入，不经对象存储；Markdown ≤ 1 MiB 且必须为 UTF-8；符号链接拒绝。
-- 文件名或路径含「答案」「解析」「answer」「solution」直接拒绝，不读取内容。
+- 讲义是公开通道：文件名或路径含「答案」「解析」「answer」「solution」直接拒绝，不读取内容。答案与解析不要走这里，应放进 `publish-paper` 的试卷 JSON，由答案页隔离展示。
 - `--dry-run` 输出 `{"dryRun":true,"slug","bytes","contentHash"}`；成功输出 `{"slug","unchanged","listed","contentHash","updatedAt"}`。
 - 重复同内容返回 `unchanged:true`，不写库；上架状态不变。
 
@@ -50,7 +50,7 @@ mykaoyan --json publish-paper <paper.json>
 - 校验：题号唯一且严格升序；选择题（单选/多选）必须有 `options`；非选择题不得带 `options`。
 - `--dry-run` 输出 `{"dryRun":true,"slug","questions","bytes","contentHash"}`；成功输出 `{"slug","unchanged","version","listed","contentHash","questionCount"}`。
 - 题目整体替换；新试卷默认下架、版本 1，内容变化版本 +1，同内容 `unchanged:true` 且不写库。
-- 题面公开，答案与解析只在登录后的单独答案页可见（`https://mykaoyan.cn/exams/<slug>/answers`）。只发布站主确认取得授权的真题。
+- 题面公开，答案与解析只在登录后的单独答案页可见（`https://mykaoyan.cn/exams/<slug>/answers`）；这是答案允许上传的唯一发布通道。只发布站主确认取得授权的真题，未授权内容仍不上站。
 
 ## 错误与恢复
 

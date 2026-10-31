@@ -58,7 +58,7 @@ mykaoyan publish "$SRC/课程/数学二/01-导数" --dry-run
 mykaoyan publish "$SRC/课程/数学二/01-导数"
 ```
 
-需要专用 `scope=publish` 的管理员令牌；普通进度令牌不能发布。CLI 按数学二或408下的章相对路径生成稳定标识，在“视频/字幕/讲稿”三个目录按同名 mp4/srt/md 配对。答案与不完整组合会跳过并报告，符号链接拒绝读取。dry-run 不联网；正式发布先准备计划再直传对象、登记、读回哈希。服务器只更新内容，已有上架状态保留，新内容默认下架；重复发布同内容不会增加版本或重复上传。章节路径改名会生成新标识，不会自动迁移旧内容。
+需要专用 `scope=publish` 的管理员令牌；普通进度令牌不能发布。讲义是公开通道，答案与解析不要走这里，请用 `publish-paper` 随试卷上传（只在登录后的答案页可见）。CLI 按数学二或408下的章相对路径生成稳定标识，在“视频/字幕/讲稿”三个目录按同名 mp4/srt/md 配对。答案与不完整组合会跳过并报告，符号链接拒绝读取。dry-run 不联网；正式发布先准备计划再直传对象、登记、读回哈希。服务器只更新内容，已有上架状态保留，新内容默认下架；重复发布同内容不会增加版本或重复上传。章节路径改名会生成新标识，不会自动迁移旧内容。
 
 发布成功 JSON：`{"published":[{"slug":"…","unchanged":false,"version":1,"listed":false,"keys":["…"],"cleanupPending":false,"publicationId":"…"}],"skipped":[]}`。若 cleanupPending=true，重新发布会重试旧对象清理；也可用发布令牌重试输出 publicationId 的 complete 接口。详细 R2 本机配置与验收边界见 `docs/ops/r2-publishing.md`。
 
