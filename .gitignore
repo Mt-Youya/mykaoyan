@@ -37,6 +37,7 @@ content/private/
 .hallmark/
 
 # local agent and editor state
+.agent-sessions/
 .claude/settings.local.json
 .agents/skills/pnpm-*
 .claude/skills/pnpm-*
