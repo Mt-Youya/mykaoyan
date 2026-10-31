@@ -54,6 +54,7 @@ jobs:
           ssh -i ~/.ssh/mykaoyan "$target" "bash -s -- mykaoyan-web:$GITHUB_SHA mykaoyan-api:$GITHUB_SHA" <<'REMOTE'
           set -euo pipefail
           cd /opt/mykaoyan
+          if [ ! -f .env ] && [ -f /opt/mykaoyan-api/.env ]; then ln -s /opt/mykaoyan-api/.env .env; fi
           printf 'WEB_IMAGE=%s\nAPI_IMAGE=%s\n' "$1" "$2" > .env.images
           docker compose --env-file .env.images -f deploy/compose.yaml up -d --remove-orphans
           for attempt in $(seq 1 30); do
