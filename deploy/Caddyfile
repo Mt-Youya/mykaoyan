@@ -6,3 +6,8 @@ mykaoyan.cn, www.mykaoyan.cn {
 		reverse_proxy web:3000
 	}
 }
+
+api.mykaoyan.cn {
+	encode zstd gzip
+	reverse_proxy api:3001
+}

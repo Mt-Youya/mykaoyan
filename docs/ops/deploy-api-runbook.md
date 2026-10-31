@@ -17,7 +17,7 @@
 | 2026-10-31 部署状态 | 镜像已通过 SSH `docker load` 到 ECS；web/api/caddy 三容器 Up；API 健康 `{"status":"ok","database":"connected"}`；阿里云号码认证短信已配置并验证（`POST /api/phone/request-code` 返回 200 `{"cooldownSeconds":60}`）。剩余外部条件：备案通过前不做 DNS，公网不可访问 |
 | 域名/DNS | `mykaoyan.cn`、`api.mykaoyan.cn` 暂无 A 记录（备案未完成）；Caddy 申请证书会持续失败，属预期，不影响容器运行 |
 | API 镜像入口 | 已改为容器内 `node --import tsx src/main.ts`（`apps/api` 的 `build` 是类型检查，不再依赖 `dist`） |
-| Worker `/api` 反代 | 已加到 `apps/web/worker-entry.ts`，`/api/**` 转发到 `https://api.mykaoyan.cn` |
+| Worker `/api` 反代 | 已加到 `apps/web/worker-entry.ts`，`/api/**` 转发到 `https://api.mykaoyan.cn`；主站 Caddy 同时服务 `mykaoyan.cn`、`www`、`api.mykaoyan.cn`（api 反代 `api:3001`），**不要同时启动独立 API compose**，否则 80/443 端口冲突 |
 
 ## 2. GitHub `production` environment 配置总表
 
