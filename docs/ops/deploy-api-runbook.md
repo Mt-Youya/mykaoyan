@@ -12,7 +12,7 @@
 | mykaoyan.cn DNS | 仍在阿里云 hichina；**备案通过前不动**，网站暂不对外 |
 | 前端 Worker | 已部署 `mykaoyan-web`，等 NS 切换后生效 |
 | ACR 仓库 | 已建 `mykaoyan/api`（华南 3 广州，私有） |
-| GitHub `production` | 已配 5 个 secrets + 2 个 variables；缺 `DEPLOY_KNOWN_HOSTS` |
+| GitHub `production` | 已配 5 个 secrets + 2 个 variables；`DEPLOY_KNOWN_HOSTS` 已移除（部署时自动抓取主机公钥） |
 | API 部署工作流 | 已新增 [.github/workflows/deploy-api.yml](../.github/workflows/deploy-api.yml)：只构建/部署 `api` 镜像 |
 | API 镜像入口 | 已改为容器内 `node --import tsx src/main.ts`（`apps/api` 的 `build` 是类型检查，不再依赖 `dist`） |
 | Worker `/api` 反代 | 已加到 `apps/web/worker-entry.ts`，`/api/**` 转发到 `https://api.mykaoyan.cn` |
@@ -30,49 +30,14 @@
 | `DEPLOY_HOST` | Secret | ECS 公网 IP 或绑定的 EIP（**先填 IP**，不要填域名） | 已配 |
 | `DEPLOY_USER` | Secret | SSH 登录 ECS 的用户（`whoami` 确认，常见 `root` / `ubuntu`） | 已配 |
 | `DEPLOY_SSH_KEY` | Secret | 部署私钥文件全文（含 BEGIN/END 行） | 已配 |
-| `DEPLOY_KNOWN_HOSTS` | Secret | `ssh-keyscan -H <DEPLOY_HOST>` 的完整输出 | **待填** |
 
-## 3. 补 `DEPLOY_KNOWN_HOSTS`（Win11 / macOS）
+`DEPLOY_KNOWN_HOSTS` 不再是必需 secret：部署工作流在 ECS 上执行前用 `ssh-keyscan -H "$DEPLOY_HOST"` 抓取主机公钥写入 `~/.ssh/known_hosts`（TOFU），并用 SSH 进入容器做健康检查。若要固定指纹，可另加一个可选的 `DEPLOY_KNOWN_HOSTS` secret，并在工作流里优先使用它。
 
-### Windows 11（PowerShell）
+## 3. 主机公钥（自动处理）
 
-先确认 OpenSSH 客户端在：
-
-```powershell
-Get-Command ssh, ssh-keygen, ssh-keyscan
-```
-
-没有就去「设置 → 系统 → 可选功能 → 添加功能 → OpenSSH 客户端」装上。
-
-生成 known_hosts（注意用 ASCII 编码，避免 PowerShell 写出 UTF-16）：
-
-```powershell
-ssh-keyscan -H <ECS公网IP> 2>$null | Out-File -Encoding ascii "$env:USERPROFILE\known_hosts.txt"
-Get-Content "$env:USERPROFILE\known_hosts.txt"
-```
-
-把输出的每一行（通常 1–3 行，形如 `<IP> ssh-ed25519 AAAA...`）完整粘贴到 `DEPLOY_KNOWN_HOSTS`。多行直接粘贴，GitHub 支持。
-
-### macOS
-
-```bash
-ssh-keyscan -H <ECS公网IP> > ~/known_hosts.txt
-cat ~/known_hosts.txt
-```
-
-### 备用：在 ECS 上取主机公钥（ssh-keyscan 被网络挡住时）
-
-ECS 控制台 → Workbench/远程连接，在 ECS 上执行，把输出拼成 `<IP> <公钥类型> <公钥>`：
-
-```bash
-for f in /etc/ssh/ssh_host_*_key.pub; do echo "<ECS公网IP> $(cut -d' ' -f1,2 "$f")"; done
-```
-
-注意：
-
-- `DEPLOY_KNOWN_HOSTS` 必须是**这台 ECS** 的；换实例、重装系统后要重新生成。
-- 用 IP 生成就用 IP 部署；以后 `DEPLOY_HOST` 改成域名时也要重新生成。
-- 端口 22；如果改过 SSH 端口，known_hosts 行要带 `[IP]:端口`。
+- 工作流在「更新 ECS compose」步骤内执行 `ssh-keyscan`，失败会重试 10 次、每次间隔 3 秒；仍取不到则部署失败并提示检查安全组 22 端口。
+- 首次部署即信任当次抓到的公钥（TOFU）；换实例/重装系统/换 IP 后无需改 secret，下一次部署自动更新。
+- 安全边界：TOFU 不能防御部署机与 ECS 之间的主动 MITM；若需要强校验，把 `ssh-keyscan` 输出保存为 `DEPLOY_KNOWN_HOSTS` secret，并在工作流里改为优先使用该文件。
 
 ## 4. 如果还需要重新生成部署 SSH 密钥
 

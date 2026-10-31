@@ -25,7 +25,6 @@ jobs:
       DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
       DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
@@ -35,7 +34,7 @@ jobs:
         shell: bash
         run: |
           : "${ACR_REGISTRY:?}" "${ACR_NAMESPACE:?}" "${ACR_USERNAME:?}" "${ACR_PASSWORD:?}"
-          : "${DEPLOY_HOST:?}" "${DEPLOY_USER:?}" "${DEPLOY_SSH_KEY:?}" "${DEPLOY_KNOWN_HOSTS:?}"
+          : "${DEPLOY_HOST:?}" "${DEPLOY_USER:?}" "${DEPLOY_SSH_KEY:?}"
           [[ "$ACR_REGISTRY/$ACR_NAMESPACE" =~ ^[a-zA-Z0-9._/-]+$ ]]
           printf '%s' "$ACR_PASSWORD" | docker login "$ACR_REGISTRY" -u "$ACR_USERNAME" --password-stdin
           for app in web api; do
@@ -48,8 +47,13 @@ jobs:
         run: |
           install -m 700 -d ~/.ssh
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/mykaoyan
-          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/mykaoyan ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/mykaoyan
+          # 主机公钥在部署时抓取（TOFU），不再依赖预先保存的 DEPLOY_KNOWN_HOSTS secret。
+          for attempt in {1..10}; do
+            if ssh-keyscan -T 10 -H "$DEPLOY_HOST" > ~/.ssh/known_hosts 2>/dev/null && [ -s ~/.ssh/known_hosts ]; then break; fi
+            sleep 3
+          done
+          [ -s ~/.ssh/known_hosts ] || { echo "无法获取 $DEPLOY_HOST 的 SSH 主机密钥" >&2; exit 1; }
           target="$DEPLOY_USER@$DEPLOY_HOST"
           scp -i ~/.ssh/mykaoyan deploy/compose.yaml deploy/Caddyfile "$target:/opt/mykaoyan/deploy/"
           web="$ACR_REGISTRY/$ACR_NAMESPACE/web:$GITHUB_SHA"
@@ -60,8 +64,17 @@ jobs:
           printf 'WEB_IMAGE=%s\nAPI_IMAGE=%s\n' "$1" "$2" > .env.images
           docker compose --env-file .env.images -f deploy/compose.yaml pull
           docker compose --env-file .env.images -f deploy/compose.yaml up -d
+          for attempt in $(seq 1 30); do
+            if docker compose --env-file .env.images -f deploy/compose.yaml exec -T api \
+              node -e "fetch('http://127.0.0.1:3001/api/health').then((r) => { if (!r.ok) process.exit(1); return r.json() }).then((d) => { if (d.status !== 'ok' || d.database !== 'connected') process.exit(1); console.log('API 容器健康检查通过') }).catch(() => process.exit(1))"; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then echo "API 容器健康检查失败" >&2; exit 1; fi
+            sleep 2
+          done
           REMOTE
-      - name: 部署后冒烟检查
+      - name: 部署后公网冒烟检查（DNS 未就绪时记录失败）
+        continue-on-error: true
         shell: bash
         run: |
           for attempt in {1..12}; do
