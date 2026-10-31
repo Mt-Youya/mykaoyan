@@ -34,3 +34,5 @@
 pnpm --filter @mykaoyan/db test
 pnpm typecheck
 ```
+
+- 2026-10-31 补充：papers.reviewer_id 改为普通 uuid（移除 accounts 外键），保留审核审计值但不随账号删除置空；避免删除账号触发 papers_review 约束失败。迁移 20261031032524_complex_stryfe.sql。

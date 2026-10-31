@@ -22,7 +22,7 @@ export const papers = pgTable(
     origin: text().notNull().default("admin"),
     reviewStatus: text("review_status").notNull().default("approved"),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
-    reviewerId: uuid("reviewer_id").references(() => accounts.id, { onDelete: "set null" }),
+    reviewerId: uuid("reviewer_id"),
     reviewReason: text("review_reason"),
     rightsConfirmedAt: timestamp("rights_confirmed_at", { withTimezone: true }),
     position: integer().notNull(),
