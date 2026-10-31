@@ -70,6 +70,10 @@ function ReviewControls({ item, onChange }: { item: AdminSubmission; onChange: (
         </Button>
       ) : null}
       {item.reason ? <p>驳回原因：{item.reason}</p> : null}
+      {item.kind === "video" ? <p>字幕：{item.subtitleCount}条</p> : null}
+      {item.kind === "manuscript" ? (
+        <p>{item.deleted ? "手稿正文已清理。" : `手稿正文：${item.manuscriptBytes ?? 0}字节，可点“阅读手稿”预览。`}</p>
+      ) : null}
       {item.listingChange ? (
         <p className="text-sm text-muted-foreground">
           最近{item.listingChange.listed ? "上架" : "下架"}：管理员 {item.listingChange.actorId} ·{" "}
@@ -82,9 +86,9 @@ function ReviewControls({ item, onChange }: { item: AdminSubmission; onChange: (
         </p>
       ) : null}
       {item.deleted ? (
-        <p>原文件已清理，审核记录保留。</p>
+        <p>{item.kind === "manuscript" ? "正文已清理" : "原文件已清理"}，审核记录保留。</p>
       ) : item.deleteMarked ? (
-        <p>已标记清理，等待删除对象重试。</p>
+        <p>已标记清理，等待删除重试。</p>
       ) : null}
       {message ? <p role="status">{message}</p> : null}
     </div>
@@ -128,7 +132,7 @@ export function AdminSubmissionsPanel() {
       <h2 id="admin-submissions" className="text-xl">
         投稿审核
       </h2>
-      <p>通过审核后上架；社区关闭时仅记为已通过。驳回原文件满30天后自动清理，审核记录保留。</p>
+      <p>通过审核后上架；社区关闭时仅记为已通过。视频驳回满30天后自动清理对象与字幕，手稿清理正文；审核记录保留。</p>
       {message ? <p role="status">{message}</p> : null}
       {data ? (
         <>

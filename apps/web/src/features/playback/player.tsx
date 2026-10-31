@@ -3,12 +3,15 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { Button } from "@mykaoyan/ui"
 
 /** 后端签发的播放令牌；字幕是独立令牌，因为媒体 Worker 要求令牌的 key 与路径一致。 */
+type PlaybackTokenSubtitle = { language: string; label: string; src: string }
 type PlaybackToken = {
   videoKey: string
   token: string
   expiresAt: string
   mediaUrl: string
   subtitle: { key: string; token: string; url: string } | null
+  /** 投稿字幕：同源 API 地址，返回归一化后的 VTT；内容不进入播放令牌。 */
+  subtitles?: PlaybackTokenSubtitle[]
 }
 
 type PlayerError = "token-failed" | "autoplay-blocked" | "unsupported" | "unknown"
@@ -168,6 +171,9 @@ export function LessonPlayer({
       {token.subtitle ? (
         <track kind="subtitles" src={token.subtitle.url} srcLang="zh" label="中文字幕" default />
       ) : null}
+      {(token.subtitles ?? []).map((track) => (
+        <track key={track.language} kind="subtitles" src={track.src} srcLang={track.language} label={track.label} />
+      ))}
       {title}
     </video>
   )

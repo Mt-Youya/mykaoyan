@@ -1,4 +1,6 @@
 export * from "./comments-panel"
+export * from "./paper-comments-panel"
 export * from "./api"
 export * from "./admin-comments"
 export * from "./admin-submission-comments"
+export * from "./admin-paper-comments"

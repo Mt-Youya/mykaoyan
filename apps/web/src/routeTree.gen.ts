@@ -33,7 +33,12 @@ import { Route as catalogExamsSlugRouteImport } from './routes/(catalog)/exams.$
 import { Route as catalogHandoutsSlugRouteImport } from './routes/(catalog)/handouts.$slug'
 import { Route as catalogLessonsSlugRouteImport } from './routes/(catalog)/lessons.$slug'
 import { Route as catalogSubjectsCodeRouteImport } from './routes/(catalog)/subjects.$code'
+import { Route as communityCommunityPapersRouteImport } from './routes/(community)/community.papers'
 import { Route as catalogExamsSlugAnswersRouteImport } from './routes/(catalog)/exams.$slug.answers'
+import { Route as communityCommunityPapersSlugRouteImport } from './routes/(community)/community.papers.$slug'
+import { Route as communityCommunityPapersMineRouteImport } from './routes/(community)/community.papers.mine'
+import { Route as communityCommunityPapersNewRouteImport } from './routes/(community)/community.papers.new'
+import { Route as communityCommunityPapersSlugAnswersRouteImport } from './routes/(community)/community.papers.$slug.answers'
 
 const accountLoginRoute = accountLoginRouteImport.update({
   id: '/(account)/login',
@@ -155,11 +160,41 @@ const catalogSubjectsCodeRoute = catalogSubjectsCodeRouteImport.update({
   path: '/subjects/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const communityCommunityPapersRoute =
+  communityCommunityPapersRouteImport.update({
+    id: '/(community)/community/papers',
+    path: '/community/papers',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const catalogExamsSlugAnswersRoute = catalogExamsSlugAnswersRouteImport.update({
   id: '/answers',
   path: '/answers',
   getParentRoute: () => catalogExamsSlugRoute,
 } as any)
+const communityCommunityPapersSlugRoute =
+  communityCommunityPapersSlugRouteImport.update({
+    id: '/$slug',
+    path: '/$slug',
+    getParentRoute: () => communityCommunityPapersRoute,
+  } as any)
+const communityCommunityPapersMineRoute =
+  communityCommunityPapersMineRouteImport.update({
+    id: '/mine',
+    path: '/mine',
+    getParentRoute: () => communityCommunityPapersRoute,
+  } as any)
+const communityCommunityPapersNewRoute =
+  communityCommunityPapersNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => communityCommunityPapersRoute,
+  } as any)
+const communityCommunityPapersSlugAnswersRoute =
+  communityCommunityPapersSlugAnswersRouteImport.update({
+    id: '/answers',
+    path: '/answers',
+    getParentRoute: () => communityCommunityPapersSlugRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof accountLoginRoute
@@ -186,7 +221,12 @@ export interface FileRoutesByFullPath {
   '/handouts/$slug': typeof catalogHandoutsSlugRoute
   '/lessons/$slug': typeof catalogLessonsSlugRoute
   '/subjects/$code': typeof catalogSubjectsCodeRoute
+  '/community/papers': typeof communityCommunityPapersRouteWithChildren
   '/exams/$slug/answers': typeof catalogExamsSlugAnswersRoute
+  '/community/papers/$slug': typeof communityCommunityPapersSlugRouteWithChildren
+  '/community/papers/mine': typeof communityCommunityPapersMineRoute
+  '/community/papers/new': typeof communityCommunityPapersNewRoute
+  '/community/papers/$slug/answers': typeof communityCommunityPapersSlugAnswersRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof accountLoginRoute
@@ -213,7 +253,12 @@ export interface FileRoutesByTo {
   '/handouts/$slug': typeof catalogHandoutsSlugRoute
   '/lessons/$slug': typeof catalogLessonsSlugRoute
   '/subjects/$code': typeof catalogSubjectsCodeRoute
+  '/community/papers': typeof communityCommunityPapersRouteWithChildren
   '/exams/$slug/answers': typeof catalogExamsSlugAnswersRoute
+  '/community/papers/$slug': typeof communityCommunityPapersSlugRouteWithChildren
+  '/community/papers/mine': typeof communityCommunityPapersMineRoute
+  '/community/papers/new': typeof communityCommunityPapersNewRoute
+  '/community/papers/$slug/answers': typeof communityCommunityPapersSlugAnswersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -241,7 +286,12 @@ export interface FileRoutesById {
   '/(catalog)/handouts/$slug': typeof catalogHandoutsSlugRoute
   '/(catalog)/lessons/$slug': typeof catalogLessonsSlugRoute
   '/(catalog)/subjects/$code': typeof catalogSubjectsCodeRoute
+  '/(community)/community/papers': typeof communityCommunityPapersRouteWithChildren
   '/(catalog)/exams/$slug/answers': typeof catalogExamsSlugAnswersRoute
+  '/(community)/community/papers/$slug': typeof communityCommunityPapersSlugRouteWithChildren
+  '/(community)/community/papers/mine': typeof communityCommunityPapersMineRoute
+  '/(community)/community/papers/new': typeof communityCommunityPapersNewRoute
+  '/(community)/community/papers/$slug/answers': typeof communityCommunityPapersSlugAnswersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -270,7 +320,12 @@ export interface FileRouteTypes {
     | '/handouts/$slug'
     | '/lessons/$slug'
     | '/subjects/$code'
+    | '/community/papers'
     | '/exams/$slug/answers'
+    | '/community/papers/$slug'
+    | '/community/papers/mine'
+    | '/community/papers/new'
+    | '/community/papers/$slug/answers'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -297,7 +352,12 @@ export interface FileRouteTypes {
     | '/handouts/$slug'
     | '/lessons/$slug'
     | '/subjects/$code'
+    | '/community/papers'
     | '/exams/$slug/answers'
+    | '/community/papers/$slug'
+    | '/community/papers/mine'
+    | '/community/papers/new'
+    | '/community/papers/$slug/answers'
   id:
     | '__root__'
     | '/(account)/login'
@@ -324,7 +384,12 @@ export interface FileRouteTypes {
     | '/(catalog)/handouts/$slug'
     | '/(catalog)/lessons/$slug'
     | '/(catalog)/subjects/$code'
+    | '/(community)/community/papers'
     | '/(catalog)/exams/$slug/answers'
+    | '/(community)/community/papers/$slug'
+    | '/(community)/community/papers/mine'
+    | '/(community)/community/papers/new'
+    | '/(community)/community/papers/$slug/answers'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -351,6 +416,7 @@ export interface RootRouteChildren {
   catalogHandoutsSlugRoute: typeof catalogHandoutsSlugRoute
   catalogLessonsSlugRoute: typeof catalogLessonsSlugRoute
   catalogSubjectsCodeRoute: typeof catalogSubjectsCodeRoute
+  communityCommunityPapersRoute: typeof communityCommunityPapersRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -523,12 +589,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof catalogSubjectsCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(community)/community/papers': {
+      id: '/(community)/community/papers'
+      path: '/community/papers'
+      fullPath: '/community/papers'
+      preLoaderRoute: typeof communityCommunityPapersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(catalog)/exams/$slug/answers': {
       id: '/(catalog)/exams/$slug/answers'
       path: '/answers'
       fullPath: '/exams/$slug/answers'
       preLoaderRoute: typeof catalogExamsSlugAnswersRouteImport
       parentRoute: typeof catalogExamsSlugRoute
+    }
+    '/(community)/community/papers/$slug': {
+      id: '/(community)/community/papers/$slug'
+      path: '/$slug'
+      fullPath: '/community/papers/$slug'
+      preLoaderRoute: typeof communityCommunityPapersSlugRouteImport
+      parentRoute: typeof communityCommunityPapersRoute
+    }
+    '/(community)/community/papers/mine': {
+      id: '/(community)/community/papers/mine'
+      path: '/mine'
+      fullPath: '/community/papers/mine'
+      preLoaderRoute: typeof communityCommunityPapersMineRouteImport
+      parentRoute: typeof communityCommunityPapersRoute
+    }
+    '/(community)/community/papers/new': {
+      id: '/(community)/community/papers/new'
+      path: '/new'
+      fullPath: '/community/papers/new'
+      preLoaderRoute: typeof communityCommunityPapersNewRouteImport
+      parentRoute: typeof communityCommunityPapersRoute
+    }
+    '/(community)/community/papers/$slug/answers': {
+      id: '/(community)/community/papers/$slug/answers'
+      path: '/answers'
+      fullPath: '/community/papers/$slug/answers'
+      preLoaderRoute: typeof communityCommunityPapersSlugAnswersRouteImport
+      parentRoute: typeof communityCommunityPapersSlugRoute
     }
   }
 }
@@ -556,6 +657,40 @@ const catalogExamsRouteWithChildren = catalogExamsRoute._addFileChildren(
   catalogExamsRouteChildren,
 )
 
+interface communityCommunityPapersSlugRouteChildren {
+  communityCommunityPapersSlugAnswersRoute: typeof communityCommunityPapersSlugAnswersRoute
+}
+
+const communityCommunityPapersSlugRouteChildren: communityCommunityPapersSlugRouteChildren =
+  {
+    communityCommunityPapersSlugAnswersRoute:
+      communityCommunityPapersSlugAnswersRoute,
+  }
+
+const communityCommunityPapersSlugRouteWithChildren =
+  communityCommunityPapersSlugRoute._addFileChildren(
+    communityCommunityPapersSlugRouteChildren,
+  )
+
+interface communityCommunityPapersRouteChildren {
+  communityCommunityPapersSlugRoute: typeof communityCommunityPapersSlugRouteWithChildren
+  communityCommunityPapersMineRoute: typeof communityCommunityPapersMineRoute
+  communityCommunityPapersNewRoute: typeof communityCommunityPapersNewRoute
+}
+
+const communityCommunityPapersRouteChildren: communityCommunityPapersRouteChildren =
+  {
+    communityCommunityPapersSlugRoute:
+      communityCommunityPapersSlugRouteWithChildren,
+    communityCommunityPapersMineRoute: communityCommunityPapersMineRoute,
+    communityCommunityPapersNewRoute: communityCommunityPapersNewRoute,
+  }
+
+const communityCommunityPapersRouteWithChildren =
+  communityCommunityPapersRoute._addFileChildren(
+    communityCommunityPapersRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   accountLoginRoute: accountLoginRoute,
   catalogExamsRoute: catalogExamsRouteWithChildren,
@@ -580,6 +715,7 @@ const rootRouteChildren: RootRouteChildren = {
   catalogHandoutsSlugRoute: catalogHandoutsSlugRoute,
   catalogLessonsSlugRoute: catalogLessonsSlugRoute,
   catalogSubjectsCodeRoute: catalogSubjectsCodeRoute,
+  communityCommunityPapersRoute: communityCommunityPapersRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

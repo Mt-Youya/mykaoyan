@@ -2,8 +2,10 @@ import { renderToStaticMarkup } from "react-dom/server"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { MembershipHelp } from "../membership"
+import { AdminPaperCommentsPanel, adminPaperCommentsPath, paperCommentsAdminHref } from "./admin-paper-comments"
 import { commentRequest } from "./api"
 import { CommentCard } from "./comments-panel"
+import { paperCommentAccess, PaperCommentsPanel, paperCommentsPath } from "./paper-comments-panel"
 const item = {
   id: "fictional-comment",
   parentId: null,
@@ -43,5 +45,54 @@ describe("评论展示与开通说明", () => {
       status: 403,
       message: "评论需要有效会员",
     })
+  })
+})
+describe("试卷评论三态、地址与管理入口", () => {
+  it("访客需登录、非会员需会员、会员与试卷上传者本人可评论", () => {
+    expect(paperCommentAccess(null)).toEqual({ access: "guest", canComment: false, owner: false })
+    expect(paperCommentAccess({ signedIn: false, member: false, owner: false })).toEqual({
+      access: "guest",
+      canComment: false,
+      owner: false,
+    })
+    expect(paperCommentAccess({ signedIn: true, member: false, owner: false })).toEqual({
+      access: "nonmember",
+      canComment: false,
+      owner: false,
+    })
+    expect(paperCommentAccess({ signedIn: true, member: true, owner: false })).toEqual({
+      access: "member",
+      canComment: true,
+      owner: false,
+    })
+    // 上传者例外优先于会员期：非会员上传者同样可以评论，并标记为本人。
+    expect(paperCommentAccess({ signedIn: true, member: false, owner: true })).toEqual({
+      access: "member",
+      canComment: true,
+      owner: true,
+    })
+  })
+  it("试卷评论地址编码 slug；管理端按来源选择真题或社区页面", () => {
+    expect(paperCommentsPath("u-0123456789ab", 2)).toBe("papers/u-0123456789ab/comments?page=2")
+    expect(paperCommentsPath("u-0123456789ab")).toBe("papers/u-0123456789ab/comments")
+    expect(paperCommentsPath("a/b")).toBe("papers/a%2Fb/comments")
+    expect(adminPaperCommentsPath(0, "虚构 关键词", "deleted")).toBe(
+      "admin/paper-comments?page=0&q=%E8%99%9A%E6%9E%84%20%E5%85%B3%E9%94%AE%E8%AF%8D&state=deleted",
+    )
+    expect(paperCommentsAdminHref({ paperSlug: "u-0123456789ab", paperOrigin: "user" })).toBe(
+      "/community/papers/u-0123456789ab",
+    )
+    expect(paperCommentsAdminHref({ paperSlug: "fictional-admin", paperOrigin: "admin" })).toBe(
+      "/exams/fictional-admin",
+    )
+  })
+  it("评论区与管理面板初次渲染显示读取状态，不提前渲染表单", () => {
+    const comments = renderToStaticMarkup(<PaperCommentsPanel slug="u-0123456789ab" />)
+    expect(comments).toContain("正在读取评论")
+    expect(comments).not.toContain("发送评论")
+    const admin = renderToStaticMarkup(<AdminPaperCommentsPanel />)
+    expect(admin).toContain("试卷评论管理")
+    expect(admin).toContain("正在读取试卷评论")
+    expect(admin).not.toContain("确认删除")
   })
 })

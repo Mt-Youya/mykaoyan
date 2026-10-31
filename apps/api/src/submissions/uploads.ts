@@ -4,7 +4,7 @@ import { BadRequestException, ConflictException, Inject, Injectable, NotFoundExc
 
 import { SUBMISSION_PART_SIZE, submissionInputSchema, uploadPartSize } from "@mykaoyan/core"
 
-import { ownSubmissionView, SubmissionAccess } from "./access"
+import { SubmissionAccess } from "./access"
 import type { SubmissionRow } from "./access"
 import { SUBMISSION_STORAGE } from "./storage"
 import type { SubmissionStorage } from "./storage"
@@ -30,6 +30,7 @@ export class SubmissionUploads {
       >`select * from submissions where id=${v.id} and account_id=${accountId} for update`
       if (!r) throw new NotFoundException("投稿不存在")
       if (
+        r.kind !== "video" ||
         r.fingerprint !== v.fingerprint ||
         r.size !== v.size ||
         r.duration !== v.duration ||
@@ -39,24 +40,25 @@ export class SubmissionUploads {
         r.topic_id !== v.topicId
       )
         throw new ConflictException("续传文件或投稿信息与原记录不符，请选择原文件或新建投稿")
-      if (r.status !== "uploading") return ownSubmissionView(r)
+      if (r.status !== "uploading") return this.access.ownView(r)
       if (!r.upload_id) {
-        const uploadId = await this.storage.start(r.object_key)
+        const uploadId = await this.storage.start(r.object_key!)
         const [saved] = await tx`update submissions set upload_id=${uploadId} where id=${r.id} returning id`
         if (!saved) throw new Error("上传编号保存失败")
       }
-      return ownSubmissionView(r)
+      return this.access.ownView(r)
     })
   }
   async resume(accountId: string, id: string) {
     this.access.open()
     const r = await this.access.owned(accountId, id)
+    if (r.kind !== "video") throw new ConflictException("手稿没有上传流程")
     if (r.status !== "uploading" || !r.upload_id) throw new ConflictException("此投稿不在可续传状态")
     // 上次完成分片后响应丢失时，对象已存在；让浏览器重试完成登记。
-    const head = await this.storage.head(r.object_key)
-    const parts = head ? [] : await this.storage.parts(r.object_key, r.upload_id)
+    const head = await this.storage.head(r.object_key!)
+    const parts = head ? [] : await this.storage.parts(r.object_key!, r.upload_id)
     return {
-      ...ownSubmissionView(r),
+      ...(await this.access.ownView(r)),
       partSize: SUBMISSION_PART_SIZE,
       completed: !!head,
       parts: parts.map((p) => ({ number: p.number, size: p.size })),
@@ -65,14 +67,15 @@ export class SubmissionUploads {
   async sign(accountId: string, id: string, number: number) {
     this.access.open()
     const r = await this.access.owned(accountId, id)
+    if (r.kind !== "video") throw new ConflictException("手稿没有上传流程")
     if (r.status !== "uploading" || !r.upload_id) throw new ConflictException("投稿已结束上传")
     let size: number
     try {
-      size = uploadPartSize(r.size, number)
+      size = uploadPartSize(r.size!, number)
     } catch {
       throw new BadRequestException("分片编号无效")
     }
-    return { url: await this.storage.sign(r.object_key, r.upload_id, number, size), size }
+    return { url: await this.storage.sign(r.object_key!, r.upload_id, number, size), size }
   }
   async finish(accountId: string, id: string) {
     this.access.open()
@@ -82,24 +85,25 @@ export class SubmissionUploads {
         SubmissionRow[]
       >`select * from submissions where id=${id} and account_id=${accountId} for update`
       if (!r) throw new NotFoundException("投稿不存在")
-      if (r.status !== "uploading") return ownSubmissionView(r)
+      if (r.kind !== "video") throw new ConflictException("手稿没有上传流程")
+      if (r.status !== "uploading") return this.access.ownView(r)
       if (!r.upload_id) throw new ConflictException("请先初始化上传")
-      let head = await this.storage.head(r.object_key)
+      let head = await this.storage.head(r.object_key!)
       if (!head) {
-        const parts = (await this.storage.parts(r.object_key, r.upload_id)).sort((a, b) => a.number - b.number)
+        const parts = (await this.storage.parts(r.object_key!, r.upload_id)).sort((a, b) => a.number - b.number)
         if (
-          parts.length !== Math.ceil(r.size / SUBMISSION_PART_SIZE) ||
-          parts.some((p, i) => p.number !== i + 1 || p.size !== uploadPartSize(r.size, i + 1))
+          parts.length !== Math.ceil(r.size! / SUBMISSION_PART_SIZE) ||
+          parts.some((p, i) => p.number !== i + 1 || p.size !== uploadPartSize(r.size!, i + 1))
         )
           throw new BadRequestException("分片缺失或大小不符，请续传原文件")
-        await this.storage.complete(r.object_key, r.upload_id, parts)
-        head = await this.storage.head(r.object_key)
+        await this.storage.complete(r.object_key!, r.upload_id, parts)
+        head = await this.storage.head(r.object_key!)
       }
       if (!head || head.size !== r.size || head.type !== "video/mp4")
         throw new BadRequestException("对象大小或类型不符，投稿未登记")
       const [saved] = await sql<SubmissionRow[]>`update submissions set status='pending' where id=${id} returning *`
       if (!saved) throw new Error("投稿登记未返回记录")
-      return ownSubmissionView(saved)
+      return this.access.ownView(saved)
     })
   }
 }

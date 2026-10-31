@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Inject, Injectable, NotFoundExc
 import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common"
 import { z } from "zod"
 
-import { ownSubmissionView, SubmissionAccess } from "./access"
+import { SubmissionAccess } from "./access"
 import type { Actor, SubmissionRow } from "./access"
 import { SUBMISSION_STORAGE } from "./storage"
 import type { SubmissionStorage } from "./storage"
@@ -42,7 +42,7 @@ export class SubmissionModeration implements OnModuleInit, OnModuleDestroy {
       SubmissionRow[]
     >`update submissions set status=${decision.decision === "approve" ? "approved" : "rejected"},listed=${decision.decision === "approve" && this.access.config.COMMUNITY_ENABLED},reviewed_at=now(),reviewer_id=${actor.id},reason=${decision.decision === "reject" ? decision.reason : null} where id=${id} and status='pending' returning *`
     if (!saved) throw new ConflictException("投稿不存在或已审核，不能覆盖审核记录")
-    return ownSubmissionView(saved)
+    return this.access.ownView(saved)
   }
   async listing(actor: Actor, id: string, input: unknown) {
     await this.access.admin(actor)
@@ -58,7 +58,7 @@ export class SubmissionModeration implements OnModuleInit, OnModuleDestroy {
       const [audit] =
         await sql`insert into listing_changes(target_type,target_id,listed,actor_id) values('submission',${id},${parsed.data.listed},${actor.id}) returning id`
       if (!audit) throw new Error("投稿上下架审计写入失败")
-      return ownSubmissionView(saved)
+      return this.access.ownView(saved)
     })
   }
   async cleanupAsAdmin(actor: Actor) {
@@ -76,9 +76,24 @@ export class SubmissionModeration implements OnModuleInit, OnModuleDestroy {
         pending = 0
       for (const row of rows) {
         try {
+          if (row.kind === "manuscript") {
+            // 手稿没有 R2 对象：同一事务清空正文并记录清理时间，保留元数据与审核记录。
+            const [saved] = await this.access.database
+              .client`update submissions set manuscript_markdown=null,deleted_at=now() where id=${row.id} and delete_marked_at is not null and deleted_at is null returning id`
+            if (saved) removed++
+            continue
+          }
+          if (!row.object_key) throw new Error("投稿对象 key 缺失")
           await this.storage.remove(row.object_key)
-          const [saved] = await this.access.database
-            .client`update submissions set deleted_at=now() where id=${row.id} and delete_marked_at is not null and deleted_at is null returning id`
+          const saved = await this.access.database.client.begin(async (sql) => {
+            const [done] = await sql<
+              { id: string }[]
+            >`update submissions set deleted_at=now() where id=${row.id} and delete_marked_at is not null and deleted_at is null returning id`
+            if (!done) return false
+            // 字幕正文属于内容，不随审核记录保留。
+            await sql`delete from submission_subtitles where submission_id=${row.id}`
+            return true
+          })
           if (saved) removed++
         } catch {
           pending++

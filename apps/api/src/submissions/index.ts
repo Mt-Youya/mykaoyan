@@ -8,9 +8,11 @@ import { PlaybackModule } from "../playback"
 import { RatingsModule } from "../ratings"
 import { SubmissionAccess } from "./access"
 import { AdminSubmissionsController, SubmissionsController } from "./controller"
+import { SubmissionManuscripts } from "./manuscripts"
 import { SubmissionModeration } from "./moderation"
 import { SubmissionsService } from "./service"
 import { R2SubmissionStorage, SUBMISSION_STORAGE } from "./storage"
+import { SubmissionSubtitles } from "./subtitles"
 import { SubmissionUploads } from "./uploads"
 export { SUBMISSION_STORAGE } from "./storage"
 export type { SubmissionStorage, UploadedPart } from "./storage"
@@ -19,8 +21,10 @@ export type { SubmissionStorage, UploadedPart } from "./storage"
   controllers: [SubmissionsController, AdminSubmissionsController],
   providers: [
     SubmissionAccess,
+    SubmissionManuscripts,
     SubmissionModeration,
     SubmissionsService,
+    SubmissionSubtitles,
     SubmissionUploads,
     { provide: SUBMISSION_STORAGE, useClass: R2SubmissionStorage },
   ],

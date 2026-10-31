@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto"
+import { randomInt, randomUUID } from "node:crypto"
 
 import postgres from "postgres"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
@@ -30,6 +30,8 @@ describe("投稿评论权限、公开读取与删除审计 HTTP", () => {
       COMMUNITY_ENABLED: "true",
       MEDIA_SIGNING_KEY: "fictional-submission-comments-key-32-chars",
     })
+  const phones: string[] = []
+  const phone = () => `199${randomInt(0, 100_000_000).toString().padStart(8, "0")}`
   const call = (
     path: string,
     cookie?: string,
@@ -43,6 +45,7 @@ describe("投稿评论权限、公开读取与删除审计 HTTP", () => {
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     })
   async function login(phone: string) {
+    phones.push(phone)
     expect((await call("phone/request-code", undefined, { phone })).status).toBe(200)
     const response = await call("phone/verify", undefined, {
       phone,
@@ -77,10 +80,10 @@ describe("投稿评论权限、公开读取与删除审计 HTTP", () => {
     app = await createApp(env)
     await app.listen(0, "127.0.0.1")
     origin = await app.getUrl()
-    admin = await login("18800002301")
-    owner = await login("18800002302")
-    member = await login("18800002303")
-    other = await login("18800002304")
+    admin = await login(phone())
+    owner = await login(phone())
+    member = await login(phone())
+    other = await login(phone())
     await sql`update accounts set role='admin' where id=${admin.id}`
     listedId = await submission({ accountId: owner.id, status: "approved", listed: true, title: "虚构已上架投稿" })
     unlistedId = await submission({ accountId: owner.id, status: "approved", listed: false, title: "虚构未上架投稿" })
@@ -98,6 +101,7 @@ describe("投稿评论权限、公开读取与删除审计 HTTP", () => {
     offOrigin = await off.getUrl()
   })
   afterAll(async () => {
+    if (sql) await sql`delete from accounts where phone in ${sql(phones.map((value) => `+86${value}`))}`
     await off?.close()
     await app?.close()
     await sql?.end({ timeout: 1 })

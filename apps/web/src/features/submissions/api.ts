@@ -1,27 +1,38 @@
 import { SUBMISSION_PART_SIZE, uploadPartSize } from "@mykaoyan/core"
-import type { RatingSummary, SubmissionInput } from "@mykaoyan/core"
+import type { ManuscriptSubmissionInput, RatingSummary, SubmissionInput, SubmissionSubtitleTrack } from "@mykaoyan/core"
+export type SubmissionKind = "video" | "manuscript"
+export type SubtitleMeta = { language: string; label: string }
 export type Submission = {
   id: string
+  kind: SubmissionKind
   title: string
   summary: string
   subjectCode: string
   topicId: string | null
   author: string
-  duration: number
+  duration: number | null
   status: "uploading" | "pending" | "approved" | "rejected"
   listed: boolean
+  manuscriptBytes: number | null
   createdAt: string
 }
 export type OwnSubmission = Submission & {
-  size: number
+  size: number | null
   fingerprint: string
   reason: string | null
   reviewedAt: string | null
   deleteMarked: boolean
   deleted: boolean
+  hasManuscript: boolean
+  hasSubtitles: boolean
+  subtitleLanguages: string[]
+  subtitles: SubtitleMeta[]
 }
 export type RatedSubmission = Submission & RatingSummary
-export type AdminSubmission = OwnSubmission & { listingChange: { actorId: string; listed: boolean; at: string } | null }
+export type AdminSubmission = OwnSubmission & {
+  subtitleCount: number
+  listingChange: { actorId: string; listed: boolean; at: string } | null
+}
 export type SubmissionList<T = Submission> = { enabled: boolean; items: T[]; hasMore: boolean }
 export class SubmissionRequestError extends Error {
   constructor(
@@ -58,6 +69,33 @@ export async function submissionRequest<T>(
     )
   }
   return response.json() as Promise<T>
+}
+/** 手稿单请求提交；相同 id 与相同内容重试会返回同一条记录。 */
+export function createManuscript(input: ManuscriptSubmissionInput, signal?: AbortSignal) {
+  return submissionRequest<OwnSubmission>("submissions/manuscripts", "POST", input, signal)
+}
+/** 整体替换视频投稿的字幕轨（0–2 条）；服务端解析 SRT/VTT 后统一存 VTT。 */
+export function putSubtitles(submissionId: string, tracks: SubmissionSubtitleTrack[], signal?: AbortSignal) {
+  return submissionRequest<OwnSubmission>(`submissions/${submissionId}/subtitles`, "PUT", { tracks }, signal)
+}
+export function deleteSubtitle(submissionId: string, language: string) {
+  return submissionRequest<OwnSubmission>(
+    `submissions/${submissionId}/subtitles/${encodeURIComponent(language)}`,
+    "DELETE",
+  )
+}
+/** 读取一条字幕的归一化 VTT 原文；本人/管理员可读未上架内容。 */
+export async function fetchSubtitleText(submissionId: string, language: string) {
+  const response = await fetch(`/api/submissions/${submissionId}/subtitles/${encodeURIComponent(language)}`, {
+    credentials: "same-origin",
+  })
+  if (!response.ok) throw new SubmissionRequestError(response.status, "字幕读取失败或已不可见")
+  return response.text()
+}
+/** 手稿正文只在详情视图按需读取；列表只给字节数。 */
+export async function fetchManuscript(submissionId: string) {
+  const result = await submissionRequest<{ markdown: string }>(`submissions/${submissionId}/manuscript`)
+  return result.markdown
 }
 function putPart(url: string, blob: Blob, signal: AbortSignal, progress: (loaded: number) => void) {
   return new Promise<void>((resolve, reject) => {

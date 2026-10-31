@@ -7,13 +7,15 @@ const sectionHeading = "mb-3.5 border-b border-border pb-2 text-[1.15rem]"
 const card =
   "grid gap-1 rounded-xl border border-border bg-card px-[1.1rem] py-4 no-underline transition-colors hover:border-foreground/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
 const note = "text-[0.95rem] opacity-[0.75]"
+const quietButton =
+  "inline-flex min-h-11 items-center justify-center rounded-md border border-border px-6 text-[0.95rem] hover:bg-muted"
 
 const subjects = [
   { code: "302", label: "数学（二）" },
   { code: "408", label: "408 计算机学科专业基础" },
 ]
 
-/** 公开真题列表：按考试科目分组；答案不在此页出现。 */
+/** 公开真题列表：按考试科目分组；答案不在此页出现，用户投稿试卷另有入口。 */
 export function PapersListPage() {
   const math = useCatalog<PaperSummary[]>("/api/papers?subject=302")
   const cs = useCatalog<PaperSummary[]>("/api/papers?subject=408")
@@ -26,6 +28,12 @@ export function PapersListPage() {
         <p className={eyebrow}>真题</p>
         <h1 className="text-section leading-tight">真题试卷</h1>
         <p className={lede}>浏览已上架试卷的题面；答案与解析只在登录后的单独页面显示。</p>
+        <p className={`${note} flex flex-wrap items-center gap-x-4 gap-y-2`}>
+          <span>用户投稿的试卷单独收录，不与真题混列。</span>
+          <a className={quietButton} href="/community/papers">
+            浏览用户投稿试卷
+          </a>
+        </p>
       </header>
       {subjects.map(({ code, label }) => (
         <section key={code} className="mt-9 reading:mt-12" aria-labelledby={`papers-${code}`}>

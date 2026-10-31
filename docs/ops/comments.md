@@ -48,3 +48,24 @@ ticket 22 的投稿已接入同一开关，见 [投稿说明](submissions.md)。
 `submission_comments`、`submission_comment_deletions` 开启 RLS 并对 PUBLIC、anon、authenticated 撤权；父评论用 `(parent_id, submission_id)` 复合外键限定同一投稿，删除审计独立表，外键级联随投稿或账号删除。迁移为 `20261031014614_lame_gauntlet.sql`，同样只在专用本地临时 Postgres 重放验证。
 
 前端在投稿卡片点“查看评论”展开评论区，默认不预取多个投稿的评论；内容管理页新增“投稿评论管理”，必须填写原因才能删除。`COMMUNITY_ENABLED` 关闭时公开列表返回 `enabled:false` 且发表403，直接请求也不能绕过。
+
+## 试卷评论（ticket 34）
+
+用户试卷与站主真题的题面页共用同一个评论区；评论对象是**已通过、已上架**的试卷，用户试卷还要求社区开放，未上架、待审核、社区关闭或不存在的试卷一律404，访客读不到其评论。讲评论与投稿评论不改动。
+
+- 访客可读已上架试卷的评论；与讲评论一致，删除后列表显示“已删除”并遮蔽正文，公开列表不返回删除原因或完整账号编号。
+- 发表和回复要求登录且为当前有效会员；**例外**：试卷上传者本人（`papers.owner_account_id` 等于当前账号）在自己的试卷下评论、回复不要求会员，会员到期后仍可继续。非会员且非上传者403，未登录401；管理员在别人的试卷下同样按会员规则处理，不能绕过会员门。
+- 正文1–2000字；回复只有一层，父评论必须属于同一试卷且未删除，不能回复回复；入参严格校验。分页每页50条、时间倒序，返回 `hasMore`。
+- 公开列表响应带 `viewer:{signedIn,member,owner}`，只描述当前请求账号能否评论，不泄露账号编号；页面据此显示登录入口、会员入口或“本卷上传者免会员”提示。
+- 关键词沿用 `comment_keywords` 与同一套 NFKC + 小写规范化匹配，命中400并提示修改。
+
+| 接口 | 行为 |
+| --- | --- |
+| GET /api/papers/:slug/comments?page=0 | 访客可读；返回 `enabled`、评论、`hasMore` 与 `viewer`；未上架/待审/不存在404 |
+| POST /api/papers/:slug/comments | `{body,parentId?}`；登录后会员或该试卷上传者本人可写 |
+| GET /api/admin/paper-comments?page=0&q=&state=all\|visible\|deleted | 管理员分页查看全部试卷评论与删除记录，可按试卷标题/评论正文关键词与删除状态筛选 |
+| DELETE /api/admin/paper-comments/:id | `{reason}`；管理员软删除并写审计；原因1–500字；重复删除409，不改写原记录 |
+
+`paper_comments`、`paper_comment_deletions` 由迁移 `20261031022329_slim_betty_ross.sql` 建立（与用户试卷字段同批），开启 RLS 并对 PUBLIC、anon、authenticated 撤权；父评论用 `(parent_id, paper_id)` 复合外键限定同一试卷，删除审计独立表，外键级联随试卷或账号删除。管理员权限每次回库复核；公开与管理员读取均带 `Cache-Control: no-store`。
+
+前端题面页 `/exams/$slug` 与 `/community/papers/$slug` 底部共用评论区（未登录、非会员、上传者本人三态）；内容管理页新增“试卷评论管理”，可按关键词与删除状态筛选，必须填写原因才能删除。`COMMUNITY_ENABLED` 关闭时公开读取返回 `enabled:false` 且发表403，直接请求也不能绕过。

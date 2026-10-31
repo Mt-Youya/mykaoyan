@@ -1,3 +1,7 @@
+export * from "./admin-controller"
 export * from "./controller"
+export * from "./moderation.service"
 export * from "./module"
 export * from "./service"
+export * from "./shared"
+export * from "./user-papers.service"

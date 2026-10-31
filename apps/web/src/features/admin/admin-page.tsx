@@ -2,11 +2,12 @@ import { useCallback, useEffect, useState } from "react"
 
 import { Badge, Button } from "@mykaoyan/ui"
 
-import { AdminCommentsPanel, AdminSubmissionCommentsPanel } from "../comments"
+import { AdminCommentsPanel, AdminPaperCommentsPanel, AdminSubmissionCommentsPanel } from "../comments"
 import { AdminMembershipPanel } from "../membership"
 import { AdminSubmissionsPanel } from "../submissions"
 import { fetchAdminContent, setListing } from "./api"
 import type { AdminContent, AdminLesson } from "./api"
+import { AdminPapersPanel } from "./papers-panel"
 
 type LoadState =
   | { status: "loading" }
@@ -75,6 +76,8 @@ export function AdminPage() {
       <AdminMembershipPanel />
       <AdminCommentsPanel />
       <AdminSubmissionCommentsPanel />
+      <AdminPaperCommentsPanel />
+      <AdminPapersPanel />
       <AdminSubmissionsPanel />
 
       {message ? (
@@ -123,20 +126,30 @@ export function AdminPage() {
           试卷（{papers.length}）
         </h2>
         <ul className="flex flex-col gap-2">
-          {papers.map((paper) => (
-            <AdminRow
-              key={paper.slug}
-              title={paper.title}
-              meta={`考试科目 ${paper.subjectCode} · ${paper.year} 年`}
-              listed={paper.listed}
-              pending={pending === `paper:${paper.slug}`}
-              onToggle={() => void toggle("paper", paper.slug, paper.listed)}
-            />
-          ))}
+          {papers.map((paper) => {
+            const waiting = paper.origin === "user" && paper.reviewStatus !== "approved"
+            return (
+              <AdminRow
+                key={paper.slug}
+                title={paper.title}
+                meta={`${paper.origin === "user" ? "用户投稿" : "真题"} · 考试科目 ${paper.subjectCode} · ${paper.year} 年 · ${reviewLabel(paper.reviewStatus)}`}
+                listed={paper.listed}
+                pending={pending === `paper:${paper.slug}`}
+                blocked={waiting}
+                onToggle={() => void toggle("paper", paper.slug, paper.listed)}
+              />
+            )
+          })}
         </ul>
       </section>
     </main>
   )
+}
+
+type AdminPaperStatus = "pending" | "approved" | "rejected"
+
+function reviewLabel(status: AdminPaperStatus): string {
+  return status === "pending" ? "待审核" : status === "rejected" ? "已驳回" : "已通过"
 }
 
 function AdminRow(props: {
@@ -144,6 +157,7 @@ function AdminRow(props: {
   meta: string
   listed: boolean
   pending: boolean
+  blocked?: boolean
   onToggle: () => void
 }) {
   return (
@@ -159,10 +173,10 @@ function AdminRow(props: {
         type="button"
         variant="outline"
         className="col-span-2 min-h-11 w-full reading:col-span-1 reading:w-auto reading:min-w-18"
-        disabled={props.pending}
+        disabled={props.pending || props.blocked}
         onClick={props.onToggle}
       >
-        {props.pending ? "处理中…" : props.listed ? "下架" : "上架"}
+        {props.blocked ? "待审核" : props.pending ? "处理中…" : props.listed ? "下架" : "上架"}
       </Button>
     </li>
   )
