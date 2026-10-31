@@ -33,13 +33,17 @@ jobs:
           echo "===== main compose ps ====="
           if [ -f /opt/mykaoyan/.env.images ]; then
             cd /opt/mykaoyan
+            cat .env.images
             docker compose --env-file .env.images -f deploy/compose.yaml ps 2>&1
-            echo "===== main api logs ====="
+            api_image=$(sed -n 's/^API_IMAGE=//p' .env.images)
+            echo "===== main api inspect ====="
+            docker inspect --format '{{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} err={{.State.Error}}' deploy-api-1 2>&1
+            echo "===== main api raw logs ====="
+            docker logs --tail=200 deploy-api-1 2>&1
+            echo "===== main api run without env (10s) ====="
+            timeout 10 docker run --rm "$api_image" 2>&1 | tail -80
+            echo "===== main api logs via compose ====="
             docker compose --env-file .env.images -f deploy/compose.yaml logs --tail=200 api 2>&1
-            echo "===== main web logs ====="
-            docker compose --env-file .env.images -f deploy/compose.yaml logs --tail=80 web 2>&1
-            echo "===== main caddy logs ====="
-            docker compose --env-file .env.images -f deploy/compose.yaml logs --tail=80 caddy 2>&1
           fi
           echo "===== api compose ps ====="
           if [ -f /opt/mykaoyan-api/.env.images ]; then
