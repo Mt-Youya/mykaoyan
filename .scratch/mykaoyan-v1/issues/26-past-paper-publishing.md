@@ -18,14 +18,18 @@
 - [x] 测试：契约、迁移、API、CLI、公开页不含答案、非会员 403、会员/上传者 200
 - [x] 文档：spec 0004、ADR 0016、PLAN 红线、GLOSSARY、CLI README、pitfalls mk/API-02
 - [x] 本机端到端：发布虚构试卷、公开详情不含答案、会员/上传者可读答案
-- [ ] 生产：迁移与首次真题发布已获站主批准；真题内容由站主提供授权文件后发布
+- [x] 生产迁移（`papers`/`paper_questions`/`owner_account_id` + 投稿评论）已手工应用
+- [x] 生产真题：数学二 2007–2026 + 408 2022–2026 共 25 套、690 题已发布并全部上架，写 25 条审计
+- [ ] 部署：`手动部署`/`手动部署 API` 被缺失的 `DEPLOY_KNOWN_HOSTS` secret 阻塞，镜像未推送、ECS 未更新；补 secret 后重跑
+- [ ] 浏览器/真机验收：域名暂无 A 记录（ICP 未就绪），无法从公网访问
 
 **验收证据（2026-10-31）：**
 
 - core：159 tests 通过；API 全量 162 项中 160 通过（2 项 `backup.test.mjs` 因本机缺少 `pg_dump` 失败，CI 安装客户端）；web 25 文件 88 项通过；cli `cargo test` 全部通过（含 5 项 `paper_http`）。
 - `pnpm typecheck`、`pnpm build`、`cargo fmt --check`、`cargo clippy --locked --all-targets -D warnings` 通过；契约生成可重复，网站与 CLI OpenAPI 哈希一致。
 - 端到端：真实 CLI → 本机 API → 临时 Postgres，发布 `e2e-paper-fictional`（2 题）：首次 `version=1,listed=false,unchanged=false`，二次 `unchanged=true`；CLI dry-run 哈希与服务器返回一致；公开列表/详情可见题面且不含 `answerMarkdown`/`analysisMarkdown`；答案接口未登录 401；集成测试验证非会员 403、会员 200、上传者本人 200 且 `Cache-Control: no-store`。
-- 未做：生产迁移、生产真题写入、浏览器/真机实测（域名未备案不可达）。首次生产发布需站主批准，默认下架；未授权内容不发布。
+- 未做：浏览器/真机实测（域名未备案不可达）；生产部署被 `DEPLOY_KNOWN_HOSTS` secret 缺失阻塞。
+- 生产（2026-10-31）：生产库迁移已应用；CLI 指向生产库的本地 API 发布 25 套（数学二 20 + 408 5），690 题全部有答案、全部 `listed=true`、25 条 `listing_changes` 审计；公开列表 20+5、题面不含答案字段、未登录答案 401 均读回通过。
 
 **红线：** 未授权真题内容不上站；官方公告原件不上站；答案不进公开页面/索引/搜索/OG/sitemap；真题内容不进仓库。
 

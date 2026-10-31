@@ -136,3 +136,5 @@ mykaoyan publish-paper paper.json
 - 端到端：真实 CLI（debug 二进制）→ 本机 API（3103）→ 临时 Postgres 发布 `e2e-paper-fictional`（2 题）：首次 `version=1`、`listed=false`、`unchanged=false`，二次 `unchanged=true`；CLI dry-run 哈希与服务器返回一致；公开列表与详情含题面、不含 `answerMarkdown`/`analysisMarkdown`；答案接口未登录 401，集成测试覆盖非会员 403、会员 200 且 `Cache-Control: no-store`、试卷上传者本人 200。
 - 未做：生产迁移、生产真题写入、浏览器/真机实测（域名未备案不可达）。首次生产发布需站主批准，默认下架；未授权内容不发布。
 - 本机限制：`pnpm fmt:check` 在 Windows CRLF 工作区仍会报既有文件行尾问题（见 pitfalls mk/TOOL-10），本次改动的文件已单独通过 oxfmt 检查；格式化结论以 CI Linux 为准。
+- 生产（2026-10-31）：站主批准公开发布并确认已获授权后，手工在生产 Supabase 应用 `papers`/`paper_questions`（含 `owner_account_id`）与 `submission_comments` 迁移；用生产库的本地 API + CLI 发布数学二 2007–2026（20 套）与 408 2022–2026（5 套）共 25 套、690 道题，全部 `listed=true` 并写入 25 条 `listing_changes` 审计；读回确认无空答案、公开列表 20+5 套、题面详情不含答案字段、未登录答案接口 401。网页端 `/exams` 需随下一次前端部署上线。
+- 部署阻塞：GitHub Actions 的 `生产` 环境缺少 `DEPLOY_KNOWN_HOSTS` 仓库 secret，`手动部署`/`手动部署 API` 在「校验部署配置并推送镜像」处失败，镜像未推送、ECS 未更新；需站主补充该 secret（`ssh-keyscan -H <ECS 主机>` 输出）后重跑部署。DNS 未就绪（`api.mykaoyan.cn`/`mykaoyan.cn` 暂无 A 记录），部署后冒烟检查仍会失败。
