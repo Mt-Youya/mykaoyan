@@ -138,4 +138,4 @@ mykaoyan publish-paper paper.json
 - 本机限制：`pnpm fmt:check` 在 Windows CRLF 工作区仍会报既有文件行尾问题（见 pitfalls mk/TOOL-10），本次改动的文件已单独通过 oxfmt 检查；格式化结论以 CI Linux 为准。
 - 生产（2026-10-31）：站主批准公开发布并确认已获授权后，手工在生产 Supabase 应用 `papers`/`paper_questions`（含 `owner_account_id`）与 `submission_comments` 迁移；用生产库的本地 API + CLI 发布数学二 2007–2026（20 套）与 408 2022–2026（5 套）共 25 套、690 道题，全部 `listed=true` 并写入 25 条 `listing_changes` 审计；读回确认无空答案、公开列表 20+5 套、题面详情不含答案字段、未登录答案接口 401。
 - 生产部署（2026-10-31）：部署 workflow 改为 runner 构建镜像 + SSH `docker save/load`（不再依赖 ACR 镜像仓库，也不再需要 `DEPLOY_KNOWN_HOSTS`），`手动部署` run `41178001262` 成功；ECS 上 web/api/caddy 三容器运行，API 健康检查 200 `{"status":"ok","database":"connected"}`。生产只读验收：`/api/papers?subject=302` 20 套、`subject=408` 5 套、详情不含答案字段、未登录答案 401、试卷评论公开可读；`/exams`、`/community/papers`、`/community/papers/new` 页面均 200。
-- 剩余外部条件：ECS 上短信凭据仍是占位值（站主需填入阿里云真实 AccessKey/签名/模板并重启容器）后手机登录才可用；`mykaoyan.cn`/`api.mykaoyan.cn` 暂无 A 记录（备案中），Caddy 证书待 DNS 生效后自动签发。
+- 剩余外部条件：阿里云号码认证短信已配置并验证（`request-code` 返回 200、`cooldownSeconds=60`），登录链路可用；`mykaoyan.cn`/`api.mykaoyan.cn` 暂无 A 记录（备案中），Caddy 证书待 DNS 生效后自动签发。

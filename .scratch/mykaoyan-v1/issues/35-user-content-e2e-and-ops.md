@@ -35,7 +35,7 @@ cargo test --manifest-path cli/Cargo.toml --locked
 - 本机静态/构建：`pnpm typecheck`、`pnpm build`、`pnpm lint`（0 errors）、改动文件 oxfmt 全过；CI 在 `2e9dc96` 全绿。
 - 测试：API 全量 194/196（仅 2 项 `backup.test.mjs` 因本机无 `pg_dump`）；web 114/114；`packages/db` 迁移 16/16（本机 PostgreSQL 18 临时集群，`PGCLIENTENCODING=GBK`）。
 - 生产部署：`手动部署` run `41178001262` 成功；ECS 上 web/api/caddy 三容器 Up；API 健康 `{"status":"ok","database":"connected"}`；生产只读验收 `/api/papers?subject=302` 20 套、`subject=408` 5 套、详情无答案字段、未登录答案 401、试卷评论公开可读；`/exams`、`/community/papers`、`/community/papers/new` 页面 200。
-- 未做/外部条件：浏览器与真机实测待域名解析；ECS 短信凭据仍是占位值（真实阿里云短信 AK/签名/模板由站主填入后才能登录，登录前评论/答案/评分/上传不可用）。
+- 未做/外部条件：浏览器与真机实测待域名解析；短信登录已在生产验证（`request-code` 返回 200、`cooldownSeconds=60`）。
 
 **验收命令（本机）：**
 
