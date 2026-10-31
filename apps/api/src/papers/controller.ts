@@ -12,7 +12,7 @@ import {
 
 import { subjectCodeSchema } from "@mykaoyan/core"
 
-import { SessionGuard, CurrentSession } from "../auth"
+import { CurrentSession, SessionGuard } from "../auth"
 import type { AuthSession } from "../auth"
 import { PapersService } from "./service"
 

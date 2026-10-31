@@ -1,4 +1,4 @@
-import { Inject, Injectable, ForbiddenException } from "@nestjs/common"
+import { ForbiddenException, Inject, Injectable } from "@nestjs/common"
 import { and, asc, count, desc, eq, inArray } from "drizzle-orm"
 
 import { paperQuestions, papers } from "@mykaoyan/db"
