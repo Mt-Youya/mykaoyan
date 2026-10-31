@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 
 import { Badge, Button } from "@mykaoyan/ui"
 
-import { AdminCommentsPanel } from "../comments"
+import { AdminCommentsPanel, AdminSubmissionCommentsPanel } from "../comments"
 import { AdminMembershipPanel } from "../membership"
 import { AdminSubmissionsPanel } from "../submissions"
 import { fetchAdminContent, setListing } from "./api"
@@ -74,6 +74,7 @@ export function AdminPage() {
       </header>
       <AdminMembershipPanel />
       <AdminCommentsPanel />
+      <AdminSubmissionCommentsPanel />
       <AdminSubmissionsPanel />
 
       {message ? (

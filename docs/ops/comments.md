@@ -28,3 +28,23 @@ ticket 22 的投稿已接入同一开关，见 [投稿说明](submissions.md)。
 内容管理页的“评论管理”可维护关键词，选择评论后必须填写原因才能删除。评论正文保留在数据库；删除标记与操作管理员、时间、原因在同一事务中写入。公开和管理员列表均把已删除正文及父评论预览遮蔽成“已删除”；公开列表不返回删除原因或完整账号编号。会员到期不删除历史评论。
 
 `comments`、`comment_deletions`、`comment_keywords` 均开启 RLS 并对 PUBLIC、anon、authenticated 撤权，浏览器通过 API 访问。迁移只在专用本地临时 Postgres 重放验证，真实环境迁移另行授权。
+
+## 投稿评论（ticket 27）
+
+同一套规则也接到已上架的投稿上；评论对象是**已通过、已上架且文件未清理**的投稿，未上架、待审核、已清理或不存在的投稿一律404，访客读不到其评论。关键词沿用 `comment_keywords` 与同一套规范化匹配。
+
+- 访客可读已上架投稿的评论；与讲评论一致，删除后列表显示“已删除”并遮蔽正文，公开列表不返回删除原因或完整账号编号。
+- 发表和回复要求登录且为当前有效会员；**例外**：投稿上传者本人（`submissions.account_id` 等于当前账号）在自己的投稿下评论、回复不要求会员，会员到期后仍可继续。非会员且非上传者403，未登录401。
+- 正文1–2000字；回复只有一层，父评论必须属于同一投稿且未删除，不能回复回复；入参严格校验。分页每页50条、时间倒序，返回 `hasMore`。
+- 公开列表响应带 `viewer:{signedIn,member,owner}`，只描述当前请求账号能否评论，不泄露账号编号；页面据此显示登录入口、会员入口或“上传者免会员”提示。
+
+| 接口 | 行为 |
+| --- | --- |
+| GET /api/submissions/:id/comments?page=0 | 访客可读；返回 `enabled`、评论、`hasMore` 与 `viewer` |
+| POST /api/submissions/:id/comments | `{body,parentId?}`；登录后会员或该投稿上传者本人可写 |
+| GET /api/admin/submission-comments?page=0 | 管理员分页查看全部投稿评论与删除记录，含未上架投稿 |
+| DELETE /api/admin/submission-comments/:id | `{reason}`；管理员软删除并写审计；重复删除409，不改写原记录 |
+
+`submission_comments`、`submission_comment_deletions` 开启 RLS 并对 PUBLIC、anon、authenticated 撤权；父评论用 `(parent_id, submission_id)` 复合外键限定同一投稿，删除审计独立表，外键级联随投稿或账号删除。迁移为 `20261031014614_lame_gauntlet.sql`，同样只在专用本地临时 Postgres 重放验证。
+
+前端在投稿卡片点“查看评论”展开评论区，默认不预取多个投稿的评论；内容管理页新增“投稿评论管理”，必须填写原因才能删除。`COMMUNITY_ENABLED` 关闭时公开列表返回 `enabled:false` 且发表403，直接请求也不能绕过。

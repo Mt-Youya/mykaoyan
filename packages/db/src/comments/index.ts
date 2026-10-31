@@ -3,6 +3,7 @@ import { check, foreignKey, index, pgTable, text, timestamp, unique, uuid } from
 
 import { accounts } from "../accounts"
 import { lessons } from "../catalog"
+import { submissions } from "../submissions"
 export const comments = pgTable(
   "comments",
   {
@@ -43,3 +44,43 @@ export const commentDeletions = pgTable(
   (t) => [check("comment_deletions_reason", sql`length(btrim(${t.reason})) between 1 and 500`)],
 ).enableRLS()
 export const commentKeywords = pgTable("comment_keywords", { word: text().primaryKey() }).enableRLS()
+/** 投稿下的评论；父评论必须同一投稿，两层结构与讲评论一致（不能回复回复由服务层校验）。 */
+export const submissionComments = pgTable(
+  "submission_comments",
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    submissionId: uuid("submission_id")
+      .notNull()
+      .references(() => submissions.id, { onDelete: "cascade" }),
+    accountId: uuid("account_id").references(() => accounts.id, { onDelete: "set null" }),
+    parentId: uuid("parent_id"),
+    body: text().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (t) => [
+    unique("submission_comments_id_submission_unique").on(t.id, t.submissionId),
+    foreignKey({
+      name: "submission_comments_parent_submission_fk",
+      columns: [t.parentId, t.submissionId],
+      foreignColumns: [t.id, t.submissionId],
+    }).onDelete("cascade"),
+    check("submission_comments_not_self_parent", sql`${t.parentId} is null or ${t.parentId} <> ${t.id}`),
+    check("submission_comments_body_length", sql`length(btrim(${t.body})) between 1 and 2000`),
+    index("submission_comments_submission_created_idx").on(t.submissionId, t.createdAt, t.id),
+  ],
+).enableRLS()
+export const submissionCommentDeletions = pgTable(
+  "submission_comment_deletions",
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    commentId: uuid("comment_id")
+      .notNull()
+      .unique()
+      .references(() => submissionComments.id, { onDelete: "cascade" }),
+    actorId: uuid("actor_id").references(() => accounts.id, { onDelete: "set null" }),
+    reason: text().notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [check("submission_comment_deletions_reason", sql`length(btrim(${t.reason})) between 1 and 500`)],
+).enableRLS()

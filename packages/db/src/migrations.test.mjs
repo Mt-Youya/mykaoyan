@@ -101,6 +101,14 @@ describe("空库迁移与权限", () => {
       ).toBe("f")
   })
 
+  it("投稿评论与删除审计启用RLS且公开角色无权限", () => {
+    for (const table of ["submission_comments", "submission_comment_deletions"]) {
+      expect(sql(`select relrowsecurity from pg_class where oid='public.${table}'::regclass`)).toBe("t")
+      for (const role of ["anon", "authenticated"])
+        expect(sql(`select has_table_privilege('${role}','public.${table}','SELECT,INSERT,UPDATE,DELETE')`)).toBe("f")
+    }
+  })
+
   it("试卷与试卷题目启用RLS，公开角色无权限", () => {
     for (const table of ["papers", "paper_questions"]) {
       expect(sql(`select relrowsecurity from pg_class where oid='public.${table}'::regclass`)).toBe("t")

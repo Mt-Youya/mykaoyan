@@ -99,6 +99,13 @@
       "when": 1793378622697,
       "tag": "20261030164342_oval_bloodstorm",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793411174243,
+      "tag": "20261031014614_lame_gauntlet",
+      "breakpoints": true
     }
   ]
 }

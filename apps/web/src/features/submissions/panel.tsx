@@ -8,6 +8,7 @@ import { LessonPlayer } from "../playback"
 import { RatingControl, RatingFilters, RatingStats } from "../ratings"
 import { submissionRequest, SubmissionRequestError } from "./api"
 import type { OwnSubmission, RatedSubmission, Submission, SubmissionList } from "./api"
+import { SubmissionComments } from "./comments"
 import { SubmissionUploadForm } from "./upload-form"
 export const submissionStatus = { uploading: "上传未完成", pending: "待审核", approved: "已通过", rejected: "已驳回" }
 export function SubmissionCard({
@@ -144,6 +145,7 @@ export function SubmissionsPanel({ subjectCode }: { subjectCode: string }) {
                 <SubmissionCard key={item.id} item={item}>
                   <RatingStats value={item} />
                   <RatingControl submissionId={item.id} access={access} onSaved={() => setReload((n) => n + 1)} />
+                  <SubmissionComments submissionId={item.id} />
                 </SubmissionCard>
               ))}
             </ul>
