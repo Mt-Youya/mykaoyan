@@ -14,6 +14,8 @@
 | ACR 仓库 | **已弃用（2026-10-31）**：个人版域名 `crpi-…personal.cr.aliyuncs.com` 公网 NXDOMAIN，部署改为 registry-less：runner 构建镜像后 `docker save | gzip | ssh docker load` 到 ECS |
 | GitHub `production` | 部署只需 `DEPLOY_HOST`、`DEPLOY_USER`、`DEPLOY_SSH_KEY` 三个 secrets；`DEPLOY_KNOWN_HOSTS` 已移除（部署时自动抓取主机公钥）；ACR 变量保留但不再使用 |
 | API 部署工作流 | 已更新 [.github/workflows/deploy-api.yml](../deploy-api.yml)：构建 `api` 镜像、SSH 上传、`docker load`、compose 更新与容器健康检查 |
+| 2026-10-31 部署状态 | 镜像已在 GitHub runner 构建并通过 SSH `docker load` 到 ECS；web/caddy 容器已启动，**api 容器因 ECS `/opt/mykaoyan-api/.env` 缺生产短信配置而重启**（`SMS_PROVIDER` 等）；补 `.env` 后重启即可，无需重新构建 |
+| 域名/DNS | `mykaoyan.cn`、`api.mykaoyan.cn` 暂无 A 记录（备案未完成）；Caddy 申请证书会持续失败，属预期，不影响容器运行 |
 | API 镜像入口 | 已改为容器内 `node --import tsx src/main.ts`（`apps/api` 的 `build` 是类型检查，不再依赖 `dist`） |
 | Worker `/api` 反代 | 已加到 `apps/web/worker-entry.ts`，`/api/**` 转发到 `https://api.mykaoyan.cn` |
 
@@ -32,6 +34,22 @@
 | `DEPLOY_SSH_KEY` | Secret | 部署私钥文件全文（含 BEGIN/END 行） | 已配 |
 
 部署镜像不再经过任何 registry：GitHub runner 用 `deploy/Dockerfile` 构建 `mykaoyan-web:<sha>` / `mykaoyan-api:<sha>`，`docker save` 后经 SSH（gzip 流）在 ECS 上 `docker load`，再 `docker compose up -d`。因此 ACR 实例不存在/过期不影响部署；代价是每次部署多传约数百 MB、耗时更长。
+
+### ECS 运行时 `.env`（API 必需）
+
+主站 compose 与 api compose 共用 `/opt/mykaoyan-api/.env`（主站通过 `/opt/mykaoyan/.env` 符号链接复用）。生产环境 API 启动时强制要求以下变量，缺任一项会直接退出：
+
+| 变量 | 说明 |
+| --- | --- |
+| `DATABASE_URL`、`DATABASE_CA` | Supabase 直连与 CA |
+| `BETTER_AUTH_SECRET`、`BETTER_AUTH_URL` | 会话签名与站点地址 |
+| `SMS_PROVIDER` | 生产只能是 `aliyun` |
+| `ALIYUN_ACCESS_KEY_ID` / `ALIYUN_ACCESS_KEY_SECRET` | 阿里云短信认证 AccessKey |
+| `ALIYUN_SMS_SIGN_NAME` / `ALIYUN_SMS_TEMPLATE_CODE` | 短信签名与模板 |
+| `R2_*`、`MEDIA_SIGNING_KEY` | 媒体与播放令牌 |
+| `COMMUNITY_ENABLED` | 评论/投稿/评分开关（未设置默认关闭） |
+
+缺短信配置时容器日志为 `认证启动配置缺失或无效：SMS_PROVIDER`；补全后 `docker compose up -d` 重启即可。
 
 `DEPLOY_KNOWN_HOSTS` 不再是必需 secret：部署工作流在 ECS 上执行前用 `ssh-keyscan -H "$DEPLOY_HOST"` 抓取主机公钥写入 `~/.ssh/known_hosts`（TOFU），并用 SSH 进入容器做健康检查。若要固定指纹，可另加一个可选的 `DEPLOY_KNOWN_HOSTS` secret，并在工作流里优先使用它。
 
