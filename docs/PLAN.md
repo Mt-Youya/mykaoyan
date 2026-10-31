@@ -158,7 +158,7 @@ M0 的本地代码与配置已准备，云端尚未验收，状态见 [本地交
   - Drizzle 用 postgres.js 连 Supavisor transaction 模式（6543 端口，IPv4），必须设 `prepare: false`；SSL `verify-full`。Supabase 直连地址默认只有 IPv6，不用。
 - **媒体** `apps/media-worker`：Cloudflare Worker，校验 HMAC 播放令牌后从 R2 读取并支持 Range。
 - **CLI** `cli/`：Rust（clap），类型从 OpenAPI 生成。
-- **Skill** `skills/mykaoyan`：按 agentskills.io 规范，包含进度文件说明、零依赖校验脚本、空白模板。
+- **Skill** `skills/mykaoyan`：按 agentskills.io 规范，包含考生进度文件说明、零依赖校验脚本、空白模板；`skills/mykaoyan-publish` 覆盖管理员用 CLI 发布课程章、讲义与试卷（dry-run 先行，不改上架状态）。
 - **部署**：API 由 GitHub Actions 构建镜像 → 阿里云 ACR → SSH 到广州 ECS 执行 `docker compose pull && up -d` → 冒烟 `/api/health` 200 且连上数据库；前端 Worker 用 `pnpm --filter @mykaoyan/web deploy:workers` 手动发布。镜像中不含任何密钥，密钥只在 ECS 的 `.env`。
 - **ECS**：广州（华南 3），2 核 4G，固定带宽 3–5 Mbps，云监控在 CPU、内存、磁盘持续超过 80% 时告警。
 - **备份**：每天 `pg_dump` 到 R2 私有桶，保留 30 天，每月演练一次恢复。

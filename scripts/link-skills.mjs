@@ -3,10 +3,12 @@ import fs from "node:fs"
 import { dirname, join, relative, resolve, sep, toNamespacedPath } from "node:path"
 import { fileURLToPath } from "node:url"
 
-const links = [
-  [".agents/skills/mykaoyan", "../../skills/mykaoyan"],
-  [".claude/skills/mykaoyan", "../../.agents/skills/mykaoyan"],
-]
+export const skillNames = ["mykaoyan", "mykaoyan-publish"]
+
+const links = skillNames.flatMap((name) => [
+  [`.agents/skills/${name}`, `../../skills/${name}`],
+  [`.claude/skills/${name}`, `../../.agents/skills/${name}`],
+])
 
 function directTarget(link) {
   return toNamespacedPath(resolve(dirname(link), fs.readlinkSync(link)))
@@ -74,9 +76,12 @@ function replaceLink(destination, source, target, existing) {
 
 export function linkSkills(input = resolve(import.meta.dirname, "..")) {
   const root = fs.realpathSync(input)
-  checkParents(root, join(root, "skills/mykaoyan"))
-  if (!fs.lstatSync(join(root, "skills/mykaoyan/SKILL.md"), { throwIfNoEntry: false })?.isFile()) {
-    throw new Error("缺少 skills/mykaoyan/SKILL.md，未修改技能入口")
+  // 所有技能来源先一起预检：任何一个缺失或入口冲突时，都不改动现有链接。
+  for (const name of skillNames) {
+    checkParents(root, join(root, `skills/${name}`))
+    if (!fs.lstatSync(join(root, `skills/${name}/SKILL.md`), { throwIfNoEntry: false })?.isFile()) {
+      throw new Error(`缺少 skills/${name}/SKILL.md，未修改技能入口`)
+    }
   }
   // 两个入口一起预检：真实内容冲突时，另一入口也不发生变化。
   const plans = links.map(([path, target]) => {

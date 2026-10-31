@@ -5,26 +5,30 @@ import { tmpdir } from "node:os"
 import { dirname, join, resolve, toNamespacedPath } from "node:path"
 import { test } from "node:test"
 
-import { linkSkills } from "./link-skills.mjs"
+import { linkSkills, skillNames } from "./link-skills.mjs"
 
-const entries = [".agents/skills/mykaoyan", ".claude/skills/mykaoyan"]
-const targets = ["../../skills/mykaoyan", "../../.agents/skills/mykaoyan"]
+const entries = skillNames.flatMap((name) => [`.agents/skills/${name}`, `.claude/skills/${name}`])
+const targets = skillNames.flatMap((name) => [`../../skills/${name}`, `../../.agents/skills/${name}`])
+const skillName = (entry) => entry.split("/")[2]
 
 function workspace(t) {
   const parent = fs.mkdtempSync(join(tmpdir(), "mykaoyan-links-"))
   t.after(() => fs.rmSync(parent, { recursive: true, force: true }))
   const root = join(parent, "仓库 with spaces")
-  fs.mkdirSync(join(root, "skills/mykaoyan"), { recursive: true })
-  fs.writeFileSync(join(root, "skills/mykaoyan/SKILL.md"), "fictional-skill")
+  for (const name of skillNames) {
+    fs.mkdirSync(join(root, `skills/${name}`), { recursive: true })
+    fs.writeFileSync(join(root, `skills/${name}/SKILL.md`), `fictional-skill-${name}`)
+  }
   return root
 }
 
 function verify(root) {
   for (const entry of entries) {
+    const name = skillName(entry)
     const link = join(root, entry)
     assert.ok(fs.lstatSync(link).isSymbolicLink())
-    assert.equal(fs.realpathSync(link), fs.realpathSync(join(root, "skills/mykaoyan")))
-    assert.equal(fs.readFileSync(join(link, "SKILL.md"), "utf8"), "fictional-skill")
+    assert.equal(fs.realpathSync(link), fs.realpathSync(join(root, `skills/${name}`)))
+    assert.equal(fs.readFileSync(join(link, "SKILL.md"), "utf8"), `fictional-skill-${name}`)
     const target = targets[entries.indexOf(entry)]
     if (process.platform === "win32") {
       assert.equal(
@@ -40,8 +44,10 @@ test("双入口共用来源，重复初始化不改写链接", (t) => {
   assert.ok(linkSkills(root).every(({ changed }) => changed))
   verify(root)
   assert.ok(linkSkills(root).every(({ changed }) => !changed))
-  fs.writeFileSync(join(root, "skills/mykaoyan/SKILL.md"), "updated-skill")
-  for (const entry of entries) assert.equal(fs.readFileSync(join(root, entry, "SKILL.md"), "utf8"), "updated-skill")
+  for (const name of skillNames) fs.writeFileSync(join(root, `skills/${name}/SKILL.md`), `updated-skill-${name}`)
+  for (const entry of entries) {
+    assert.equal(fs.readFileSync(join(root, entry, "SKILL.md"), "utf8"), `updated-skill-${skillName(entry)}`)
+  }
 })
 
 test("修复 Git 在 Windows 检出的链接文本，兼容 CRLF", (t) => {

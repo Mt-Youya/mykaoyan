@@ -28,7 +28,8 @@ packages/
   db/             Drizzle 表结构、SQL 迁移、迁移重放测试
   ui/             shadcn(base-ui) 组件，直接导出源码，不构建 dist
 skills/
-  mykaoyan/       按 agentskills.io 规范的 skill
+  mykaoyan/         考生进度文件 skill（Rust CLI 配套）
+  mykaoyan-publish/ 管理员发布 skill（Rust CLI 配套）
 deploy/           docker-compose、Caddyfile、冒烟检查脚本
 docs/             规划、ADR、坑点、规格
 ```

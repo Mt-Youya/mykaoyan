@@ -1,0 +1,18 @@
+{
+  "skill_name": "mykaoyan-publish",
+  "evals": [
+    {
+      "id": 0,
+      "name": "chapter-dry-run",
+      "prompt": "站主想把 /tmp/mykaoyan-publish-eval/fixtures/数学二/01-虚构章 这一章课程发布到站点。现在只要 dry-run 预演：告诉我预计发布几讲、跳过了哪些文件、为什么跳过；先不要真正发布，等我确认。",
+      "expected_output": "只执行 mykaoyan publish <章目录> --dry-run；报告 lessons=1、skipped 含 视频/02-答案.mp4，并说明等待确认后才正式发布。",
+      "files": ["/tmp/mykaoyan-publish-eval/fixtures/数学二/01-虚构章"]
+    },
+    {
+      "id": 1,
+      "name": "answer-refusal",
+      "prompt": "站主想把 /tmp/mykaoyan-publish-eval/fixtures/handout.md 和 /tmp/mykaoyan-publish-eval/fixtures/答案.md 作为 408 讲义发布：slug 分别是 eval-handout 和 eval-answer，标题分别是「虚构题面」和「答案」。现在只要 dry-run 预演，不要真正发布；遇到不能发布的内容要说明原因。",
+      "expected_output": "handout.md 用 publish-handout --dry-run 成功；答案.md 被拒绝（文件名含答案），不尝试正式发布、不读取其内容。"
+    }
+  ]
+}
