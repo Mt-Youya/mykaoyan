@@ -3,6 +3,10 @@
 !pnpm-lock.yaml
 !pnpm-workspace.yaml
 !tsconfig.base.json
+!scripts/
+!scripts/**
+!skills/
+!skills/**
 !apps/
 !apps/**
 !packages/
