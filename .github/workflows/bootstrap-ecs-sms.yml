@@ -15,7 +15,7 @@ jobs:
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
       DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
     steps:
-      - name: 写入占位短信配置并诊断数据库连接
+      - name: 写入占位短信配置并诊断数据库认证
         shell: bash
         run: |
           : "${DEPLOY_HOST:?}" "${DEPLOY_USER:?}" "${DEPLOY_SSH_KEY:?}"
@@ -39,26 +39,15 @@ jobs:
           set_key ALIYUN_ACCESS_KEY_SECRET REPLACE_WITH_REAL_AK_SECRET
           set_key ALIYUN_SMS_SIGN_NAME REPLACE_WITH_REAL_SIGN_NAME
           set_key ALIYUN_SMS_TEMPLATE_CODE REPLACE_WITH_REAL_TEMPLATE_CODE
-          db=$(sed -n 's/^DATABASE_URL=//p' .env | sed -E 's#^[a-z]+://[^@]*@##; s#[/?].*##')
-          dbhost=${db%:*}; dbport=${db#*:}
-          echo "db=$dbhost:$dbport"
-          echo "===== host tcp test ====="
-          timeout 10 bash -c "exec 3<>/dev/tcp/$dbhost/$dbport" && echo host-tcp-ok || echo host-tcp-fail
+          dburl=$(sed -n 's/^DATABASE_URL=//p' .env)
+          echo "db user: $(printf '%s' "$dburl" | sed -E 's#^[a-z]+://([^:@/]+).*#\1#')"
           cd /opt/mykaoyan
           docker compose --env-file .env.images -f deploy/compose.yaml up -d 2>&1 || true
           sleep 5
-          echo "===== container tcp test ====="
-          docker compose --env-file .env.images -f deploy/compose.yaml exec -T api node -e "const net=require('net');const u=new URL(process.env.DATABASE_URL);const s=net.connect({host:u.hostname,port:Number(u.port||5432)});s.setTimeout(8000);s.on('connect',()=>{console.log('tcp-ok');process.exit(0)});s.on('timeout',()=>{console.log('tcp-timeout');process.exit(0)});s.on('error',(e)=>{console.log('tcp-error='+e.code);process.exit(0)})" < /dev/null 2>&1 || true
+          echo "===== container db query ====="
+          docker compose --env-file .env.images -f deploy/compose.yaml exec -T api node -e "const postgres=require('postgres');const sql=postgres(process.env.DATABASE_URL,{max:1});sql.unsafe('select 1 as ok').then((r)=>console.log('db-query-ok '+JSON.stringify(r))).catch((e)=>console.log('db-query-error code='+(e.code||'')+' msg='+String(e.message).slice(0,300))).finally(()=>sql.end({timeout:1}))" < /dev/null 2>&1 || true
           echo "===== api logs ====="
           docker logs --tail=40 deploy-api-1 2>&1 || true
           echo "===== health ====="
-          for attempt in $(seq 1 10); do
-            if docker compose --env-file .env.images -f deploy/compose.yaml exec -T api \
-              node -e "fetch('http://127.0.0.1:3001/api/health').then(async (r) => { console.log('status=' + r.status); console.log((await r.text()).slice(0,200)); if (!r.ok) process.exit(1) }).catch(() => process.exit(1))" < /dev/null; then
-              echo HEALTHY
-              break
-            fi
-            if [ "$attempt" -eq 10 ]; then echo UNHEALTHY; fi
-            sleep 2
-          done
+          docker compose --env-file .env.images -f deploy/compose.yaml exec -T api node -e "fetch('http://127.0.0.1:3001/api/health').then(async (r)=>{console.log('status='+r.status);console.log((await r.text()).slice(0,200))})" < /dev/null 2>&1 || true
           REMOTE
