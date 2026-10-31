@@ -10,7 +10,7 @@ if (!["localhost", "127.0.0.1"].includes(url.hostname) || url.pathname !== "/myk
   throw new Error("迁移测试只允许专用的本机 mykaoyan_test 临时库")
 }
 const sql = (query) =>
-  execFileSync("psql", ["-XAt", "-v", "ON_ERROR_STOP=1", "-d", url.href, "-c", query], {
+  execFileSync("psql", ["-XAtq", "-v", "ON_ERROR_STOP=1", "-d", url.href, "-c", query], {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
   }).trim()
