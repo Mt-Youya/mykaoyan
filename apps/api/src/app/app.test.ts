@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 
-import { readEnvironment } from "../environment"
 import { createApp } from "."
+import { readEnvironment } from "../environment"
 
 const TEST_ENV = {
   ...process.env,

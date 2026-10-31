@@ -5,13 +5,13 @@ import { Test } from "@nestjs/testing"
 import postgres from "postgres"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 
+import { SUBMISSION_STORAGE } from "."
+import type { SubmissionStorage, UploadedPart } from "."
 import { AppModule } from "../app"
 import type { MemorySmsVerifier } from "../auth"
 import { PRIVACY_POLICY_VERSION, SMS_VERIFIER } from "../auth"
 import { ProblemFilter } from "../common"
 import { readEnvironment } from "../environment"
-import { SUBMISSION_STORAGE } from "."
-import type { SubmissionStorage, UploadedPart } from "."
 type TestResponse = Omit<Response, "json"> & {
   json(): Promise<{
     url: string

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
 
+import { PROGRESS_FILE_APP, PROGRESS_FILE_VERSION, progressFileSchema } from "."
 import { localDateSchema } from "../dates"
 import { fullProgressFileFixture, invalidProgressFixtures, validProgressFixtures } from "./fixtures"
-import { PROGRESS_FILE_APP, PROGRESS_FILE_VERSION, progressFileSchema } from "."
 
 type JsonObject = Record<string, unknown>
 

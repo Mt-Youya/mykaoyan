@@ -5,8 +5,6 @@ import { memoryAdapter } from "better-auth/adapters/memory"
 import type { MemoryDB } from "better-auth/adapters/memory"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 
-import { CONFIG } from "../config"
-import type { Environment } from "../environment"
 import {
   AUTH,
   AUTH_ENV,
@@ -21,6 +19,8 @@ import {
   SMS_VERIFIER,
 } from "."
 import type { AuthEnvironment } from "."
+import { CONFIG } from "../config"
+import type { Environment } from "../environment"
 import { PRIVACY_POLICY_VERSION } from "./policy"
 import { createMemoryStores } from "./stores"
 import type { MemoryAuthStores } from "./stores"

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest"
 
+import { getDueRetests, getRetestState, getStableOn, isMistakeStable, isRetestDue, recordRetest } from "."
 import { parseLocalDate } from "../dates"
-import { fullProgressFileFixture } from "../progress/fixtures"
 import { mistakeSchema, progressFileSchema } from "../progress"
 import type { RetestAttempt } from "../progress"
-import { getDueRetests, getRetestState, getStableOn, isMistakeStable, isRetestDue, recordRetest } from "."
+import { fullProgressFileFixture } from "../progress/fixtures"
 
 const base = progressFileSchema.parse(fullProgressFileFixture.value).data.mistakes[0]!
 

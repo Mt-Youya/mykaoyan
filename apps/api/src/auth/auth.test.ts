@@ -4,10 +4,6 @@ import { NestFactory } from "@nestjs/core"
 import postgres from "postgres"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 
-import { CONFIG } from "../config"
-import { DatabaseService } from "../database"
-import { readEnvironment } from "../environment"
-import type { Environment } from "../environment"
 import {
   AUTH,
   AUTH_ENV,
@@ -26,6 +22,10 @@ import {
   SMS_VERIFIER,
 } from "."
 import type { AuthEnvironment } from "."
+import { CONFIG } from "../config"
+import { DatabaseService } from "../database"
+import { readEnvironment } from "../environment"
+import type { Environment } from "../environment"
 
 /**
  * 真实 Postgres 路径：Drizzle store + Drizzle adapter + 迁移后的真实表。
