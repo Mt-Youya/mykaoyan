@@ -1,0 +1,54 @@
+name: 诊断 ECS 容器
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+    steps:
+      - name: 读取 compose 状态与容器日志
+        shell: bash
+        run: |
+          : "${DEPLOY_HOST:?}" "${DEPLOY_USER:?}" "${DEPLOY_SSH_KEY:?}"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/mykaoyan
+          chmod 600 ~/.ssh/mykaoyan
+          for attempt in {1..10}; do
+            if ssh-keyscan -T 10 -H "$DEPLOY_HOST" > ~/.ssh/known_hosts 2>/dev/null && [ -s ~/.ssh/known_hosts ]; then break; fi
+            sleep 3
+          done
+          target="$DEPLOY_USER@$DEPLOY_HOST"
+          ssh -i ~/.ssh/mykaoyan "$target" "bash -s" <<'REMOTE'
+          set -x
+          ls -la /opt/mykaoyan /opt/mykaoyan-api 2>&1 | head -80
+          echo "===== main compose ps ====="
+          if [ -f /opt/mykaoyan/.env.images ]; then
+            cd /opt/mykaoyan
+            docker compose --env-file .env.images -f deploy/compose.yaml ps 2>&1
+            echo "===== main api logs ====="
+            docker compose --env-file .env.images -f deploy/compose.yaml logs --tail=200 api 2>&1
+            echo "===== main web logs ====="
+            docker compose --env-file .env.images -f deploy/compose.yaml logs --tail=80 web 2>&1
+            echo "===== main caddy logs ====="
+            docker compose --env-file .env.images -f deploy/compose.yaml logs --tail=80 caddy 2>&1
+          fi
+          echo "===== api compose ps ====="
+          if [ -f /opt/mykaoyan-api/.env.images ]; then
+            cd /opt/mykaoyan-api
+            docker compose --env-file .env.images -f api-compose.yaml ps 2>&1
+            docker compose --env-file .env.images -f api-compose.yaml logs --tail=120 api 2>&1
+          fi
+          echo "===== docker images ====="
+          docker images --format '{{.Repository}}:{{.Tag}} {{.Size}}' | head -20
+          echo "===== disk ====="
+          df -h / 2>&1 | tail -2
+          REMOTE
