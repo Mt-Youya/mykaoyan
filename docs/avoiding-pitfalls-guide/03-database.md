@@ -18,6 +18,10 @@
 **4. 最后怎么处理的**
 调试脚本输出 `updatedAt` 为 ISO 字符串，handout 测试 4/4 通过。`docs/pitfalls.md` 的 `mk/DB-03` 已记录同一原理，这里补的是真实报错形态与“改之前先重读文件”。
 
+
+**2026-10-31 增量**  会员接口再次复现 timestamptz 字符串（`p.startsAt.toISOString is not a function`），并补反向形态：JS `Date` 直接进 postgres 模板报 Buffer/Date TypeError。
+
+- 📎 增量证据: [evidence.gz](./evidence.gz) → DB-01
 - 📎 excerpt: [evidence.gz](./evidence.gz) → DB-01
 
 ### DB-02 · 生产库落后 8 个迁移，而且没有迁移历史表
@@ -54,6 +58,10 @@
 **4. 最后怎么处理的**
 链路 `*.pooler.supabase.com → Supabase Intermediate 2021 CA → Supabase Root 2021 CA`，`DB OK: postgres`，本地 API health 200。pooler 不能当裸 TLS 端口用。
 
+
+**2026-10-31 增量**  psql 与容器侧补充：`sslrootcert=system`、挂宿主 CA 都不够；必须 `openssl s_client -starttls postgres` 取三段链；东京与新加坡根指纹一致后落盘；运行时 `NODE_EXTRA_CA_CERTS` + `verify-full`，迁移阶段临时 `sslmode=require` 并在报告披露。
+
+- 📎 增量证据: [evidence.gz](./evidence.gz) → DB-03
 - 📎 excerpt: [evidence.gz](./evidence.gz) → DB-03
 
 ### DB-04 · drizzle-kit 生成的迁移不含 REVOKE，新表默认对 PUBLIC 开放
@@ -109,3 +117,39 @@
 改完后迁移测试 16/16；但“删审核人账号”这条用例没有补测试。审计字段的生命周期与账号生命周期不一致时，外键可能是错的建模。
 
 - 📎 excerpt: [evidence.gz](./evidence.gz) → DB-06
+
+### DB-07 · pg_restore 到空库先撞 `schema "public" already exists`；重建 public 后又因 PUBLIC 权限未重放，业务角色读表 500
+
+`batch` 2026-10-31 · `severity` high · `status` resolved · `source` codex 01a17774-3a23-78d1-b0bc-dfa1c4dd1cae（codex--01a17774-3a23-78d1…md 第 898–912、920–940、1002–1018、1587–1603、1611–1635 行）
+
+**1. 怎么出现的**
+备份恢复测试一上来就红：`pg_restore --exit-on-error --no-owner` 在空库上执行 `CREATE SCHEMA public;`，报 `ERROR: schema "public" already exists`。补 `--clean --if-exists` 后第二轮继续推进，又在 `src/backup.test.mjs:86:25` 报 `PostgresError: permission denied for schema public`——那一行的前一句刚 `set local role service_role` 去读 `public.backup_probe`。
+
+**2. 怎么诊断的**
+先按报错定位到“目标库不是空白 schema”的假设，强化空库判定（统计非系统 schema 里的 `pg_class`/`pg_proc`/`pg_type`），再加 `--clean --if-exists --no-owner`。第二轮失败后对比正常库与恢复库：恢复时 `public` schema 被重建，但默认 PUBLIC 的 USAGE 权限没有被 pg_restore 重放，`service_role` 连 schema 都进不去。
+
+**3. 提了什么方案**
+备份清单里同时记录 `pg_roles`（含 ACL 引用的角色）和 schema ACL（`aclexplode` 读 `publicPrivileges`），恢复后 `revoke all on schema ... from public` 再按清单重授（采用）；恢复后手工执行 SQL 把权限写死（否，不可重复）；接受恢复库权限不同（否，会掩盖真实 ACL 漂移）。
+
+**4. 最后怎么处理的**
+`backup.test.mjs` 3/3 通过，逐表行数、表权限与 `public`/`supabase_migrations` 的默认权限都做了往返比对并补齐 ACL 引用的角色。验证范围仅本机临时 Postgres 15（CI 是 PG 17），本会话没有真正触发 GitHub Actions。
+
+- 📎 excerpt: [evidence.gz](./evidence.gz) → DB-07
+
+### DB-08 · 两条 Supabase 连接串 project ref 相同但 pooler 地域不同：自检只比 ref 就报「一致」
+
+`batch` 2026-10-31 · `severity` medium · `status` resolved · `source` dsh session-1461740f-95ff-42cf-bf42-4e2c42a6d1d1（dsh--session-1461740f-9…md 第 7962–7998、8004–8024、8135–8157、8161–8175 行）
+
+**1. 怎么出现的**
+项目实际创建在东京，但 `MIGRATION_DATABASE_URL` 是从别处拷来的新加坡 pooler 地址；两条串 project ref 相同、host 不同。应用启动体检只看能否拿到配置，真正跑迁移时 5432 直接 `FATAL: (ENOTFOUND) tenant/user postgres.<ref> not found`。
+
+**2. 怎么诊断的**
+`.env` 结构检查已经打出两个 host 分别在东京与新加坡；但同一脚本的“一致性”判定只比较 `postgres.<ref>` 里的 ref，输出“refs 一致: True”，加上两个 host 的 5432 都通，自检给人“连接串没问题”的假象。随后用 `postgres:17-alpine` 分别 `psql -tAc "select 1"`：6543 返回 1、5432 报 tenant/user not found，才看清是地域混用。
+
+**3. 提了什么方案**
+只改 hostname（新加坡 → 东京）、不动用户名密码（采用）；迁移继续用 `MIGRATION_DATABASE_URL`；自检增加“同一 ref 必须落在同一 pooler 地域”的断言（未补，仍是空白）。
+
+**4. 最后怎么处理的**
+改完 host 后 5 个迁移全部应用成功；运行时 6543 + `verify-full` 配合固定根证书后 `/api/health` 返回 `{"status":"ok","database":"connected"}`。一致性检查至少要比 ref、地域 host、端口用途三样。
+
+- 📎 excerpt: [evidence.gz](./evidence.gz) → DB-08

@@ -98,9 +98,13 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 改了术语就改 GLOSSARY；做了难以撤回、有真实取舍的决定就加一份 ADR；踩到新坑就按 pitfalls.md 的格式追加 `mk/` 条目。
 
+## 避坑指南
+
+Import [avoiding-pitfalls-guide](docs/avoiding-pitfalls-guide)
+
 ## 红线
 
-见 [docs/PLAN.md §2](docs/PLAN.md)。要点：仓库公开，不提交任何密钥、项目 ID、连接串、IP、真实个人数据；不转载真题原文与答案；课程内容不进仓库；答案不出现在任何可见载体上。
+见 [docs/PLAN.md §2](docs/PLAN.md)。要点：仓库公开，不提交任何密钥、项目 ID、连接串、IP、真实个人数据；课程内容不进仓库；答案不出现在任何可见载体上。
 
 ## 动手规则
 
@@ -135,7 +139,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 | skill 与 CLI | `skill-creator`（遵循 agentskills.io 规范）、`cli-creator`（Rust CLI 参考 Rust CLI Book） |
 | 规格、工单、测试 | `to-spec`、`to-tickets`、`tdd`、`code-review` |
 
-**不启用**：`baseline-ui`、`frontend-design`（与 impeccable、emil-design-eng 的规则冲突）、`ui-ux-pro-max`（本机已失效）。`migrate-radix-to-base` 只在从 radix 模板复制了代码时使用。
+**不启用**：`baseline-ui`、`frontend-design`（与 impeccable、emil-design-eng 的规则冲突）、`ui-ux-pro-max`。
 
 设计规则的本地放宽：中文字体不强制自托管；shadcn 默认卡片的边框与阴影可以保留；没有合适照片时用数据、界面截图或插画，不用图库照片。
 

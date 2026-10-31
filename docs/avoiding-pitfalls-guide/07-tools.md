@@ -36,6 +36,10 @@
 **4. 最后怎么处理的**
 所有 edit 最终成功，没有文件丢失。格式化器也是写入者，跑完要重新读。
 
+
+**2026-10-31 增量**  补 fs 保护的新事实：未读文件直接 `write` 报“file has not been read”；刚被外部改过的文件 `edit` 报“file changed since it was read”；`read limit:5` 登记后即可写。
+
+- 📎 增量证据: [evidence.gz](./evidence.gz) → TOOL-02
 - 📎 excerpt: [evidence.gz](./evidence.gz) → TOOL-02
 
 ### TOOL-03 · PowerShell 写文件带 BOM，`JSON.parse` 直接抛 `Unexpected token '﻿'`
@@ -90,6 +94,10 @@ verify 脚本在去掉 BOM 后 `failures: 0`；后续文件写入正常。编码
 **4. 最后怎么处理的**
 临时集群跑完 db 16/16、api 194/196、web 114/114、仓库级 108/109，跑完停库删目录。否定结论要写范围：“本次在 PATH/常见安装位置未查到”，不是“本机没有”。
 
+
+**2026-10-31 增量**  macOS/Homebrew 同因：`pnpm test` 需要 `initdb/pg_ctl` 在 PATH，前缀 `/opt/homebrew/opt/postgresql@15/bin` 后全过——否定结论要写范围。
+
+- 📎 增量证据: [evidence.gz](./evidence.gz) → TOOL-05
 - 📎 excerpt: [evidence.gz](./evidence.gz) → TOOL-05
 
 ### TOOL-06 · 固定手机号触发验证码 60 秒冷却，全量测试随机 429（规则第二次被复现）
@@ -108,6 +116,10 @@ grep `429|TooManyRequests|rate|limit`，读 `apps/api/src/auth/phone/phone.servi
 **4. 最后怎么处理的**
 全量 API 30 文件 193 passed、新增 7/7、材料测试 5/5。这条规则在 `docs/pitfalls.md` 已有，但下一批仍复现——说明规则要变成派单前置检查。
 
+
+**2026-10-31 增量**  第三次复现短信冷却（变异检查后同库重跑 429）；另一类后果是跨文件复用同一号码：移除全表清理后，退出用例把别的测试遗留会话算进“剩余 1 个会话”断言。处理是换全新临时库、号码全仓唯一，而不是放宽限流。
+
+- 📎 增量证据: [evidence.gz](./evidence.gz) → TOOL-06
 - 📎 excerpt: [evidence.gz](./evidence.gz) → TOOL-06
 
 ### TOOL-07 · sarch 在 Windows 的安装与退出码语义：make/gcc 不可用，scan/export exit 1 也不代表缺少会话
@@ -144,6 +156,10 @@ grep `429|TooManyRequests|rate|limit`，读 `apps/api/src/auth/phone/phone.servi
 **4. 最后怎么处理的**
 `workbench version` 输出 `v1.0.4`、checksum 校验通过；用户自行配置凭据成功。安装脚本要读代码，不能只读注释。
 
+
+**2026-10-31 增量**  bash 里 pnpm 间歇 `command not found`（PATH 只有 corepack），`corepack pnpm` / `corepack enable pnpm` 恢复。
+
+- 📎 增量证据: [evidence.gz](./evidence.gz) → TOOL-08
 - 📎 excerpt: [evidence.gz](./evidence.gz) → TOOL-08
 
 ### TOOL-09 · Windows PowerShell 向远程 Linux 传多行命令：引号会被吃掉，改用 base64
