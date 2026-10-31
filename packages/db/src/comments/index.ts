@@ -3,6 +3,7 @@ import { check, foreignKey, index, pgTable, text, timestamp, unique, uuid } from
 
 import { accounts } from "../accounts"
 import { lessons } from "../catalog"
+import { papers } from "../papers"
 import { submissions } from "../submissions"
 export const comments = pgTable(
   "comments",
@@ -83,4 +84,44 @@ export const submissionCommentDeletions = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [check("submission_comment_deletions_reason", sql`length(btrim(${t.reason})) between 1 and 500`)],
+).enableRLS()
+/** 用户试卷下的评论；父评论必须同一试卷，结构与投稿评论一致（不能回复回复由服务层校验）。 */
+export const paperComments = pgTable(
+  "paper_comments",
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    paperId: uuid("paper_id")
+      .notNull()
+      .references(() => papers.id, { onDelete: "cascade" }),
+    accountId: uuid("account_id").references(() => accounts.id, { onDelete: "set null" }),
+    parentId: uuid("parent_id"),
+    body: text().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (t) => [
+    unique("paper_comments_id_paper_unique").on(t.id, t.paperId),
+    foreignKey({
+      name: "paper_comments_parent_paper_fk",
+      columns: [t.parentId, t.paperId],
+      foreignColumns: [t.id, t.paperId],
+    }).onDelete("cascade"),
+    check("paper_comments_not_self_parent", sql`${t.parentId} is null or ${t.parentId} <> ${t.id}`),
+    check("paper_comments_body_length", sql`length(btrim(${t.body})) between 1 and 2000`),
+    index("paper_comments_paper_created_idx").on(t.paperId, t.createdAt, t.id),
+  ],
+).enableRLS()
+export const paperCommentDeletions = pgTable(
+  "paper_comment_deletions",
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    commentId: uuid("comment_id")
+      .notNull()
+      .unique()
+      .references(() => paperComments.id, { onDelete: "cascade" }),
+    actorId: uuid("actor_id").references(() => accounts.id, { onDelete: "set null" }),
+    reason: text().notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [check("paper_comment_deletions_reason", sql`length(btrim(${t.reason})) between 1 and 500`)],
 ).enableRLS()
