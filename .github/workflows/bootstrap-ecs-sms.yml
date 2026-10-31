@@ -31,7 +31,6 @@ jobs:
           set -uo pipefail
           cd /opt/mykaoyan-api || { echo "NO /opt/mykaoyan-api"; exit 1; }
           echo "before: $(grep -E '^SMS_PROVIDER=' .env || true)"
-          cp -n .env ".env.bak-$(date +%Y%m%d%H%M%S)" || true
           set_key() {
             key="$1"; val="$2"
             if grep -q "^$key=" .env; then sed -i "s|^$key=.*|$key=$val|" .env; else printf '\n%s=%s\n' "$key" "$val" >> .env; fi
@@ -41,18 +40,19 @@ jobs:
           set_key ALIYUN_ACCESS_KEY_SECRET REPLACE_WITH_REAL_AK_SECRET
           set_key ALIYUN_SMS_SIGN_NAME REPLACE_WITH_REAL_SIGN_NAME
           set_key ALIYUN_SMS_TEMPLATE_CODE REPLACE_WITH_REAL_TEMPLATE_CODE
-          echo "after:"
-          grep -E '^(SMS_PROVIDER|ALIYUN_[A-Z_]+)=' .env | sed 's/=.*/=<set>/' || true
-          if [ -f /opt/mykaoyan-api/api-compose.yaml ] && [ -f /opt/mykaoyan-api/.env.images ]; then
-            echo "restart api compose"
-            docker compose --env-file .env.images -f api-compose.yaml up -d 2>&1 || true
-          fi
+          echo "sms env: $(grep -cE '^(SMS_PROVIDER|ALIYUN_[A-Z_]+)=' .env) keys"
+          echo "db host in env: $(sed -n 's/^DATABASE_URL=//p' .env | sed -E 's#^[a-z]+://[^@]*@##; s#[/?].*##')"
           cd /opt/mykaoyan
-          echo "restart main compose"
           docker compose --env-file .env.images -f deploy/compose.yaml up -d 2>&1 || true
           sleep 8
+          echo "===== compose ps ====="
+          docker compose --env-file .env.images -f deploy/compose.yaml ps 2>&1 || true
+          echo "===== api sees db ====="
+          docker compose --env-file .env.images -f deploy/compose.yaml exec -T api node -e "try { const u = new URL(process.env.DATABASE_URL); console.log('api-db=' + u.host); } catch { console.log('api-db-env-missing'); }" 2>&1 || true
+          echo "===== api tcp test ====="
+          docker compose --env-file .env.images -f deploy/compose.yaml exec -T api node -e "const net=require('net');const u=new URL(process.env.DATABASE_URL);const s=net.connect({host:u.hostname,port:Number(u.port||5432)});s.setTimeout(8000);s.on('connect',()=>{console.log('tcp-ok');process.exit(0)});s.on('timeout',()=>{console.log('tcp-timeout');process.exit(1)});s.on('error',(e)=>{console.log('tcp-error='+e.code);process.exit(1)})" 2>&1 || true
           echo "===== api logs ====="
-          docker logs --tail=30 deploy-api-1 2>&1 || true
+          docker logs --tail=40 deploy-api-1 2>&1 || true
           echo "===== health ====="
           for attempt in $(seq 1 20); do
             if docker compose --env-file .env.images -f deploy/compose.yaml exec -T api \
