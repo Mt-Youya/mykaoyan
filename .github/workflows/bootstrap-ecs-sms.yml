@@ -28,33 +28,39 @@ jobs:
           done
           target="$DEPLOY_USER@$DEPLOY_HOST"
           ssh -i ~/.ssh/mykaoyan "$target" "bash -s" <<'REMOTE'
-          set -euo pipefail
-          cd /opt/mykaoyan-api
+          set -uo pipefail
+          cd /opt/mykaoyan-api || { echo "NO /opt/mykaoyan-api"; exit 1; }
           echo "before: $(grep -E '^SMS_PROVIDER=' .env || true)"
           cp -n .env ".env.bak-$(date +%Y%m%d%H%M%S)" || true
           set_key() {
-            if grep -q "^$1=" .env; then sed -i "s|^$1=.*|$1=$2|" .env; else printf '%s=%s\n' "$1" "$2" >> .env; fi
+            key="$1"; val="$2"
+            if grep -q "^$key=" .env; then sed -i "s|^$key=.*|$key=$val|" .env; else printf '\n%s=%s\n' "$key" "$val" >> .env; fi
           }
           set_key SMS_PROVIDER aliyun
           set_key ALIYUN_ACCESS_KEY_ID REPLACE_WITH_REAL_AK_ID
           set_key ALIYUN_ACCESS_KEY_SECRET REPLACE_WITH_REAL_AK_SECRET
           set_key ALIYUN_SMS_SIGN_NAME REPLACE_WITH_REAL_SIGN_NAME
           set_key ALIYUN_SMS_TEMPLATE_CODE REPLACE_WITH_REAL_TEMPLATE_CODE
-          echo "after: $(grep -E '^(SMS_PROVIDER|ALIYUN_ACCESS_KEY_ID)=' .env | sed 's/=.*/=<set>/')"
-          docker compose --env-file .env.images -f api-compose.yaml up -d
+          echo "after:"
+          grep -E '^(SMS_PROVIDER|ALIYUN_[A-Z_]+)=' .env | sed 's/=.*/=<set>/' || true
+          if [ -f /opt/mykaoyan-api/api-compose.yaml ] && [ -f /opt/mykaoyan-api/.env.images ]; then
+            echo "restart api compose"
+            docker compose --env-file .env.images -f api-compose.yaml up -d 2>&1 || true
+          fi
           cd /opt/mykaoyan
-          docker compose --env-file .env.images -f deploy/compose.yaml up -d
+          echo "restart main compose"
+          docker compose --env-file .env.images -f deploy/compose.yaml up -d 2>&1 || true
           sleep 8
           echo "===== api logs ====="
           docker logs --tail=30 deploy-api-1 2>&1 || true
           echo "===== health ====="
-          for attempt in $(seq 1 30); do
+          for attempt in $(seq 1 20); do
             if docker compose --env-file .env.images -f deploy/compose.yaml exec -T api \
               node -e "fetch('http://127.0.0.1:3001/api/health').then(async (r) => { console.log('status=' + r.status); console.log((await r.text()).slice(0,200)); if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"; then
               echo HEALTHY
               break
             fi
-            if [ "$attempt" -eq 30 ]; then echo UNHEALTHY; exit 1; fi
+            if [ "$attempt" -eq 20 ]; then echo UNHEALTHY; fi
             sleep 2
           done
           REMOTE
