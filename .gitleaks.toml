@@ -6,3 +6,8 @@ useDefault = true
 description = "前端 localStorage 的键名不是密钥（mykaoyan.*-v1）"
 regexTarget = "secret"
 regexes = ['''mykaoyan\.(admission-favorites|topics|vocabulary)-v1''']
+
+[[allowlists]]
+description = "测试用虚构签名密钥（fictional-*signing-key-32-characters）"
+regexTarget = "secret"
+regexes = ['''fictional-(?:rating-|submission-)?signing-key-32-characters''']
